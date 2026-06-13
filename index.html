@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DeepFlow — Research institucional de acciones de EE.UU. en minutos</title>
+  <meta name="description" content="DeepFlow es el motor de investigación de Denario: convierte un ticker en un paquete completo de research — datos verificados, modelo de valuación, memo de inversión y evidencia auditable — en menos de 10 minutos, por centavos de dólar." />
+  <meta property="og:title" content="DeepFlow — el motor de research de Denario" />
+  <meta property="og:description" content="De un ticker a un memo de inversión completo, auditable y con fuentes. En menos de 10 minutos." />
+  <meta property="og:type" content="website" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ============ NAV ============ -->
+  <header class="nav" id="nav">
+    <div class="nav__inner">
+      <a class="nav__brand" href="#top">
+        <span class="nav__logo">DeepFlow</span>
+        <span class="nav__by">by Denario</span>
+      </a>
+      <nav class="nav__links">
+        <a href="#producto">Producto</a>
+        <a href="#proceso">Cómo funciona</a>
+        <a href="#muestra">Muestra</a>
+      </nav>
+      <a href="#contacto" class="btn btn--small">Hablemos</a>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- ============ HERO ============ -->
+    <section class="hero">
+      <div class="hero__bg" aria-hidden="true">
+        <canvas id="hero-canvas" aria-hidden="true"></canvas>
+        <!-- anillos 3D de tickers en vivo (datos: Yahoo Finance, fallback estático) -->
+        <div class="ring3d ring3d--one">
+          <div class="ring3d__rotor" id="ring-rotor"></div>
+        </div>
+        <div class="ring3d ring3d--two">
+          <div class="ring3d__rotor ring3d__rotor--rev" id="ring-rotor-2"></div>
+        </div>
+      </div>
+      <div class="hero__inner">
+        <div class="hero__copy">
+          <p class="eyebrow" data-reveal>Motor de research · US listed equities</p>
+          <h1 class="hero__title">
+            <span class="line"><span>Research de nivel</span></span>
+            <span class="line"><span><em>institucional</em>,</span></span>
+            <span class="line"><span>en menos de</span></span>
+            <span class="line"><span><em>10 minutos</em>.</span></span>
+          </h1>
+          <p class="hero__sub" data-reveal>
+            DeepFlow convierte un ticker en un paquete completo de research:
+            datos verificados, modelo de valuación, memo de inversión y evidencia
+            auditable. Por centavos de dólar.
+          </p>
+          <div class="hero__cta" data-reveal>
+            <a href="#muestra" class="btn btn--primary">Ver una muestra</a>
+            <a href="#proceso" class="btn btn--ghost">Cómo funciona</a>
+          </div>
+        </div>
+
+        <!-- Live run console -->
+        <div class="console" data-reveal aria-label="Simulación de un run de DeepFlow">
+          <div class="console__bar">
+            <span class="console__dot"></span>
+            <span class="console__dot"></span>
+            <span class="console__dot"></span>
+            <span class="console__title">deepflow · run_2041 · NVDA</span>
+          </div>
+          <div class="console__body" id="console-body"></div>
+          <div class="console__status">
+            <span class="pulse"></span>
+            <span id="console-state">inicializando run…</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero__stats" data-reveal>
+        <div class="stat">
+          <span class="stat__num">&lt;<span data-count="10">10</span> min</span>
+          <span class="stat__label">por compañía analizada</span>
+        </div>
+        <div class="stat">
+          <span class="stat__num">centavos <span class="stat__unit">USD</span></span>
+          <span class="stat__label">costo por run completo</span>
+        </div>
+        <div class="stat">
+          <span class="stat__num"><span data-count="8">8</span>+ fuentes</span>
+          <span class="stat__label">de datos primarios, con timestamp</span>
+        </div>
+        <div class="stat">
+          <span class="stat__num"><span data-count="100">100</span>%</span>
+          <span class="stat__label">trazable y auditable</span>
+        </div>
+      </div>
+
+      <div class="hero__scrollhint" aria-hidden="true">
+        <span></span>
+      </div>
+    </section>
+
+    <!-- ============ MARQUEE ============ -->
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee__track">
+        <span>SEC / EDGAR</span><i>·</i>
+        <span>FMP</span><i>·</i>
+        <span>Yahoo Finance</span><i>·</i>
+        <span>Finnhub</span><i>·</i>
+        <span>Earnings transcripts</span><i>·</i>
+        <span>News</span><i>·</i>
+        <span>Macro</span><i>·</i>
+        <span>Peer context</span><i>·</i>
+        <span>SEC / EDGAR</span><i>·</i>
+        <span>FMP</span><i>·</i>
+        <span>Yahoo Finance</span><i>·</i>
+        <span>Finnhub</span><i>·</i>
+        <span>Earnings transcripts</span><i>·</i>
+        <span>News</span><i>·</i>
+        <span>Macro</span><i>·</i>
+        <span>Peer context</span><i>·</i>
+      </div>
+    </div>
+
+    <!-- ============ MANIFESTO / PRODUCTO ============ -->
+    <section class="manifesto" id="producto">
+      <div class="manifesto__bg" aria-hidden="true">
+        <div class="manifesto__glow"></div>
+        <canvas id="manifesto-canvas"></canvas>
+      </div>
+      <div class="manifesto__inner">
+        <p class="eyebrow" data-reveal>Qué es DeepFlow</p>
+        <div class="manifesto__grid">
+          <h2 class="manifesto__text" data-lines>
+            DeepFlow <em>no</em> es un bot de trading. No promete alpha mágico.
+            Es una <em>línea de producción</em> de research: datos verificables,
+            modelo reproducible, memo legible y controles estrictos antes de publicar.
+            La decisión final siempre queda en <em>manos humanas</em>.
+          </h2>
+
+          <!-- pila de artifacts: la evidencia que deja cada run -->
+          <aside class="mstack" aria-label="Artifacts que produce cada run">
+            <div class="mstack__card">
+              <span class="mstack__type mstack__type--pdf">PDF</span>
+              <div class="mstack__info">
+                <span class="mstack__name">final_memo.pdf</span>
+                <span class="mstack__meta">memo de inversión completo</span>
+              </div>
+            </div>
+            <div class="mstack__card">
+              <span class="mstack__type mstack__type--xlsx">XLSX</span>
+              <div class="mstack__info">
+                <span class="mstack__name">valuation_model.xlsx</span>
+                <span class="mstack__meta">DCF · SOTP · price targets</span>
+              </div>
+            </div>
+            <div class="mstack__card">
+              <span class="mstack__type mstack__type--json">JSON</span>
+              <div class="mstack__info">
+                <span class="mstack__name">research_packet.json</span>
+                <span class="mstack__meta">datos canónicos + lineage</span>
+              </div>
+            </div>
+            <div class="mstack__card">
+              <span class="mstack__type mstack__type--log">LOG</span>
+              <div class="mstack__info">
+                <span class="mstack__name">run_events.log</span>
+                <span class="mstack__meta">trazabilidad completa del run</span>
+              </div>
+            </div>
+            <p class="mstack__caption" data-reveal>← cada run deja evidencia auditable</p>
+          </aside>
+        </div>
+        <div class="manifesto__cols">
+          <div class="mcol" data-reveal>
+            <span class="mcol__num">01</span>
+            <h3>Evidencia, no opiniones</h3>
+            <p>Cada cifra importante queda registrada con fuente, timestamp y linaje. Si un dato no se puede defender, no entra al memo.</p>
+          </div>
+          <div class="mcol" data-reveal>
+            <span class="mcol__num">02</span>
+            <h3>Reproducible de punta a punta</h3>
+            <p>Cada análisis es un run con ID, eventos y artifacts. Podés volver atrás, revisar qué se usó y por qué se concluyó lo que se concluyó.</p>
+          </div>
+          <div class="mcol" data-reveal>
+            <span class="mcol__num">03</span>
+            <h3>El humano decide</h3>
+            <p>DeepFlow produce una recomendación investigativa y una decisión de publicabilidad. La decisión de capital queda separada, siempre.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CÓMO FUNCIONA (horizontal pinned scroll) ============ -->
+    <section class="process" id="proceso">
+      <div class="process__top">
+        <div>
+          <p class="eyebrow">Cómo funciona</p>
+          <h2 class="process__title">De un ticker a un memo defendible, en siete pasos.</h2>
+        </div>
+        <div class="process__counter" aria-hidden="true">
+          <span id="proc-current">01</span><span class="process__counter-sep">/</span><span>07</span>
+        </div>
+      </div>
+
+      <div class="process__track" id="process-track">
+        <article class="pstep">
+          <span class="pstep__num">01</span>
+          <div class="pstep__body">
+            <h3>Entrada</h3>
+            <p>Le das un ticker o una pregunta. DeepFlow abre el análisis y empieza a trabajar.</p>
+          </div>
+          <code class="step__code">un ticker → un run</code>
+        </article>
+        <article class="pstep">
+          <span class="pstep__num">02</span>
+          <div class="pstep__body">
+            <h3>Ingesta de datos</h3>
+            <p>Reúne datos de mercado, filings, noticias y más, de fuentes confiables y con trazabilidad.</p>
+          </div>
+          <code class="step__code">datos con fuente</code>
+        </article>
+        <article class="pstep">
+          <span class="pstep__num">03</span>
+          <div class="pstep__body">
+            <h3>Normalización</h3>
+            <p>Ordena todo en un paquete único y consistente, listo para analizar.</p>
+          </div>
+          <code class="step__code">research packet</code>
+        </article>
+        <article class="pstep">
+          <span class="pstep__num">04</span>
+          <div class="pstep__body">
+            <h3>Gates de calidad</h3>
+            <p>Controles automáticos revisan los datos. Si algo no es confiable, el proceso se frena.</p>
+          </div>
+          <code class="step__code">control de calidad</code>
+        </article>
+        <article class="pstep">
+          <span class="pstep__num">05</span>
+          <div class="pstep__body">
+            <h3>Valuación</h3>
+            <p>Construye el modelo de valuación y estima los precios objetivo.</p>
+          </div>
+          <code class="step__code">modelo + price targets</code>
+        </article>
+        <article class="pstep">
+          <span class="pstep__num">06</span>
+          <div class="pstep__body">
+            <h3>Análisis</h3>
+            <p>Redacta el análisis con guardrails: la lógica decide, el modelo no improvisa.</p>
+          </div>
+          <code class="step__code">análisis con control</code>
+        </article>
+        <article class="pstep">
+          <span class="pstep__num">07</span>
+          <div class="pstep__body">
+            <h3>Memo</h3>
+            <p>Entrega un memo de inversión completo, con toda la evidencia detrás.</p>
+          </div>
+          <code class="step__code">memo + evidencia</code>
+        </article>
+      </div>
+
+      <div class="process__bar" aria-hidden="true">
+        <div class="process__chartwrap">
+          <span class="process__chart-base"></span>
+          <span class="process__chart-fill"></span>
+          <span class="process__tip" id="proc-tip"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ QUÉ SOLUCIONA ============ -->
+    <section class="solves" id="soluciona">
+      <div class="solves__inner">
+        <p class="eyebrow" data-reveal>Para qué sirve</p>
+        <h2 class="h2" data-reveal>El research serio toma semanas.<br />DeepFlow lo vuelve una operación de minutos.</h2>
+
+        <div class="solves__grid">
+          <article class="card" data-reveal>
+            <div class="card__metric"><span class="strike">semanas</span> → 10 min</div>
+            <h3>Reducción brutal de trabajo manual</h3>
+            <p>Juntar filings, datos de mercado, transcripts y noticias a mano toma días. DeepFlow lo orquesta en un solo run reproducible.</p>
+          </article>
+          <article class="card" data-reveal>
+            <div class="card__metric">fuente + timestamp</div>
+            <h3>Confianza verificable, no fe</h3>
+            <p>Nada de "según mis cálculos". Cada número del memo tiene linaje: de dónde salió, cuándo, y qué calidad tiene la fuente.</p>
+          </article>
+          <article class="card" data-reveal>
+            <div class="card__metric">gates estrictos</div>
+            <h3>Cero humo</h3>
+            <p>Si la valuación o la calidad de datos es débil, el memo lo dice — en vez de forzar un precio objetivo. Lo no defendible se bloquea.</p>
+          </article>
+          <article class="card" data-reveal>
+            <div class="card__metric">decisión separada</div>
+            <h3>El juicio sigue siendo tuyo</h3>
+            <p>DeepFlow no reemplaza al analista: le da una línea de producción. La decisión de capital queda registrada como acto humano, aparte.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MUESTRA ============ -->
+    <section class="sample" id="muestra">
+      <div class="sample__inner">
+        <p class="eyebrow" data-reveal>La muestra</p>
+        <h2 class="h2" data-reveal>Así se ve un memo de DeepFlow.</h2>
+        <p class="sample__sub" data-reveal>Cada run produce un memo de inversión completo, listo para un comité. Esta es su anatomía:</p>
+
+        <div class="sample__layout">
+          <!--
+            PLACEHOLDER DE MUESTRA:
+            Reemplazar este mock por la muestra real (imagen, PDF embebido o link)
+            cuando esté disponible. Mantener el wrapper .memo para conservar el estilo.
+          -->
+          <div class="memo" data-reveal>
+            <div class="memo__page">
+              <div class="memo__header">
+                <span class="memo__brand">DEEPFLOW · MEMO DE INVERSIÓN</span>
+                <span class="memo__date">run_2041 · 2026</span>
+              </div>
+              <h3 class="memo__title">NVIDIA Corp <span>(NVDA)</span></h3>
+              <div class="memo__tags">
+                <span class="tag tag--green">PUBLICABLE ✓</span>
+                <span class="tag">confianza: alta</span>
+                <span class="tag">8 fuentes</span>
+              </div>
+              <div class="memo__lines">
+                <div class="memo__line w90"></div>
+                <div class="memo__line w75"></div>
+                <div class="memo__line w85"></div>
+                <div class="memo__line w60"></div>
+              </div>
+              <div class="memo__chart" aria-hidden="true">
+                <svg viewBox="0 0 300 80" preserveAspectRatio="none">
+                  <polyline points="0,65 30,60 60,62 90,50 120,52 150,40 180,42 210,30 240,33 270,18 300,22" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+              </div>
+              <div class="memo__lines">
+                <div class="memo__line w80"></div>
+                <div class="memo__line w70"></div>
+              </div>
+              <div class="memo__blur">
+                <span>La muestra completa, por mail o WhatsApp →</span>
+              </div>
+            </div>
+          </div>
+
+          <ul class="sample__contents" data-reveal>
+            <li><span>01</span> Resumen ejecutivo</li>
+            <li><span>02</span> Tesis de inversión</li>
+            <li><span>03</span> Checklist antes de capital</li>
+            <li><span>04</span> Historia financiera</li>
+            <li><span>05</span> Valuación &amp; precio objetivo</li>
+            <li><span>06</span> Caso alcista / Caso bajista</li>
+            <li><span>07</span> Catalizadores &amp; riesgos</li>
+            <li><span>08</span> Contexto de noticias</li>
+            <li><span>09</span> Apéndice de fuentes</li>
+            <li><span>10</span> Supuestos del modelo</li>
+          </ul>
+        </div>
+
+        <div class="sample__cta" data-reveal>
+          <a href="#contacto" class="btn btn--primary">Pedir la muestra completa</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CONTACTO ============ -->
+    <section class="contact" id="contacto">
+      <div class="contact__inner">
+        <div class="contact__copy">
+          <p class="eyebrow" data-reveal>Contacto</p>
+          <h2 class="contact__title" data-lines>¿Querés ver qué dice DeepFlow sobre <em>tu</em> próxima inversión?</h2>
+          <p class="contact__sub" data-reveal>Escribime y te mando una muestra real, o corremos un run sobre el ticker que vos elijas.</p>
+          <div class="contact__channels" data-reveal>
+            <a href="mailto:francobales3@gmail.com?subject=Quiero%20ver%20una%20muestra%20de%20DeepFlow" class="channel">
+              <span class="channel__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="5" width="18" height="14" rx="2.5"/>
+                  <path d="M3.5 7.5 12 13l8.5-5.5"/>
+                </svg>
+              </span>
+              <span class="channel__label">Email</span>
+              <span class="channel__arrow" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18 18 6M9 6h9v9"/></svg>
+              </span>
+            </a>
+            <a href="https://wa.me/5491128818819?text=Hola%20Franco%2C%20quiero%20ver%20una%20muestra%20de%20DeepFlow." class="channel" target="_blank" rel="noopener">
+              <span class="channel__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.86 9.86 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2Zm0 1.67c2.2 0 4.27.86 5.83 2.41a8.2 8.2 0 0 1 2.42 5.83c0 4.54-3.7 8.24-8.25 8.24a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.11.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24Zm-4.5 4.96c-.21 0-.55.08-.84.39-.29.31-1.1 1.08-1.1 2.62 0 1.55 1.13 3.04 1.29 3.25.16.21 2.22 3.39 5.38 4.62.75.29 1.33.46 1.79.59.75.24 1.43.2 1.97.12.6-.09 1.85-.76 2.11-1.49.26-.73.26-1.36.18-1.49-.08-.13-.29-.21-.6-.37-.31-.16-1.85-.91-2.13-1.02-.29-.1-.5-.16-.71.16-.21.31-.81 1.02-.99 1.23-.18.21-.37.24-.68.08-.31-.16-1.32-.49-2.51-1.55-.93-.83-1.56-1.85-1.74-2.16-.18-.31-.02-.48.14-.63.14-.14.31-.37.47-.55.16-.18.21-.31.31-.52.1-.21.05-.39-.03-.55-.08-.16-.71-1.71-.97-2.34-.26-.62-.52-.53-.71-.54-.18-.01-.39-.01-.6-.01Z"/></svg>
+              </span>
+              <span class="channel__label">WhatsApp</span>
+              <span class="channel__arrow" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18 18 6M9 6h9v9"/></svg>
+              </span>
+            </a>
+          </div>
+        </div>
+
+        <form class="form" id="contact-form" data-reveal>
+          <label class="form__field">
+            <span>Nombre</span>
+            <input type="text" name="name" placeholder="Tu nombre" required />
+          </label>
+          <label class="form__field">
+            <span>Email</span>
+            <input type="email" name="email" placeholder="tu@email.com" required />
+          </label>
+          <label class="form__field">
+            <span>Mensaje</span>
+            <textarea name="message" rows="4" placeholder="Quiero ver una muestra de DeepFlow sobre…" required></textarea>
+          </label>
+          <button type="submit" class="btn btn--primary btn--full">Enviar mensaje</button>
+          <p class="form__hint">Se abre tu cliente de correo con el mensaje listo para enviar.</p>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <span class="footer__brand">DeepFlow <em>by Denario</em></span>
+      <span class="footer__note">Research auditable. Decisión humana.</span>
+      <span class="footer__legal">© 2026 Denario. DeepFlow no es asesoramiento financiero ni un bot de trading.</span>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
