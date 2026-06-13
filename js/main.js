@@ -17,6 +17,27 @@
   }
   updateNav(0);
 
+  // ---------- theme toggle ----------
+  (function () {
+    if (localStorage.getItem("df-theme") === "light") document.body.classList.add("light");
+  })();
+  const themeToggle = document.getElementById("theme-toggle");
+  function setToggleIcon() {
+    if (!themeToggle) return;
+    const li = document.body.classList.contains("light");
+    themeToggle.innerHTML = li
+      ? '<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M13.5 8.7A6 6 0 0 1 7.3 2.5a6 6 0 1 0 6.2 6.2z" fill="currentColor"/></svg>'
+      : '<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3.2" stroke="currentColor" stroke-width="1.4"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.1 3.1l1.06 1.06M11.84 11.84l1.06 1.06M3.1 12.9l1.06-1.06M11.84 4.16l1.06-1.06" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
+  }
+  setToggleIcon();
+  if (themeToggle) {
+    themeToggle.addEventListener("click", function () {
+      document.body.classList.toggle("light");
+      localStorage.setItem("df-theme", document.body.classList.contains("light") ? "light" : "dark");
+      setToggleIcon();
+    });
+  }
+
   // ---------- contact form → mailto ----------
   const form = document.getElementById("contact-form");
   if (form) {
@@ -31,152 +52,188 @@
     });
   }
 
-  // ---------- anillos 3D de tickers (precios reales del día) ----------
-  // Dos filas: una gira en un sentido, la otra al revés (rotor--rev en CSS).
-  const ROWS = [
-    {
-      id: "ring-rotor",
-      symbols: ["NVDA", "AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA", "MELI", "AMD", "NFLX", "JPM", "V"],
-    },
-    {
-      id: "ring-rotor-2",
-      symbols: ["WMT", "HD", "MCD", "NKE", "SBUX", "BA", "GE", "XOM", "CVX", "PFE", "MRK", "KO"],
-    },
-  ];
-  // Fallback si el feed no responde (datos de muestra, no en tiempo real)
-  const FALLBACK = {
-    NVDA: [205.19, 204.87], AAPL: [291.13, 295.63], MSFT: [390.74, 390.34],
-    AMZN: [201.6, 199.2], GOOGL: [178.3, 177.1], META: [591.7, 585.2],
-    TSLA: [248.5, 252.3], MELI: [1842.0, 1820.5], AMD: [142.3, 140.8],
-    NFLX: [712.4, 718.9], JPM: [224.1, 222.6], V: [308.7, 307.2],
-    WMT: [98.4, 97.6], HD: [412.5, 409.2], MCD: [298.7, 300.1],
-    NKE: [78.3, 79.5], SBUX: [97.6, 96.8], BA: [178.2, 175.9],
-    GE: [182.4, 180.0], XOM: [114.8, 113.5], CVX: [152.3, 151.0],
-    PFE: [26.4, 26.7], MRK: [98.9, 99.6], KO: [62.4, 62.1],
-  };
 
-  const ringChips = {};
-  let ringSymbols = [];
-
-  ROWS.forEach((row) => {
-    const rotor = document.getElementById(row.id);
-    if (!rotor) return;
-    const step = 360 / row.symbols.length;
-    row.symbols.forEach((sym, i) => {
-      const el = document.createElement("span");
-      el.className = "rtick";
-      el.style.setProperty("--i", i);
-      el.style.setProperty("--step", step + "deg");
-      rotor.appendChild(el);
-      ringChips[sym] = el;
-      ringSymbols.push(sym);
-    });
-  });
-
-  if (ringSymbols.length) {
-    const renderChip = (sym, px, prev) => {
-      const chg = prev ? ((px - prev) / prev) * 100 : 0;
-      const up = chg >= 0;
-      ringChips[sym].innerHTML =
-        '<span class="rtick__sym">' + sym + "</span>" +
-        '<span class="rtick__px">' + px.toFixed(2) + "</span>" +
-        '<span class="rtick__chg ' + (up ? "up" : "down") + '">' +
-        (up ? "▲ " : "▼ ") + Math.abs(chg).toFixed(2) + "%</span>";
-    };
-
-    // pinta el fallback al instante; el feed real lo pisa cuando llega
-    ringSymbols.forEach((s) => { if (FALLBACK[s]) renderChip(s, FALLBACK[s][0], FALLBACK[s][1]); });
-
-    const fetchLive = () => {
-      const yahooUrl = "https://query1.finance.yahoo.com/v8/finance/spark?symbols=" +
-        ringSymbols.join(",") + "&range=1d&interval=1d";
-      fetch("https://corsproxy.io/?url=" + encodeURIComponent(yahooUrl))
-        .then((r) => r.json())
-        .then((data) => {
-          ringSymbols.forEach((sym) => {
-            const d = data[sym];
-            if (!d || !d.close || !d.close.length) return;
-            renderChip(sym, d.close[d.close.length - 1], d.chartPreviousClose);
-          });
-        })
-        .catch(() => { /* el fallback ya está pintado */ });
-    };
-    fetchLive();
-    setInterval(fetchLive, 120000); // refresco cada 2 min
-  }
-
-  // ---------- canvas particles (hero + manifesto) ----------
-  function initParticles(canvasId, count) {
+  // ---------- canvas particles — Bloomberg terminal vibe ----------
+  function initParticles(canvasId, count, floaterCount) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
-    let W, H, pts;
+    let W, H, pts, scanY = 0;
+    const isHero = canvasId === "hero-canvas";
+    // banda superior libre para que nada se cruce con la navbar (solo el hero la necesita)
+    const TOP_SAFE = isHero ? 96 : 0;
+    // cuántas filas de datos flotantes muestra esta sección
+    const nFloaters = floaterCount || 0;
+
+    // capas flotantes; crosshair solo en el hero
+    let floaters = [], crosshair = null;
+
+    const GLYPHS    = ["+", "−", "%", "▲", "▼", "×", "↑", "↓"];
+    const NUM_FRAGS = [
+      "+28%", "−1%", "+1.2%", "−0.4%", "+12.4%", "−2.8%",
+      "VOL", "24.3M", "1.2B", "842M", "4.2", "1.8", "2.5", "0.7",
+    ];
+    const DATA_ROWS = [
+      "NVDA   205.19   ▲ 2.34   +1.15%   VOL 24.3M",
+      "BID 204.90   ASK 205.20   SPREAD 0.30",
+      "52W H: 276.30   52W L: 102.18   BETA 1.65",
+      "EPS $4.82   MKT CAP 5.04T   DIV 0.04%",
+      "RSI 14: 58.3   MACD: +1.24   VOL 31.2%",
+      "AAPL   291.13   ▲ 5.48   +1.92%   P/E 32.4x",
+      "YTD +68.4%   30D VOL 31.2%   SHORT 1.2%",
+      "MSFT   478.02   ▼ 1.18   −0.25%   VOL 18.7M",
+      "TSLA   412.55   ▲ 9.30   +2.30%   VOL 92.1M",
+      "VOL 1.24B   AVG 30D 842M   REL 1.47x",
+      "Δ +28.4%   3M +11.2%   6M −4.6%   1Y +68%",
+      "GOOGL  198.44   ▲ 0.92   +0.47%   VOL 14.2M",
+      "FCF $74.3B   ROE 31.5%   NET MARGIN 28.9%",
+      "AMZN   223.71   ▼ 0.64   −0.29%   VOL 27.5M",
+    ];
 
     function resize() {
       W = canvas.width = canvas.offsetWidth;
       H = canvas.height = canvas.offsetHeight;
+
+      // filas de datos flotantes (subconjunto) — pocas y repartidas
+      if (nFloaters > 0) {
+        const rows = DATA_ROWS.slice(0, nFloaters);
+        const band = (H - TOP_SAFE) / rows.length;
+        floaters = rows.map((text, i) => ({
+          text,
+          x: Math.random() * W,
+          y: TOP_SAFE + band * i + Math.random() * band * 0.7,
+          vx: (Math.random() - 0.5) * 0.09,
+          vy: (Math.random() - 0.5) * 0.07,
+          a: Math.random() * 0.12 + 0.08,
+        }));
+      }
+
+      // crosshair solo en el hero
+      if (isHero) {
+        crosshair = { x: W * 0.5, y: H * 0.55, vx: 0.07, vy: 0.04, t: 0 };
+      }
     }
     resize();
     window.addEventListener("resize", resize, { passive: true });
 
     function makePoints(n) {
-      pts = Array.from({ length: n }, () => ({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        vx: (Math.random() - 0.5) * 0.18,
-        vy: (Math.random() - 0.5) * 0.18,
-        r: Math.random() * 1.4 + 0.3,
-        a: Math.random() * 0.25 + 0.04,
-      }));
+      pts = Array.from({ length: n }, () => {
+        const t = Math.random();
+        return {
+          x: Math.random() * W, y: Math.random() * H,
+          vx: (Math.random() - 0.5) * 0.14,
+          vy: (Math.random() - 0.5) * 0.14,
+          r: Math.random() * 1.5 + 0.3,
+          a: Math.random() * 0.28 + 0.08,
+          type: t < 0.58 ? "dot" : t < 0.8 ? "glyph" : "num",
+          char: t < 0.8
+            ? GLYPHS[Math.floor(Math.random() * GLYPHS.length)]
+            : NUM_FRAGS[Math.floor(Math.random() * NUM_FRAGS.length)],
+          amber: Math.random() < 0.22,
+        };
+      });
     }
     makePoints(count);
 
     let raf;
     function draw() {
+      var li = document.body.classList.contains("light");
+      var am = li ? "140,80,10" : "232,179,75";
+      var gr = li ? "16,110,68" : "62,207,142";
       ctx.clearRect(0, 0, W, H);
-      pts.forEach((p) => {
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0) p.x = W;
-        if (p.x > W) p.x = 0;
-        if (p.y < 0) p.y = H;
-        if (p.y > H) p.y = 0;
 
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(62,207,142," + p.a + ")";
-        ctx.fill();
+      if (isHero) {
+        // scanline (no entra en la banda de la navbar)
+        scanY += 0.55;
+        if (scanY > H || scanY < TOP_SAFE) scanY = TOP_SAFE;
+        ctx.fillStyle = "rgba(" + gr + "," + (li ? 0.09 : 0.055) + ")";
+        ctx.fillRect(0, scanY, W, 2);
+
+        // horizontal price grid (amber) — arranca debajo de la navbar
+        ctx.lineWidth = 0.5;
+        for (let row = 1; row <= 5; row++) {
+          const gy = TOP_SAFE + ((H - TOP_SAFE) / 6) * row;
+          ctx.strokeStyle = "rgba(" + am + "," + (li ? 0.22 : 0.14) + ")";
+          ctx.beginPath();
+          ctx.moveTo(0, gy);
+          ctx.lineTo(W, gy);
+          ctx.stroke();
+        }
+
+        // crosshair (amber, blinking) — se mantiene debajo de la navbar
+        if (crosshair) {
+          crosshair.x += crosshair.vx; crosshair.y += crosshair.vy;
+          if (crosshair.x < 0 || crosshair.x > W) crosshair.vx *= -1;
+          if (crosshair.y < TOP_SAFE || crosshair.y > H) crosshair.vy *= -1;
+          crosshair.t = (crosshair.t + 0.04) % (Math.PI * 2);
+          const ca = (Math.sin(crosshair.t) * 0.5 + 0.5) * (li ? 0.28 : 0.18) + (li ? 0.10 : 0.07);
+          ctx.strokeStyle = "rgba(" + am + "," + ca + ")";
+          ctx.lineWidth = 0.5;
+          ctx.beginPath(); ctx.moveTo(crosshair.x - 20, crosshair.y); ctx.lineTo(crosshair.x + 20, crosshair.y); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(crosshair.x, crosshair.y - 20); ctx.lineTo(crosshair.x, crosshair.y + 20); ctx.stroke();
+          ctx.beginPath(); ctx.arc(crosshair.x, crosshair.y, 2, 0, Math.PI * 2);
+          ctx.strokeStyle = "rgba(" + am + "," + (ca * 1.8) + ")"; ctx.stroke();
+        }
+      }
+
+      // filas de datos flotantes (en hero y en el resto de secciones)
+      floaters.forEach((f) => {
+        f.x += f.vx; f.y += f.vy;
+        if (f.x < -620) f.x = W + 20;
+        if (f.x > W + 20) f.x = -620;
+        if (f.y < TOP_SAFE) f.y = H + 10;
+        if (f.y > H + 10) f.y = TOP_SAFE;
+        ctx.font = "10px 'JetBrains Mono',monospace";
+        ctx.fillStyle = "rgba(" + am + "," + f.a + ")";
+        ctx.fillText(f.text, f.x, f.y);
       });
 
-      // faint connecting lines between close neighbours
+      // particle field
+      const top = isHero ? TOP_SAFE : 0;
+      pts.forEach((p) => {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+        if (p.y < top) p.y = H; if (p.y > H) p.y = top;
+        const color = p.amber ? "rgba(" + am + "," + p.a + ")" : "rgba(" + gr + "," + p.a + ")";
+        if (p.type === "dot") {
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = color; ctx.fill();
+        } else {
+          ctx.font = (p.type === "num" ? "9" : "10") + "px 'JetBrains Mono',monospace";
+          ctx.fillStyle = color; ctx.fillText(p.char, p.x, p.y);
+        }
+      });
+
+      // neighbour connections
       for (let i = 0; i < pts.length; i++) {
         for (let j = i + 1; j < pts.length; j++) {
-          const dx = pts[i].x - pts[j].x;
-          const dy = pts[i].y - pts[j].y;
+          const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 100) {
-            ctx.beginPath();
-            ctx.moveTo(pts[i].x, pts[i].y);
-            ctx.lineTo(pts[j].x, pts[j].y);
-            ctx.strokeStyle = "rgba(62,207,142," + (0.04 * (1 - dist / 100)) + ")";
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
+          if (dist < 90) {
+            ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y);
+            ctx.strokeStyle = "rgba(" + gr + "," + (0.09 * (1 - dist / 90)) + ")";
+            ctx.lineWidth = 0.5; ctx.stroke();
           }
         }
       }
+
       raf = requestAnimationFrame(draw);
     }
     draw();
 
-    // pause when tab is hidden (saves CPU)
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) { cancelAnimationFrame(raf); }
       else { draw(); }
     });
   }
   if (!reduceMotion) {
-    initParticles("hero-canvas", 70);
-    initParticles("manifesto-canvas", 55);
+    // hero: menos cosas flotando para que no confunda
+    initParticles("hero-canvas", 60, 5);
+    // resto de secciones: pocas, sutiles y blurred (vía CSS)
+    initParticles("manifesto-canvas", 38, 3);
+    initParticles("solves-canvas", 26, 3);
+    initParticles("sample-canvas", 26, 3);
+    initParticles("contact-canvas", 26, 3);
   }
 
   // ---------- hero console (simulación de un run) ----------
@@ -286,36 +343,115 @@
     window.addEventListener("scroll", () => updateNav(window.scrollY), { passive: true });
   }
 
-  // ---------- hero intro ----------
-  const intro = gsap.timeline({ defaults: { ease: "power4.out" } });
-  intro
-    .to(".hero__title .line > span", { y: 0, duration: 1.2, stagger: 0.09 }, 0.15)
-    .to(".hero__copy [data-reveal], .hero .console", {
-      opacity: 1, y: 0, duration: 1, stagger: 0.12,
-    }, 0.55)
-    .to(".hero__stats", { opacity: 1, y: 0, duration: 1 }, 0.9);
+  // ---------- typing utilities ----------
+  function typewriteEl(el, delay, speed, onDone) {
+    const tmp = document.createElement("div");
+    tmp.innerHTML = el.innerHTML.trim();
+    const tokens = [];
+
+    const walk = (node) => {
+      if (node.nodeType === 3) {
+        [...node.textContent].forEach((ch) => tokens.push({ ch }));
+      } else if (node.nodeType === 1) {
+        const tag = node.tagName.toLowerCase();
+        tokens.push({ open: tag });
+        node.childNodes.forEach(walk);
+        tokens.push({ close: tag });
+      }
+    };
+    tmp.childNodes.forEach(walk);
+
+    gsap.set(el, { opacity: 1, y: 0 });
+    el.innerHTML = "";
+    let idx = 0;
+
+    function build() {
+      let h = "", stack = [];
+      for (let i = 0; i < idx; i++) {
+        const t = tokens[i];
+        if (t.open)  { h += "<" + t.open + ">"; stack.push(t.open); }
+        else if (t.close) { h += "</" + t.close + ">"; stack.pop(); }
+        else h += t.ch;
+      }
+      while (stack.length) h += "</" + stack.pop() + ">";
+      return h;
+    }
+
+    function tick() {
+      const done = idx >= tokens.length;
+      el.innerHTML = build() + (done ? "" : '<span class="type-cursor" aria-hidden="true"></span>');
+      if (!done) { idx++; setTimeout(tick, speed); }
+      else if (onDone) setTimeout(onDone, 180);
+    }
+    setTimeout(tick, delay);
+  }
+
+  function charRevealEl(el, charDelay, onDone) {
+    const tmp = document.createElement("div");
+    tmp.innerHTML = el.innerHTML;
+    let out = "";
+
+    tmp.childNodes.forEach((node) => {
+      if (node.nodeType === 3) {
+        [...node.textContent].forEach((ch) => { out += "<span class='ch'>" + ch + "</span>"; });
+      } else {
+        const tag = node.tagName.toLowerCase();
+        out += "<" + tag + ">";
+        [...node.textContent].forEach((ch) => { out += "<span class='ch'>" + ch + "</span>"; });
+        out += "</" + tag + ">";
+      }
+    });
+    el.innerHTML = out;
+    gsap.set(el, { y: 0 }); // revelar DESPUÉS de reemplazar innerHTML (chars en opacity:0)
+
+    const spans = el.querySelectorAll(".ch");
+    gsap.set(spans, { opacity: 0 });
+    gsap.to(spans, { opacity: 1, duration: 0.001, stagger: charDelay / 1000 });
+    if (onDone) setTimeout(onDone, spans.length * charDelay + 120);
+  }
+
+  // ---------- hero intro (typing) ----------
+  // Los .line > span arrancan en translateY(110%) por CSS → invisible hasta que charRevealEl los revela
+  gsap.set(".hero .eyebrow, .hero__sub, .hero__cta, .hero .console, .hero__stats", { opacity: 0, y: 0 });
+
+  const titleLines = gsap.utils.toArray(".hero__title .line > span");
+
+  function typeTitleLines(idx) {
+    if (idx >= titleLines.length) {
+      typewriteEl(document.querySelector(".hero .eyebrow"), 0, 28);
+      setTimeout(() => typewriteEl(document.querySelector(".hero__sub"), 0, 7), 350);
+      gsap.to(".hero__cta",    { opacity: 1, duration: 0.8, delay: 0.55, ease: "power3.out" });
+      gsap.to(".hero .console",{ opacity: 1, y: 0, duration: 0.8, delay: 0.8, ease: "power3.out" });
+      gsap.to(".hero__stats",  { opacity: 1, y: 0, duration: 0.8, delay: 1.05, ease: "power3.out" });
+      return;
+    }
+    charRevealEl(titleLines[idx], 26, () => typeTitleLines(idx + 1));
+  }
+  setTimeout(() => typeTitleLines(0), 250);
 
   // ---------- reveals genéricos ----------
   document.querySelectorAll("[data-reveal]").forEach((el) => {
     if (el.closest(".hero")) return;
-    gsap.to(el, {
-      opacity: 1,
-      y: 0,
-      duration: 1,
-      ease: "power3.out",
-      scrollTrigger: { trigger: el, start: "top 85%" },
-    });
+    const isText = el.matches("p, h2, h3, h4, .eyebrow");
+    if (isText) {
+      ScrollTrigger.create({
+        trigger: el, start: "top 88%", once: true,
+        onEnter: () => typewriteEl(el, 0, 16),
+      });
+    } else {
+      gsap.to(el, {
+        opacity: 1, y: 0, duration: 1, ease: "power3.out",
+        scrollTrigger: { trigger: el, start: "top 85%" },
+      });
+    }
   });
 
-  // ---------- titulares por línea ----------
+  // ---------- titulares data-lines ----------
   document.querySelectorAll("[data-lines]").forEach((el) => {
-    gsap.fromTo(el,
-      { opacity: 0, y: 40 },
-      {
-        opacity: 1, y: 0, duration: 1.3, ease: "power3.out",
-        scrollTrigger: { trigger: el, start: "top 80%" },
-      }
-    );
+    ScrollTrigger.create({
+      trigger: el, start: "top 80%", once: true,
+      onEnter: () => typewriteEl(el, 0, 20),
+    });
   });
 
   // ---------- proceso: horizontal pinned scroll ----------
