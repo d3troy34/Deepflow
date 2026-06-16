@@ -22,7 +22,8 @@ Set these in the Vercel project connected to `d3troy34/Deepflow`:
 - `BLOB_READ_WRITE_TOKEN`: Vercel Blob read/write token.
 - `DEEPFLOW_PUBLISH_TOKEN`: shared token used by Denario Control Room publish requests.
 
-The app build uses `app/.env.production`:
+The app ships `app/.env.example`; copy it to a local env file when overriding the default feed URL.
+Do not commit real `.env*` files:
 
 ```bash
 VITE_PUBLICATIONS_INDEX_URL=/api/publications/feed
