@@ -668,10 +668,7 @@ function publicationStatusLabel(value: string): string {
   return value.replace(/_/g, ' ').toUpperCase()
 }
 
-function publicStatItems(
-  publications: PublicPublication[],
-  livePrices: Record<string, number | null>,
-): StatTile[] {
+function publicStatItems(publications: PublicPublication[]): StatTile[] {
   const sorted = [...publications].sort(
     (a, b) => new Date(b.published_at).valueOf() - new Date(a.published_at).valueOf(),
   )
@@ -682,17 +679,6 @@ function publicStatItems(
       Boolean(publication.memo_long_url) &&
       Boolean(publication.memo_full_url),
   ).length
-  const drifts = publications
-    .map((publication) => {
-      const livePrice = livePrices[publication.ticker]
-      if (publication.memo_price == null || livePrice == null) return null
-      return ((livePrice - publication.memo_price) / publication.memo_price) * 100
-    })
-    .filter((value): value is number => value !== null && Number.isFinite(value))
-  const averageDrift = drifts.length
-    ? drifts.reduce((sum, value) => sum + value, 0) / drifts.length
-    : null
-  const driftSign = averageDrift != null && averageDrift > 0 ? '+' : ''
 
   return [
     {
@@ -714,15 +700,9 @@ function publicStatItems(
       sub: publications.length > 0 ? 'complete' : undefined,
     },
     {
-      label: 'Price Drift',
-      value: averageDrift == null ? 'n/d' : `${driftSign}${averageDrift.toFixed(1)}%`,
-      color:
-        averageDrift == null
-          ? 'var(--muted)'
-          : averageDrift >= 0
-            ? 'var(--green)'
-            : 'var(--red)',
-      sub: drifts.length > 0 ? `${drifts.length} live ${drifts.length === 1 ? 'quote' : 'quotes'}` : undefined,
+      label: 'Private Thesis',
+      value: '321',
+      color: 'var(--bone)',
     },
   ]
 }
@@ -793,8 +773,11 @@ function PublicPublicationRow({
         </span>
       </td>
       <td className="py-3.5 pr-4 align-middle whitespace-nowrap">
-        <span className="font-mono text-[12px] text-bone-dim">
+        <span className="font-mono text-[12px] text-bone-dim block">
           {formatPrice(livePrice, publication.memo_price_currency)}
+        </span>
+        <span className="font-mono text-[9.5px] uppercase tracking-[0.12em] text-muted">
+          Yahoo Finance
         </span>
       </td>
       <td className="py-3.5 pr-4 align-middle whitespace-nowrap">
@@ -858,7 +841,7 @@ function PublicPublicationsTable({
             <th className="py-3 pr-4 font-normal">Evidence path</th>
             <th className="py-3 pr-4 font-normal">Memo price</th>
             <th className="py-3 pr-4 font-normal">Live price</th>
-            <th className="py-3 pr-4 font-normal">Since memo</th>
+            <th className="py-3 pr-4 font-normal">Since thesis</th>
             <th className="py-3 pr-4 font-normal">Documentos</th>
           </tr>
         </thead>
@@ -876,7 +859,13 @@ function PublicPublicationsTable({
   )
 }
 
-function PublicFeaturedMemo({ publication }: { publication: PublicPublication | null }) {
+function PublicFeaturedMemo({
+  publication,
+  livePrice,
+}: {
+  publication: PublicPublication | null
+  livePrice: number | null | undefined
+}) {
   if (!publication) {
     return (
       <div className="rounded-xl border border-line bg-ink-2 p-6 text-muted text-[13px]">
@@ -920,6 +909,22 @@ function PublicFeaturedMemo({ publication }: { publication: PublicPublication | 
           </a>
         )}
       </div>
+      <div className="mt-6 flex justify-end">
+        <div className="min-w-[190px] rounded-lg border border-line bg-ink-3 px-4 py-3 text-right">
+          <div className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted">
+            Live price · Yahoo Finance
+          </div>
+          <div className="mt-1 font-display text-[22px] leading-none text-bone">
+            {formatPrice(livePrice, publication.memo_price_currency)}
+          </div>
+          <div className="mt-2 flex items-center justify-end gap-2">
+            <span className="font-mono text-[9.5px] uppercase tracking-[0.12em] text-muted">
+              Since thesis
+            </span>
+            <PriceChange memoPrice={publication.memo_price} livePrice={livePrice} />
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
@@ -954,10 +959,11 @@ function PublicEvidenceView({
     )
   }, [publications, q])
   const publicStats = useMemo(
-    () => publicStatItems(publications || [], livePrices),
-    [publications, livePrices],
+    () => publicStatItems(publications || []),
+    [publications],
   )
   const featured = filtered[0] ?? null
+  const featuredLivePrice = featured ? livePrices[featured.ticker] : null
 
   return (
     <div className="min-h-screen">
@@ -981,7 +987,7 @@ function PublicEvidenceView({
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 mt-10">
-          <PublicFeaturedMemo publication={featured} />
+          <PublicFeaturedMemo publication={featured} livePrice={featuredLivePrice} />
           <PublicEvidenceAuditCard publications={publications || []} />
         </div>
       </main>
