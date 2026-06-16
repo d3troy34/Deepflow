@@ -1,0 +1,12 @@
+{
+  "framework": null,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "redirects": [
+    {
+      "source": "/app",
+      "destination": "/app/",
+      "permanent": false
+    }
+  ]
+}

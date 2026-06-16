@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* DeepFlow design system — dark is default, .light overrides (design-system.md v1.0). */
+:root {
+  --ink: #0a0b0d;
+  --ink-2: #101216;
+  --ink-3: #16191f;
+  --bone: #ece9e2;
+  --bone-dim: #b8b5ae;
+  --muted: #7d8088;
+  --green: #3ecf8e;
+  --green-dim: rgba(62, 207, 142, 0.12);
+  --amber: #e8b34b;
+  --term-amber: #ff9d2e;
+  --red: #e0654f;
+  --line: rgba(236, 233, 226, 0.09);
+  --line-strong: rgba(236, 233, 226, 0.18);
+}
+
+.light {
+  --ink: #f0ede6;
+  --ink-2: #e8e5de;
+  --ink-3: #ddd9d2;
+  --bone: #111217;
+  --bone-dim: #3d3e44;
+  --muted: #6b6c72;
+  --green: #1a9e6a;
+  --green-dim: rgba(26, 158, 106, 0.12);
+  --amber: #c57a10;
+  --term-amber: #c96800;
+  --red: #b03020;
+  --line: rgba(17, 18, 23, 0.1);
+  --line-strong: rgba(17, 18, 23, 0.22);
+}
+
+@layer base {
+  body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--bone);
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  ::selection {
+    background: var(--green);
+    color: var(--ink);
+  }
+}
