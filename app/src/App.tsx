@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import {
   fetchLivePrices,
   fetchPublications,
@@ -14,12 +14,18 @@ import {
   type RunSummary,
 } from './lib/api'
 import {
+  fetchAccountProfile,
   getInitialAuthSession,
   onAuthSessionChange,
   signOut,
   signInWithGoogle,
   supabaseAuthConfig,
+  updateAccountProfile,
+  validateUsername,
+  type AccountProfile,
+  type AccountProfileUpdate,
   type AuthSession,
+  type UserEntitlement,
 } from './lib/supabase'
 import { getPins, isPinned, pin, unpin, type Pin } from './lib/watchlist'
 
@@ -357,15 +363,28 @@ interface AuthNavState {
   email: string | null
 }
 
+interface AccountNavState {
+  profile: AccountProfile | null
+  entitlement: UserEntitlement | null
+  loading: boolean
+  saving: boolean
+  error: string | null
+  saved: boolean
+}
+
 function NavBar({
   light,
   toggleTheme,
   auth,
+  account,
+  onProfileSave,
   onSignOut,
 }: {
   light: boolean
   toggleTheme: () => void
   auth?: AuthNavState
+  account?: AccountNavState
+  onProfileSave?: (input: AccountProfileUpdate) => void
   onSignOut?: () => void
 }) {
   const profileRef = useRef<HTMLDivElement | null>(null)
@@ -374,6 +393,17 @@ function NavBar({
     return new URLSearchParams(window.location.search).get('profile') === '1'
   })
   const profileEmail = auth?.email?.trim() || null
+  const [profileFormError, setProfileFormError] = useState<string | null>(null)
+  const displayName = account?.profile?.display_name || account?.profile?.name || ''
+  const accountTitle = displayName || account?.profile?.username || profileEmail || 'Invitado'
+  const creditsLabel = account?.entitlement?.credits_label || 'Proximamente'
+  const planLabel = account?.entitlement?.plan_code || account?.profile?.tier || 'free'
+  const profileFormKey = [
+    account?.profile?.id ?? 'anon',
+    account?.profile?.username ?? '',
+    account?.profile?.display_name ?? '',
+    account?.profile?.updated_at ?? '',
+  ].join(':')
 
   useEffect(() => {
     if (!profileOpen) return
@@ -396,6 +426,26 @@ function NavBar({
       document.removeEventListener('keydown', handleKeyDown)
     }
   }, [profileOpen])
+
+  const handleProfileSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!onProfileSave || !profileEmail) return
+
+    const formData = new FormData(event.currentTarget)
+    const username = String(formData.get('username') ?? '').trim().toLowerCase()
+    const formDisplayName = String(formData.get('displayName') ?? '')
+    const usernameError = validateUsername(username || null)
+    if (usernameError) {
+      setProfileFormError(usernameError)
+      return
+    }
+
+    setProfileFormError(null)
+    onProfileSave({
+      displayName: formDisplayName,
+      username,
+    })
+  }
 
   return (
     <header className="nav">
@@ -423,7 +473,10 @@ function NavBar({
             <button
               type="button"
               className="profile-button"
-              onClick={() => setProfileOpen((value) => !value)}
+              onClick={() => {
+                setProfileFormError(null)
+                setProfileOpen((value) => !value)
+              }}
               aria-label="Ver perfil"
               aria-controls="nav-profile-menu"
               aria-expanded={profileOpen}
@@ -434,27 +487,85 @@ function NavBar({
             {profileOpen && (
               <div className="profile-menu" id="nav-profile-menu" role="dialog" aria-label="Perfil">
                 <span className="profile-menu__eyebrow">Perfil</span>
-                <strong>{profileEmail ?? (auth?.loading ? 'Cargando...' : 'Invitado')}</strong>
-                <span>
-                  {profileEmail
-                    ? 'Sesion Google activa'
-                    : 'Inicia sesion para ver tu perfil de Denario.'}
-                </span>
-                {profileEmail && onSignOut ? (
-                  <button
-                    type="button"
-                    className="profile-menu__action"
-                    onClick={() => {
-                      setProfileOpen(false)
-                      onSignOut()
-                    }}
-                  >
-                    Cerrar sesion
-                  </button>
+                <strong>{accountTitle}</strong>
+                {profileEmail ? (
+                  <>
+                    <span>{profileEmail}</span>
+                    <form
+                      key={profileFormKey}
+                      className="profile-menu__form"
+                      onSubmit={handleProfileSubmit}
+                    >
+                      <label>
+                        <span>Usuario</span>
+                        <input
+                          name="username"
+                          defaultValue={account?.profile?.username || ''}
+                          placeholder="tu_usuario"
+                          autoComplete="username"
+                          disabled={account?.loading || account?.saving}
+                        />
+                      </label>
+                      <label>
+                        <span>Nombre</span>
+                        <input
+                          name="displayName"
+                          defaultValue={displayName}
+                          placeholder="Nombre visible"
+                          autoComplete="name"
+                          disabled={account?.loading || account?.saving}
+                        />
+                      </label>
+                      <div className="profile-menu__grid">
+                        <div>
+                          <span>Creditos</span>
+                          <strong>{creditsLabel}</strong>
+                        </div>
+                        <div>
+                          <span>Acceso</span>
+                          <strong>{planLabel}</strong>
+                        </div>
+                      </div>
+                      {(profileFormError || account?.error) && (
+                        <p className="profile-menu__error">{profileFormError || account?.error}</p>
+                      )}
+                      {account?.saved && !profileFormError && !account?.error && (
+                        <p className="profile-menu__status">Perfil guardado.</p>
+                      )}
+                      <div className="profile-menu__actions">
+                        <button
+                          type="submit"
+                          className="profile-menu__action"
+                          disabled={account?.loading || account?.saving}
+                        >
+                          {account?.saving ? 'Guardando...' : 'Guardar'}
+                        </button>
+                        {onSignOut && (
+                          <button
+                            type="button"
+                            className="profile-menu__action profile-menu__action--muted"
+                            onClick={() => {
+                              setProfileOpen(false)
+                              onSignOut()
+                            }}
+                          >
+                            Cerrar sesion
+                          </button>
+                        )}
+                      </div>
+                    </form>
+                  </>
                 ) : (
-                  <a className="profile-menu__action" href="/app/">
-                    Abrir tracker
-                  </a>
+                  <>
+                    <span>
+                      {auth?.loading
+                        ? 'Cargando...'
+                        : 'Inicia sesion para ver tu perfil de Denario.'}
+                    </span>
+                    <a className="profile-menu__action" href="/app/">
+                      Abrir tracker
+                    </a>
+                  </>
                 )}
               </div>
             )}
@@ -1019,6 +1130,8 @@ function PublicEvidenceView({
   light,
   toggleTheme,
   auth,
+  account,
+  onProfileSave,
   onSignOut,
   authError,
 }: {
@@ -1030,6 +1143,8 @@ function PublicEvidenceView({
   light: boolean
   toggleTheme: () => void
   auth: AuthNavState
+  account: AccountNavState
+  onProfileSave: (input: AccountProfileUpdate) => void
   onSignOut: () => void
   authError: string | null
 }) {
@@ -1052,7 +1167,14 @@ function PublicEvidenceView({
 
   return (
     <div className="min-h-screen">
-      <NavBar light={light} toggleTheme={toggleTheme} auth={auth} onSignOut={onSignOut} />
+      <NavBar
+        light={light}
+        toggleTheme={toggleTheme}
+        auth={auth}
+        account={account}
+        onProfileSave={onProfileSave}
+        onSignOut={onSignOut}
+      />
       <main className="mx-auto max-w-container px-6">
         <Hero />
         <StatsBar items={publicStats} />
@@ -1154,6 +1276,12 @@ export default function App() {
   const [authSession, setAuthSession] = useState<AuthSession | null>(null)
   const [authLoading, setAuthLoading] = useState(supabaseAuthConfig.enabled)
   const [authError, setAuthError] = useState<string | null>(null)
+  const [accountProfile, setAccountProfile] = useState<AccountProfile | null>(null)
+  const [accountEntitlement, setAccountEntitlement] = useState<UserEntitlement | null>(null)
+  const [accountLoading, setAccountLoading] = useState(false)
+  const [accountSaving, setAccountSaving] = useState(false)
+  const [accountError, setAccountError] = useState<string | null>(null)
+  const [accountSaved, setAccountSaved] = useState(false)
 
   useEffect(() => {
     if (!supabaseAuthConfig.enabled) return
@@ -1180,6 +1308,10 @@ export default function App() {
         setDetails({})
         setPublications(null)
         setLivePrices({})
+        setAccountProfile(null)
+        setAccountEntitlement(null)
+        setAccountError(null)
+        setAccountSaved(false)
       }
     })
 
@@ -1192,6 +1324,36 @@ export default function App() {
   useEffect(() => {
     setApiAuthTokenProvider(() => authSession?.access_token ?? null)
     return () => setApiAuthTokenProvider(null)
+  }, [authSession])
+
+  useEffect(() => {
+    if (!supabaseAuthConfig.enabled || !authSession) {
+      return
+    }
+
+    let cancelled = false
+    queueMicrotask(() => {
+      if (cancelled) return
+      setAccountLoading(true)
+      setAccountError(null)
+    })
+
+    fetchAccountProfile(authSession.user.id)
+      .then(({ profile, entitlement }) => {
+        if (cancelled) return
+        setAccountProfile(profile)
+        setAccountEntitlement(entitlement)
+      })
+      .catch((e) => {
+        if (!cancelled) setAccountError(errorMessage(e))
+      })
+      .finally(() => {
+        if (!cancelled) setAccountLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
   }, [authSession])
 
   useEffect(() => {
@@ -1271,6 +1433,14 @@ export default function App() {
     loading: authLoading,
     email: authSession?.user.email ?? null,
   }), [requiresAuth, authLoading, authSession])
+  const account = useMemo<AccountNavState>(() => ({
+    profile: accountProfile,
+    entitlement: accountEntitlement,
+    loading: accountLoading,
+    saving: accountSaving,
+    error: accountError,
+    saved: accountSaved,
+  }), [accountProfile, accountEntitlement, accountLoading, accountSaving, accountError, accountSaved])
 
   const handleSignIn = () => {
     setAuthError(null)
@@ -1280,6 +1450,25 @@ export default function App() {
   const handleSignOut = () => {
     setAuthError(null)
     void signOut().catch((e) => setAuthError(errorMessage(e)))
+  }
+
+  const handleProfileSave = (input: AccountProfileUpdate) => {
+    if (!authSession) return
+    setAccountSaving(true)
+    setAccountError(null)
+    setAccountSaved(false)
+
+    void updateAccountProfile(authSession.user.id, input)
+      .then((profile) => {
+        setAccountProfile(profile)
+        setAccountSaved(true)
+      })
+      .catch((e) => {
+        setAccountError(errorMessage(e))
+      })
+      .finally(() => {
+        setAccountSaving(false)
+      })
   }
 
   const toggleTheme = () => {
@@ -1316,6 +1505,8 @@ export default function App() {
         light={light}
         toggleTheme={toggleTheme}
         auth={auth}
+        account={account}
+        onProfileSave={handleProfileSave}
         onSignOut={handleSignOut}
         authError={authError}
       />
@@ -1336,7 +1527,14 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
-      <NavBar light={light} toggleTheme={toggleTheme} auth={auth} onSignOut={handleSignOut} />
+      <NavBar
+        light={light}
+        toggleTheme={toggleTheme}
+        auth={auth}
+        account={account}
+        onProfileSave={handleProfileSave}
+        onSignOut={handleSignOut}
+      />
       <main className="mx-auto max-w-container px-6">
         <Hero />
         <StatsBar items={internalStatItems(stats)} />

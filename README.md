@@ -66,6 +66,25 @@ endpoints accept either that server token or a Supabase session whose user is an
 can be granted through `DEEPFLOW_ADMIN_EMAILS` or through Supabase `app_metadata` with
 `role: "admin"`, `admin: true`, or `roles` containing `"admin"`.
 
+## Account profile and future entitlements
+
+Supabase stores browser-safe account state in:
+
+- `public.profiles`: user-owned display fields such as `username`, `display_name`, and `avatar_url`.
+- `public.user_entitlements`: client-readable derived access state, currently `free` /
+  `coming_soon` with `credits_label = 'Proximamente'`.
+
+Billing provider IDs, webhook state, and credit audit rows are intentionally kept out of exposed
+public tables:
+
+- `private.billing_customers`
+- `private.credit_ledger`
+
+The browser can read its own profile/entitlement row and can only update profile display columns.
+It cannot update credits, subscription state, Stripe fields, or admin flags. Future Stripe or credit
+mutations should be written server-side with idempotent webhook handling and, for credits, a ledger
+row plus cached entitlement update in the same transaction.
+
 The public tracker only reads the feed returned by `/api/publications/feed`. New publication writes
 go through `/api/publications/publish` from the private Denario backend and store sanitized HTML
 documents (`memo.html`, `resumen.html`, and optionally `tesis-completa.html`) in Vercel Blob. Deletes
