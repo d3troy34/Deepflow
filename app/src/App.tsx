@@ -410,6 +410,7 @@ function NavBar({
           <a href="/#producto">Producto</a>
           <a href="/#proceso">{'C\u00f3mo funciona'}</a>
           <a href="/#muestra">Muestra</a>
+          <a href="/#roadmap">Roadmap</a>
         </nav>
         <div className="nav__actions">
           <a href="/app/" className="btn btn--small">
