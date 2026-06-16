@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Legales — DeepFlow by Denario</title>
+  <meta name="description" content="Términos y Condiciones, Política de Privacidad, Política de Cookies, Aviso de No Asesoramiento Financiero y demás documentos legales de DeepFlow by Denario." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script defer src="/_vercel/insights/script.js"></script>
+
+  <style>
+    /* ===========================
+       LEGAL PAGE
+    =========================== */
+
+    .legal-page { min-height: 100vh; }
+
+    /* Hero */
+    .legal-hero {
+      padding: 8rem var(--pad) 3rem;
+      max-width: var(--max);
+      margin: 0 auto;
+      border-bottom: 1px solid var(--line);
+    }
+    .legal-hero .eyebrow { margin-bottom: 1.25rem; }
+    .legal-hero__title {
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: clamp(36px, 5vw, 64px);
+      font-weight: 300;
+      line-height: 1.1;
+      color: var(--bone);
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.02em;
+    }
+    .legal-hero__title em { font-style: italic; font-weight: 300; }
+    .legal-hero__sub {
+      font-size: 16px;
+      line-height: 1.65;
+      color: var(--bone-dim);
+      max-width: 560px;
+      margin: 0;
+    }
+    .legal-updated {
+      display: inline-block;
+      margin-top: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--muted);
+    }
+
+    /* Layout */
+    .legal-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      max-width: var(--max);
+      margin: 0 auto;
+    }
+
+    /* Sidebar */
+    .legal-toc {
+      border-right: 1px solid var(--line);
+      padding: 2.5rem 1.5rem 4rem 0;
+    }
+    .legal-toc__inner {
+      position: sticky;
+      top: 80px;
+    }
+    .legal-toc__label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 1rem;
+      display: block;
+    }
+    .legal-toc nav {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .legal-toc nav a {
+      display: block;
+      font-size: 13px;
+      color: var(--bone-dim);
+      text-decoration: none;
+      padding: 0.45rem 0.75rem;
+      border-radius: 6px;
+      transition: color 0.18s, background 0.18s;
+      line-height: 1.4;
+    }
+    .legal-toc nav a:hover {
+      color: var(--bone);
+      background: rgba(236,233,226,0.05);
+    }
+    .legal-toc nav a.active {
+      color: var(--green);
+      background: var(--green-dim);
+    }
+
+    /* Content */
+    .legal-content {
+      padding: 2.5rem var(--pad) 6rem 3rem;
+      min-width: 0;
+    }
+
+    /* Document sections */
+    .legal-doc {
+      scroll-margin-top: 88px;
+      padding-bottom: 4rem;
+      margin-bottom: 4rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .legal-doc:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+    .legal-doc__label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--green);
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+    .legal-doc > h2 {
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: clamp(22px, 3vw, 36px);
+      font-weight: 400;
+      color: var(--bone);
+      margin: 0 0 2.5rem;
+      line-height: 1.2;
+    }
+    .legal-doc h3 {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--bone);
+      margin: 2.5rem 0 0.85rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--line);
+    }
+    .legal-doc h3.no-border {
+      border-top: none;
+      padding-top: 0;
+      margin-top: 0;
+    }
+    .legal-doc p {
+      font-size: 15px;
+      line-height: 1.78;
+      color: var(--bone-dim);
+      margin: 0 0 0.9rem;
+      max-width: 660px;
+    }
+    .legal-doc ul,
+    .legal-doc ol {
+      padding-left: 1.5rem;
+      margin: 0 0 1rem;
+      max-width: 660px;
+    }
+    .legal-doc li {
+      font-size: 15px;
+      line-height: 1.72;
+      color: var(--bone-dim);
+      margin-bottom: 0.45rem;
+    }
+    .legal-doc a {
+      color: var(--green);
+      text-decoration: none;
+      text-underline-offset: 3px;
+    }
+    .legal-doc a:hover { text-decoration: underline; }
+    .legal-doc strong { color: var(--bone); font-weight: 500; }
+
+    /* Placeholder badge */
+    .ph {
+      display: inline-block;
+      background: rgba(232,179,75,0.1);
+      border: 1px solid rgba(232,179,75,0.3);
+      color: var(--amber);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      vertical-align: baseline;
+    }
+
+    /* Variant box (short versions of disclaimer) */
+    .legal-variant {
+      background: var(--ink-2);
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      padding: 1.5rem 1.75rem;
+      margin: 1.5rem 0;
+      max-width: 660px;
+    }
+    .legal-variant__label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 0.85rem;
+      display: block;
+    }
+    .legal-variant p {
+      margin: 0 0 0.75rem;
+      max-width: none;
+      font-size: 14px;
+      line-height: 1.72;
+    }
+    .legal-variant p:last-child { margin-bottom: 0; }
+
+    /* Callout / highlight box */
+    .legal-callout {
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      margin: 0 0 1.5rem;
+      max-width: 660px;
+    }
+    .legal-callout p { margin: 0; max-width: none; }
+    .legal-callout--green {
+      background: rgba(62,207,142,0.05);
+      border: 1px solid rgba(62,207,142,0.18);
+      border-left: 3px solid var(--green);
+    }
+    .legal-callout--green p { color: rgba(62,207,142,0.82); }
+
+    /* Responsive */
+    @media (max-width: 860px) {
+      .legal-layout { grid-template-columns: 1fr; }
+      .legal-toc {
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+        padding: 1.5rem var(--pad);
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .legal-toc::-webkit-scrollbar { display: none; }
+      .legal-toc__inner { position: static; }
+      .legal-toc nav {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        gap: 0.5rem;
+        width: max-content;
+      }
+      .legal-toc nav a {
+        white-space: nowrap;
+        border: 1px solid var(--line);
+        font-size: 12px;
+      }
+      .legal-content { padding: 2rem var(--pad) 4rem; }
+      .legal-hero { padding-top: 6rem; }
+    }
+  </style>
+</head>
+<body>
+<script>if(localStorage.getItem('df-theme')==='light')document.body.classList.add('light');</script>
+
+  <!-- NAV -->
+  <header class="nav" id="nav">
+    <div class="nav__inner">
+      <a class="nav__brand" href="/">
+        <span class="nav__logo">DeepFlow</span>
+        <span class="nav__by">by Denario</span>
+      </a>
+      <nav class="nav__links">
+        <a href="/#producto">Producto</a>
+        <a href="/#proceso">Cómo funciona</a>
+        <a href="/#muestra">Muestra</a>
+      </nav>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema"></button>
+      <a href="/#contacto" class="btn btn--small">Hablemos</a>
+    </div>
+  </header>
+
+  <main class="legal-page">
+
+    <!-- HERO -->
+    <div class="legal-hero">
+      <p class="eyebrow">Documentos legales · Denario / DeepFlow</p>
+      <h1 class="legal-hero__title">Legales y<br /><em>políticas</em></h1>
+      <p class="legal-hero__sub">Términos de uso, privacidad, cookies, uso aceptable, aviso de no asesoramiento financiero y demás condiciones del Servicio.</p>
+      <span class="legal-updated">Última actualización: 16 de junio de 2026</span>
+    </div>
+
+    <div class="legal-layout">
+
+      <!-- SIDEBAR -->
+      <aside class="legal-toc">
+        <div class="legal-toc__inner">
+          <span class="legal-toc__label">Documentos</span>
+          <nav id="legal-nav">
+            <a href="#terminos">Términos y Condiciones</a>
+            <a href="#aviso-riesgo">Aviso de No Asesoramiento</a>
+            <a href="#privacidad">Política de Privacidad</a>
+            <a href="#cookies">Política de Cookies</a>
+            <a href="#uso-aceptable">Uso Aceptable</a>
+            <a href="#cancelaciones">Cancelaciones y Reembolsos</a>
+            <a href="#aviso-legal">Aviso Legal</a>
+          </nav>
+        </div>
+      </aside>
+
+      <!-- CONTENT -->
+      <div class="legal-content">
+
+        <!-- ── DOC 1: TÉRMINOS Y CONDICIONES ── -->
+        <section class="legal-doc" id="terminos">
+          <span class="legal-doc__label">Documento 01</span>
+          <h2>Términos y Condiciones de Uso</h2>
+
+          <h3 class="no-border">1. Identificación del responsable</h3>
+          <p>Estos Términos y Condiciones de Uso ("Términos") regulan el acceso y uso del sitio web denario.lat, sus subdominios, formularios, materiales, comunicaciones, productos, reportes, modelos, archivos, APIs, demos y servicios relacionados bajo la marca Denario y/o DeepFlow ("Denario", "DeepFlow", "nosotros" o el "Servicio").</p>
+          <p>El responsable del Servicio es <span class="ph">[DENARIO / RAZÓN SOCIAL]</span>, <span class="ph">[tipo societario]</span>, CUIT/tax ID <span class="ph">[COMPLETAR]</span>, con domicilio en <span class="ph">[COMPLETAR]</span>, correo de contacto legal <a href="mailto:legal@denario.lat">legal@denario.lat</a>.</p>
+          <p>Si el usuario no acepta estos Términos, debe abstenerse de usar el Servicio, solicitar runs, descargar materiales, utilizar reportes o contratar cualquier plan.</p>
+
+          <h3>2. Aceptación</h3>
+          <p>Al navegar el sitio, enviar un formulario, solicitar una muestra, contratar un plan, pedir un run, descargar un entregable o utilizar cualquier funcionalidad de Denario, el usuario declara haber leído, entendido y aceptado estos Términos, la Política de Privacidad, la Política de Cookies, el Aviso de No Asesoramiento Financiero y Riesgos, y toda condición comercial aplicable al plan contratado.</p>
+          <p>Cuando el usuario actúe en nombre de una empresa, fondo, vehículo, sociedad, institución, empleador, cliente o tercero, declara que cuenta con facultades suficientes para obligarlo. Si no cuenta con tales facultades, responde personalmente por el uso realizado.</p>
+
+          <h3>3. Descripción general del Servicio</h3>
+          <p>Denario / DeepFlow es una herramienta de investigación financiera que organiza, procesa y presenta información, datos, fuentes, supuestos, modelos, escenarios, estimaciones y materiales de soporte sobre determinados instrumentos financieros, emisores o tickers. El Servicio puede generar, entre otros, archivos PDF, XLSX, JSON, logs de auditoría, resúmenes, modelos de valuación, evidencia documental, comentarios, escenarios, rangos de valuación y controles de calidad.</p>
+          <p>El Servicio no es una plataforma de trading, broker, agente de liquidación, custodio, asesor financiero personalizado, asesor fiscal, asesor legal, administrador de carteras, fiduciario, gestor patrimonial ni intermediario de valores negociables. Denario no recibe, transmite, ejecuta ni gestiona órdenes de compra o venta de instrumentos financieros. Denario no custodia dinero, valores negociables, criptoactivos, activos financieros ni credenciales de cuentas de inversión de usuarios.</p>
+
+          <h3>4. No asesoramiento de inversión, financiero, legal, contable ni fiscal</h3>
+          <p>Todo contenido, reporte, memo, modelo, output, estimación, escenario, rating interno, control de publicabilidad, precio objetivo, rango de valuación, checklist, comparación, comentario o comunicación emitida por Denario tiene finalidad informativa, investigativa, educativa y de soporte analítico general.</p>
+          <p>Nada de lo publicado o entregado por Denario constituye, ni debe interpretarse como, recomendación personalizada de inversión, asesoramiento financiero, asesoramiento en mercado de capitales, oferta pública, invitación a ofertar, solicitud de compra o venta, research personalizado, recomendación de comprar, vender o mantener un activo, asesoramiento fiscal, asesoramiento contable, asesoramiento legal, gestión de cartera, promesa de rentabilidad, garantía de resultado o sustituto del juicio profesional humano.</p>
+          <p>El usuario reconoce que cualquier decisión de inversión, desinversión, cobertura, asignación de capital, sizing, rebalanceo, trading, uso de derivados, endeudamiento, apalancamiento o ejecución de operaciones es tomada exclusivamente por el usuario o por sus asesores registrados, bajo su propio análisis, responsabilidad y riesgo.</p>
+
+          <h3>5. No personalización y ausencia de idoneidad</h3>
+          <p>Denario no conoce necesariamente la situación financiera, patrimonio, ingresos, horizonte temporal, restricciones, tolerancia al riesgo, obligaciones fiscales, jurisdicción, experiencia inversora, objetivos de inversión, necesidades de liquidez ni circunstancias particulares del usuario.</p>
+          <p>Los outputs no están diseñados para determinar si un instrumento financiero es adecuado, conveniente, compatible o idóneo para un usuario específico. El usuario debe consultar a profesionales debidamente autorizados o registrados antes de tomar decisiones de inversión.</p>
+
+          <h3>6. Riesgos de mercado</h3>
+          <p>Invertir en valores negociables, acciones, bonos, ETFs, derivados, ADRs, Cedears, instrumentos extranjeros, activos digitales u otros instrumentos financieros implica riesgos relevantes, incluyendo pérdida parcial o total del capital, volatilidad, iliquidez, riesgo cambiario, riesgo de tasas, riesgo regulatorio, riesgo contable, riesgo de emisor, riesgo de contraparte, riesgo de ejecución, riesgo fiscal, riesgo geopolítico y riesgo de datos.</p>
+          <p>La rentabilidad pasada no garantiza resultados futuros. Las valuaciones, rangos de precio, escenarios, múltiplos, modelos DCF, SOTP, comparables, supuestos macroeconómicos y price targets son estimaciones sujetas a incertidumbre y no predicciones garantizadas.</p>
+
+          <h3>7. Datos, fuentes de terceros y limitaciones</h3>
+          <p>Denario puede utilizar fuentes públicas, privadas, comerciales, APIs, filings, datos de mercado, transcripciones, noticias, series macroeconómicas, información de emisores, proveedores externos, modelos propios y sistemas automatizados. Aunque Denario puede aplicar controles de trazabilidad, calidad, linaje y consistencia, no garantiza que los datos sean exactos, completos, actuales, libres de errores, disponibles de forma continua o adecuados para un fin específico.</p>
+          <p>Algunos datos pueden estar demorados, corregidos posteriormente, sujetos a licencias de terceros, contener errores de origen, estar incompletos o depender de supuestos. El usuario es responsable de verificar cualquier dato antes de utilizarlo en decisiones reales, presentaciones, comités, publicaciones, órdenes, transacciones, reportes regulatorios o documentación a terceros.</p>
+
+          <h3>8. Uso de automatización e inteligencia artificial</h3>
+          <p>El Servicio puede utilizar automatización, modelos estadísticos, modelos de lenguaje, pipelines de datos, herramientas de extracción, generación de texto, análisis semántico, reglas de control y otros sistemas automatizados. Estos sistemas pueden producir errores, omisiones, inconsistencias, inferencias incorrectas, información desactualizada, respuestas incompletas o formulaciones ambiguas.</p>
+          <p>Denario puede implementar controles para reducir errores, pero no garantiza ausencia de fallas. El usuario acepta que todo output requiere revisión humana independiente antes de cualquier uso relevante.</p>
+
+          <h3>9. Conducta del usuario</h3>
+          <p>El usuario se obliga a utilizar el Servicio de forma lícita, prudente y compatible con estos Términos. En particular, el usuario se obliga a no:</p>
+          <ul>
+            <li>Usar el Servicio para brindar asesoramiento financiero, recomendaciones personalizadas, captación de clientes, promoción de valores negociables o gestión de carteras si no cuenta con las autorizaciones regulatorias aplicables.</li>
+            <li>Presentar outputs de Denario como recomendación oficial, señal de trading, garantía de resultado, indicación de compra o venta, research regulado, fairness opinion, informe pericial, dictamen legal, contable o fiscal.</li>
+            <li>Usar outputs como única base para ejecutar operaciones financieras.</li>
+            <li>Introducir, cargar o revelar información privilegiada, no pública, confidencial o sujeta a restricciones de mercado.</li>
+            <li>Utilizar el Servicio para manipulación de mercado, abuso de información, insider trading, front-running, scalping engañoso, pump and dump, difusión de rumores o cualquier conducta prohibida por leyes de mercado de capitales.</li>
+            <li>Revender, sublicenciar, publicar masivamente, scrapear, indexar, copiar, modificar o distribuir los outputs fuera del alcance autorizado por Denario.</li>
+            <li>Intentar acceder a sistemas, modelos, credenciales, APIs, datos o infraestructura de Denario sin autorización.</li>
+            <li>Realizar ingeniería inversa, benchmarking competitivo no autorizado, scraping intensivo, pruebas de carga no autorizadas o extracción automatizada de contenidos.</li>
+            <li>Infringir derechos de propiedad intelectual, privacidad, confidencialidad, licencias de datos o derechos de terceros.</li>
+          </ul>
+
+          <h3>10. Cuentas, accesos y seguridad</h3>
+          <p>Cuando el Servicio requiera cuenta, clave, token, enlace privado o credenciales, el usuario es responsable de mantener su confidencialidad. Toda actividad realizada desde la cuenta, enlace o credencial del usuario se considerará realizada por el usuario, salvo prueba en contrario.</p>
+          <p>El usuario debe notificar de inmediato cualquier acceso no autorizado, pérdida de credenciales, uso indebido o incidente de seguridad a <a href="mailto:soporte@denario.lat">soporte@denario.lat</a>.</p>
+
+          <h3>11. Planes, pagos e impuestos</h3>
+          <p>Las condiciones comerciales, precios, moneda, impuestos, recurrencia, límites de uso, features, cantidad de runs, soporte, entregables incluidos y restricciones de cada plan serán las informadas al momento de contratación o en la propuesta comercial aplicable.</p>
+          <p>Salvo que se indique expresamente lo contrario, los precios no incluyen impuestos, percepciones, retenciones, tasas, cargos bancarios, cargos de pasarela, costos de conversión, costos de transferencia, comisiones del medio de pago ni tributos aplicables.</p>
+          <p>Denario puede modificar precios o planes hacia el futuro, con aviso razonable cuando corresponda. Los cambios no afectarán períodos ya pagados, salvo acuerdo distinto o exigencia legal.</p>
+
+          <h3>12. Cancelaciones, arrepentimiento y reembolsos</h3>
+          <p>Si el usuario contrata como consumidor por medios digitales y la ley aplicable reconoce un derecho de arrepentimiento, podrá ejercerlo dentro del plazo legal mediante el canal indicado por Denario, sin perjuicio de las excepciones o condiciones que correspondan por la naturaleza digital, personalizada, iniciada o íntegramente prestada del Servicio. Denario deberá implementar los botones o mecanismos exigidos por la normativa aplicable cuando corresponda.</p>
+          <p>Las suscripciones recurrentes podrán cancelarse hacia adelante. La cancelación evita renovaciones futuras, pero no implica automáticamente reembolso de períodos ya iniciados, entregables ya generados, runs ya ejecutados, servicios ya prestados, costos de terceros ya incurridos o trabajos personalizados ya realizados, salvo que la ley aplicable disponga lo contrario o Denario lo acepte por escrito.</p>
+          <p>Para usuarios empresariales, salvo pacto escrito distinto, los pagos por servicios ya ejecutados, runs generados, entregables emitidos, licencias activadas, integraciones realizadas o trabajos bajo propuesta aceptada no son reembolsables.</p>
+
+          <h3>13. Propiedad intelectual de Denario</h3>
+          <p>El sitio, marca, nombre comercial, diseño, software, procesos, pipelines, prompts, criterios de control, modelos, documentación, interfaces, bases de datos, know-how, textos, logos, estructura, metodología, templates, reportes de muestra y elementos no entregados expresamente al usuario son propiedad de Denario o de sus licenciantes.</p>
+          <p>El usuario recibe únicamente una licencia limitada, revocable, no exclusiva, no transferible y no sublicenciable para acceder y usar el Servicio y los entregables conforme al plan contratado.</p>
+
+          <h3>14. Uso de entregables</h3>
+          <p>Salvo acuerdo escrito distinto, los entregables de Denario pueden ser utilizados por el usuario para análisis interno, revisión, investigación y soporte de trabajo propio. No pueden ser revendidos, publicados, redistribuidos, incorporados en productos comerciales, utilizados para captar clientes, presentados como research regulado, usados como recomendación personalizada a terceros, ni utilizados en materiales de oferta pública, fundraising, marketing financiero o comunicaciones regulatorias sin autorización escrita de Denario y revisión profesional independiente.</p>
+          <p>Si el plan contratado permite uso empresarial, la licencia se limita a la organización, equipo, cantidad de usuarios, finalidad, territorio y plazo indicados en la propuesta comercial.</p>
+
+          <h3>15. Contenido del usuario</h3>
+          <p>El usuario conserva los derechos sobre la información, tickers, preguntas, archivos, comentarios, instrucciones o materiales que envíe a Denario ("Contenido del Usuario"). El usuario otorga a Denario una licencia limitada para procesar dicho contenido con el fin de prestar, mantener, auditar, asegurar, facturar y mejorar el Servicio, conforme a la Política de Privacidad y cualquier acuerdo de confidencialidad aplicable.</p>
+          <p>El usuario declara que cuenta con derechos suficientes para enviar el Contenido del Usuario y que dicho contenido no viola confidencialidad, secreto profesional, acuerdos de empleo, restricciones regulatorias, derechos de terceros ni leyes aplicables.</p>
+
+          <h3>16. Confidencialidad</h3>
+          <p>Cuando Denario y el usuario intercambien información confidencial, cada parte deberá utilizarla únicamente para los fines de la relación comercial y protegerla con medidas razonables. No se considerará confidencial la información que sea pública, ya conocida legítimamente, recibida de un tercero sin deber de confidencialidad, desarrollada independientemente o exigida por autoridad competente.</p>
+          <p>Si el usuario necesita un NDA específico, DPA, addendum de seguridad o contrato enterprise, deberá solicitarlo antes de cargar información sensible o confidencial.</p>
+
+          <h3>17. Conflictos de interés</h3>
+          <p>Denario, sus socios, colaboradores, asesores, proveedores o personas vinculadas podrían mantener, haber mantenido o adquirir posiciones, intereses económicos, relaciones comerciales, suscripciones, partnerships, comisiones, beneficios o exposición directa o indirecta respecto de emisores, sectores, instrumentos, proveedores de datos o entidades mencionadas en los outputs.</p>
+          <p>Denario procurará divulgar conflictos materiales conocidos cuando corresponda, pero el usuario no debe asumir que la ausencia de una divulgación específica implica ausencia total de conflictos. El usuario debe realizar su propia revisión independiente.</p>
+
+          <h3>18. Comunicaciones y marketing</h3>
+          <p>Denario puede enviar comunicaciones operativas relacionadas con el Servicio. Las comunicaciones comerciales, newsletters o promociones se enviarán conforme a la ley aplicable y las preferencias del usuario. El usuario podrá solicitar dejar de recibir comunicaciones comerciales mediante los mecanismos indicados en cada mensaje o escribiendo a <a href="mailto:soporte@denario.lat">soporte@denario.lat</a>.</p>
+
+          <h3>19. Disponibilidad, cambios y suspensión</h3>
+          <p>Denario puede modificar, actualizar, limitar, suspender o discontinuar funcionalidades del Servicio por mantenimiento, seguridad, mejoras, cambios regulatorios, disponibilidad de datos, decisiones comerciales, uso indebido o fuerza mayor. Denario no garantiza disponibilidad ininterrumpida, ausencia de errores, compatibilidad con todos los sistemas ni permanencia indefinida de una funcionalidad.</p>
+
+          <h3>20. Exclusión de garantías</h3>
+          <p>El Servicio y los entregables se proveen "tal como están" y "según disponibilidad". En la máxima medida permitida por la ley aplicable, Denario no otorga garantías expresas o implícitas de exactitud, integridad, oportunidad, comerciabilidad, idoneidad para un fin particular, no infracción, performance financiera, rentabilidad, ausencia de pérdidas, disponibilidad, seguridad absoluta, compatibilidad o resultados.</p>
+          <p>Nada en estos Términos limita derechos irrenunciables de consumidores ni responsabilidades que no puedan excluirse por ley.</p>
+
+          <h3>21. Limitación de responsabilidad</h3>
+          <p>En la máxima medida permitida por la ley aplicable, Denario no será responsable por pérdidas financieras, lucro cesante, pérdida de oportunidad, pérdida de datos, daño reputacional, daños indirectos, especiales, incidentales, punitivos o consecuenciales derivados del uso o imposibilidad de uso del Servicio, incluyendo decisiones de inversión, trading, asignación de capital, cumplimiento regulatorio, comunicaciones a terceros o uso de outputs sin revisión independiente.</p>
+          <p>Para usuarios empresariales, salvo dolo o culpa grave y en la máxima medida permitida por ley, la responsabilidad total acumulada de Denario por cualquier reclamo vinculado al Servicio no excederá el monto efectivamente pagado por el usuario a Denario por el Servicio específico que originó el reclamo durante los tres meses anteriores al hecho generador. Si el usuario no pagó por el Servicio, la responsabilidad total será de USD 100 o su equivalente, salvo que la ley aplicable disponga otra cosa.</p>
+
+          <h3>22. Indemnidad</h3>
+          <p>El usuario mantendrá indemne a Denario, sus directores, socios, empleados, contratistas, proveedores y afiliadas frente a reclamos, pérdidas, daños, sanciones, costos y gastos razonables derivados de: uso indebido del Servicio; incumplimiento de estos Términos; infracción de leyes, regulaciones o derechos de terceros; uso de outputs para asesorar a terceros sin autorización; carga de información no autorizada; o decisiones financieras tomadas por el usuario o terceros a partir de los entregables.</p>
+          <p>Esta cláusula se aplicará en la máxima medida permitida por la ley y sin afectar derechos irrenunciables de consumidores.</p>
+
+          <h3>23. Terminación</h3>
+          <p>Denario puede suspender o terminar el acceso del usuario si detecta incumplimiento de estos Términos, uso riesgoso, abuso, fraude, acceso no autorizado, falta de pago, infracción de propiedad intelectual, riesgo legal o regulatorio, requerimiento de autoridad o conducta que pueda afectar a Denario, otros usuarios o terceros.</p>
+          <p>La terminación no libera al usuario de obligaciones de pago, confidencialidad, propiedad intelectual, restricciones de uso, indemnidad y limitación de responsabilidad devengadas antes de la terminación.</p>
+
+          <h3>24. Ley aplicable y jurisdicción</h3>
+          <p>Estos Términos se regirán por las leyes de <span class="ph">[Argentina]</span>, sin perjuicio de normas imperativas de protección al consumidor, datos personales, mercado de capitales, comercio electrónico, tributarias o regulatorias que resulten aplicables.</p>
+          <p>Para usuarios empresariales, cualquier controversia se someterá a los tribunales competentes de <span class="ph">[Ciudad Autónoma de Buenos Aires]</span>, con renuncia a cualquier otro fuero o jurisdicción que pudiera corresponder, salvo que una norma imperativa disponga otra cosa.</p>
+          <p>Para consumidores, se aplicarán las reglas de jurisdicción y protección irrenunciables previstas por la ley aplicable.</p>
+
+          <h3>25. Cambios a estos Términos</h3>
+          <p>Denario puede actualizar estos Términos. La versión vigente será la publicada en el sitio, con indicación de fecha de última actualización. Cuando los cambios sean materiales, Denario procurará informar por medios razonables. El uso continuado del Servicio luego de la entrada en vigencia de los cambios implica aceptación de la nueva versión, salvo que la ley exija otro mecanismo.</p>
+
+          <h3>26. Contacto</h3>
+          <p>Para consultas legales: <a href="mailto:legal@denario.lat">legal@denario.lat</a>. Para soporte: <a href="mailto:soporte@denario.lat">soporte@denario.lat</a>. Para privacidad: <a href="mailto:privacidad@denario.lat">privacidad@denario.lat</a>.</p>
+        </section>
+
+        <!-- ── DOC 2: AVISO DE NO ASESORAMIENTO ── -->
+        <section class="legal-doc" id="aviso-riesgo">
+          <span class="legal-doc__label">Documento 02</span>
+          <h2>Aviso de No Asesoramiento Financiero y Riesgos</h2>
+
+          <div class="legal-variant">
+            <span class="legal-variant__label">Versión larga · Página legal</span>
+            <p>Denario / DeepFlow no presta asesoramiento financiero personalizado, asesoramiento en mercado de capitales, asesoramiento de inversión, asesoramiento legal, fiscal, contable, patrimonial, previsional ni de ningún otro tipo profesional regulado. Denario no es broker, dealer, agente de negociación, agente de liquidación, custodio, banco, sociedad gerente, administrador de carteras, asesor registrado, fiduciario ni intermediario financiero, salvo que se indique expresamente lo contrario mediante la exhibición de la licencia, matrícula o registro correspondiente.</p>
+            <p>Los materiales generados por Denario son research general, automatizado y no personalizado. Pueden incluir análisis de emisores, datos financieros, modelos de valuación, escenarios, rangos estimativos, múltiplos, supuestos, riesgos, catalizadores, apéndices de fuentes, controles de calidad, price targets o equivalentes. Estos elementos no son una recomendación de comprar, vender, mantener, suscribir, rescatar, canjear, cubrir, apalancar, shortear o realizar cualquier operación sobre instrumentos financieros.</p>
+            <p>Denario no evalúa la idoneidad, conveniencia ni adecuación de ningún instrumento para ningún usuario concreto. El usuario es el único responsable de consultar a asesores profesionales debidamente autorizados, verificar datos, analizar riesgos y tomar decisiones. Ningún output de Denario debe ser usado como única fuente para una decisión de inversión.</p>
+            <p>Los mercados financieros son riesgosos. El valor de los instrumentos puede subir o bajar. El usuario puede perder parte o la totalidad del capital invertido. Las estimaciones, escenarios y valuaciones se basan en supuestos que pueden resultar equivocados. Los datos pueden estar demorados, incompletos o contener errores. La rentabilidad pasada no garantiza resultados futuros.</p>
+            <p>Denario no garantiza rentabilidad, performance, alpha, exactitud de precios, cumplimiento de objetivos, ausencia de pérdidas, liquidez, ejecución, timing, calidad de datos de terceros ni resultados específicos.</p>
+            <p>El usuario no debe utilizar Denario para operar con información privilegiada, manipular mercados, asesorar terceros sin licencia, promover valores negociables, captar clientes para intermediarios financieros, emitir reportes regulados o realizar actividades reservadas a sujetos autorizados.</p>
+          </div>
+
+          <div class="legal-variant">
+            <span class="legal-variant__label">Versión corta · Footer del sitio</span>
+            <p>DeepFlow by Denario provee research general y automatizado. No es asesoramiento financiero, recomendación de inversión, oferta pública, intermediación, gestión de cartera ni bot de trading. Toda decisión de capital queda exclusivamente en manos del usuario y/o sus asesores registrados. Invertir implica riesgo de pérdida parcial o total del capital.</p>
+          </div>
+
+          <div class="legal-variant">
+            <span class="legal-variant__label">Versión previa al run · Aceptación requerida</span>
+            <p>Antes de ejecutar el run, declaro que entiendo y acepto que el resultado de Denario / DeepFlow tendrá finalidad informativa y de research general. No será asesoramiento financiero personalizado, recomendación de compra, venta o mantenimiento, oferta, solicitud, intermediación, gestión de cartera ni garantía de resultado. Asumo plena responsabilidad por verificar la información y por cualquier decisión de inversión, trading o asignación de capital que tome.</p>
+          </div>
+
+          <div class="legal-variant">
+            <span class="legal-variant__label">Versión portada · PDF / Memo</span>
+            <p>AVISO IMPORTANTE: Este documento fue generado por Denario / DeepFlow con fines exclusivamente informativos y de research general. No constituye asesoramiento financiero, recomendación personalizada, oferta pública, solicitud de compra o venta, intermediación, gestión de cartera, research regulado ni garantía de rentabilidad. Las valuaciones, escenarios, supuestos y precios objetivo son estimaciones no vinculantes, sujetas a incertidumbre y error. La decisión de inversión corresponde exclusivamente al lector y/o a sus asesores debidamente autorizados. Invertir implica riesgo de pérdida parcial o total del capital.</p>
+          </div>
+        </section>
+
+        <!-- ── DOC 3: PRIVACIDAD ── -->
+        <section class="legal-doc" id="privacidad">
+          <span class="legal-doc__label">Documento 03</span>
+          <h2>Política de Privacidad</h2>
+
+          <h3 class="no-border">1. Responsable</h3>
+          <p>Esta Política de Privacidad explica cómo <span class="ph">[DENARIO / RAZÓN SOCIAL]</span> ("Denario", "nosotros") recopila, usa, conserva, comparte y protege datos personales en relación con el sitio denario.lat, DeepFlow, formularios, comunicaciones, demos, runs, entregables, propuestas, soporte y servicios relacionados.</p>
+          <p>Responsable: <span class="ph">[DENARIO / RAZÓN SOCIAL]</span>. Domicilio: <span class="ph">[COMPLETAR]</span>. Email de privacidad: <a href="mailto:privacidad@denario.lat">privacidad@denario.lat</a>.</p>
+
+          <h3>2. Datos que podemos recopilar</h3>
+          <p>Podemos recopilar las siguientes categorías de datos, según el uso del Servicio:</p>
+          <ul>
+            <li><strong>Datos de identificación y contacto:</strong> nombre, apellido, email, teléfono, empresa, cargo, país, ciudad, usuario de mensajería y datos incluidos en formularios.</li>
+            <li><strong>Datos comerciales:</strong> plan, propuesta, contrato, facturación, estado de pago, historial de runs, solicitudes, soporte, preferencias y comunicaciones.</li>
+            <li><strong>Datos técnicos:</strong> dirección IP, identificadores de dispositivo, navegador, sistema operativo, idioma, páginas visitadas, logs, fechas y horas de acceso, eventos de seguridad, cookies y tecnologías similares.</li>
+            <li><strong>Datos de uso:</strong> tickers consultados, preguntas, parámetros, instrucciones, outputs generados, archivos descargados, actividad dentro del Servicio y métricas de funcionamiento.</li>
+            <li><strong>Datos de pago:</strong> información necesaria para facturación y cobro. Los datos completos de tarjetas u otros medios de pago pueden ser procesados por proveedores externos de pago; Denario no debería almacenar números completos de tarjeta salvo que se implemente una infraestructura específica y segura para ello.</li>
+            <li><strong>Contenido enviado por el usuario:</strong> mensajes, archivos, notas, prompts, documentación, comentarios o cualquier otro material que el usuario cargue o comparta.</li>
+          </ul>
+          <p>No solicitamos datos sensibles salvo que sean estrictamente necesarios y exista una base legal adecuada. El usuario no debe cargar datos sensibles, información privilegiada, secretos comerciales de terceros, datos de clientes finales, información médica, biométrica, política, sindical, religiosa o información confidencial no autorizada.</p>
+
+          <h3>3. Finalidades del tratamiento</h3>
+          <p>Podemos tratar datos personales para:</p>
+          <ul>
+            <li>Responder consultas, enviar muestras y gestionar comunicaciones.</li>
+            <li>Prestar el Servicio, ejecutar runs, generar entregables, brindar soporte y mantener trazabilidad.</li>
+            <li>Crear, administrar y proteger cuentas, accesos, tokens y permisos.</li>
+            <li>Facturar, cobrar, verificar pagos y cumplir obligaciones contables, fiscales y legales.</li>
+            <li>Auditar calidad, seguridad, disponibilidad, abuso, errores, fraude y uso indebido.</li>
+            <li>Mejorar funcionalidades, modelos, experiencia de usuario, performance y confiabilidad.</li>
+            <li>Enviar comunicaciones operativas, actualizaciones, avisos legales y mensajes de soporte.</li>
+            <li>Enviar comunicaciones comerciales cuando exista consentimiento u otra base legal aplicable.</li>
+            <li>Cumplir requerimientos legales, regulatorios, judiciales o de autoridades competentes.</li>
+            <li>Proteger derechos, seguridad, propiedad intelectual, infraestructura, usuarios y terceros.</li>
+          </ul>
+
+          <h3>4. Bases legales</h3>
+          <p>Según la jurisdicción aplicable, tratamos datos personales sobre la base de consentimiento del titular, ejecución de una relación contractual o precontractual, cumplimiento de obligaciones legales, interés legítimo en operar y proteger el Servicio, y/o cualquier otra base permitida por la normativa aplicable.</p>
+
+          <h3>5. Tratamiento automatizado e inteligencia artificial</h3>
+          <p>El Servicio puede utilizar sistemas automatizados e inteligencia artificial para procesar información, organizar fuentes, generar resúmenes, modelos, comentarios y entregables. Estos procesos se aplican para prestar el Servicio y no deben interpretarse como una decisión automatizada sobre la situación legal, financiera, crediticia, laboral, médica o personal del usuario.</p>
+          <p>El usuario debe revisar humana e independientemente los outputs. Si el usuario considera que un tratamiento automatizado lo perjudica de manera relevante, puede contactarnos en <a href="mailto:privacidad@denario.lat">privacidad@denario.lat</a> para solicitar información razonable sobre el proceso aplicable, sujeto a confidencialidad, seguridad, secreto comercial y límites legales.</p>
+
+          <h3>6. Compartición con terceros</h3>
+          <p>Podemos compartir datos personales, en la medida necesaria, con:</p>
+          <ul>
+            <li>Proveedores de hosting, infraestructura, almacenamiento, seguridad, email, analytics, CRM, soporte, automatización, pagos, facturación, bases de datos, APIs, datos financieros y herramientas de productividad.</li>
+            <li>Asesores profesionales, auditores, contadores, abogados y consultores bajo deber de confidencialidad.</li>
+            <li>Autoridades públicas, tribunales o reguladores cuando exista obligación legal, requerimiento válido o necesidad de defensa de derechos.</li>
+            <li>Afiliadas, adquirentes, inversores o sucesores en procesos de reorganización, fusión, adquisición, financiamiento o venta de activos, bajo salvaguardas razonables.</li>
+          </ul>
+          <p>No vendemos datos personales como negocio independiente. Si en el futuro implementamos publicidad comportamental, data sharing comercial o venta de datos en el sentido regulatorio aplicable, actualizaremos esta Política y solicitaremos los consentimientos que correspondan.</p>
+
+          <h3>7. Transferencias internacionales</h3>
+          <p>Los datos pueden ser tratados, almacenados o accedidos desde países distintos al país de residencia del usuario, incluyendo Argentina, Estados Unidos u otros países donde operen Denario o sus proveedores. Cuando corresponda, aplicaremos salvaguardas contractuales, técnicas y organizativas razonables para proteger los datos conforme a la normativa aplicable.</p>
+
+          <h3>8. Conservación</h3>
+          <p>Conservaremos los datos durante el tiempo necesario para cumplir las finalidades indicadas, prestar el Servicio, mantener trazabilidad de runs, resolver disputas, cumplir obligaciones legales, auditar seguridad, facturar, respaldar operaciones y defender derechos.</p>
+          <p>Los logs técnicos y de seguridad podrán conservarse por períodos razonables. Los registros contables, fiscales y contractuales se conservarán por los plazos exigidos por la ley aplicable. Los datos de marketing se conservarán hasta que el usuario retire su consentimiento o solicite la baja, salvo obligación legal o interés legítimo prevalente.</p>
+
+          <h3>9. Seguridad</h3>
+          <p>Implementamos medidas técnicas y organizativas razonables para proteger datos personales contra acceso no autorizado, pérdida, destrucción, uso indebido, alteración o divulgación. Sin embargo, ningún sistema es completamente seguro. El usuario debe proteger sus credenciales, limitar la información que comparte y notificarnos ante cualquier incidente sospechoso.</p>
+
+          <h3>10. Derechos del titular de datos</h3>
+          <p>Según la ley aplicable, el usuario puede solicitar acceso, rectificación, actualización, supresión, confidencialidad, oposición, limitación, portabilidad o retiro de consentimiento respecto de sus datos personales. Para ejercer derechos, escribir a <a href="mailto:privacidad@denario.lat">privacidad@denario.lat</a> con información suficiente para verificar identidad y procesar la solicitud.</p>
+          <p>Si la normativa argentina resulta aplicable, el titular de datos tiene derecho a solicitar información sobre sus datos personales, pedir corrección, actualización o supresión cuando corresponda, y acudir ante la Agencia de Acceso a la Información Pública como autoridad de control.</p>
+
+          <h3>11. Menores de edad</h3>
+          <p>El Servicio no está dirigido a menores de 18 años. No recopilamos intencionalmente datos de menores. Si tomamos conocimiento de que un menor nos proporcionó datos sin autorización válida, podremos eliminarlos.</p>
+
+          <h3>12. Marketing</h3>
+          <p>Podemos enviar comunicaciones comerciales si el usuario lo autoriza o si existe una base legal aplicable. El usuario puede darse de baja en cualquier momento mediante el enlace incluido en las comunicaciones o escribiendo a <a href="mailto:soporte@denario.lat">soporte@denario.lat</a>. La baja de marketing no impide recibir comunicaciones operativas o legales necesarias para el Servicio.</p>
+
+          <h3>13. Cookies</h3>
+          <p>El uso de cookies y tecnologías similares se regula en la <a href="#cookies">Política de Cookies</a>. El usuario puede configurar su navegador o el panel de preferencias, cuando esté disponible, para rechazar o limitar cookies no esenciales.</p>
+
+          <h3>14. Cambios a esta Política</h3>
+          <p>Podemos actualizar esta Política de Privacidad. La versión vigente será la publicada en el sitio con fecha de última actualización. Si los cambios son materiales, procuraremos informar por medios razonables.</p>
+
+          <h3>15. Contacto</h3>
+          <p>Para consultas o solicitudes de privacidad, escribir a <a href="mailto:privacidad@denario.lat">privacidad@denario.lat</a>.</p>
+        </section>
+
+        <!-- ── DOC 4: COOKIES ── -->
+        <section class="legal-doc" id="cookies">
+          <span class="legal-doc__label">Documento 04</span>
+          <h2>Política de Cookies</h2>
+
+          <h3 class="no-border">1. Qué son las cookies</h3>
+          <p>Las cookies son pequeños archivos o identificadores que se almacenan en el navegador o dispositivo del usuario cuando visita un sitio web. También podemos usar tecnologías similares, como local storage, píxeles, SDKs, etiquetas, logs o identificadores técnicos.</p>
+
+          <h3>2. Tipos de cookies que podemos usar</h3>
+          <ul>
+            <li><strong>Cookies estrictamente necesarias:</strong> permiten navegación, seguridad, sesión, preferencias básicas, carga del sitio, prevención de fraude y funcionamiento esencial. No requieren consentimiento cuando son imprescindibles para prestar el servicio solicitado.</li>
+            <li><strong>Cookies funcionales:</strong> recuerdan preferencias, idioma, región, formularios, configuraciones o experiencias personalizadas.</li>
+            <li><strong>Cookies analíticas:</strong> nos ayudan a entender uso del sitio, páginas visitadas, errores, performance, campañas y métricas agregadas.</li>
+            <li><strong>Cookies de marketing o medición publicitaria:</strong> permiten medir campañas, atribución, conversiones o mostrar comunicaciones relevantes. Se usarán conforme a la ley aplicable y preferencias del usuario.</li>
+          </ul>
+
+          <h3>3. Cookies de terceros</h3>
+          <p>Algunas cookies o tecnologías pueden ser provistas por terceros, como proveedores de analytics, hosting, seguridad, pagos, CRM, email, soporte, publicidad o herramientas integradas. Estos terceros pueden tratar datos conforme a sus propias políticas.</p>
+
+          <h3>4. Gestión de preferencias</h3>
+          <p>El usuario puede configurar su navegador para bloquear, eliminar o limitar cookies. También podrá usar el panel de preferencias de cookies cuando Denario lo implemente. Bloquear cookies esenciales puede afectar el funcionamiento del sitio o del Servicio.</p>
+
+          <h3>5. Cambios</h3>
+          <p>Podemos actualizar esta Política de Cookies para reflejar cambios técnicos, legales o comerciales. La versión vigente será la publicada en el sitio.</p>
+
+          <h3>6. Contacto</h3>
+          <p>Para consultas sobre cookies, escribir a <a href="mailto:privacidad@denario.lat">privacidad@denario.lat</a>.</p>
+        </section>
+
+        <!-- ── DOC 5: USO ACEPTABLE ── -->
+        <section class="legal-doc" id="uso-aceptable">
+          <span class="legal-doc__label">Documento 05</span>
+          <h2>Política de Uso Aceptable</h2>
+
+          <h3 class="no-border">1. Propósito</h3>
+          <p>Esta Política de Uso Aceptable establece reglas mínimas para proteger a Denario, usuarios, terceros, mercados, proveedores de datos e infraestructura. Aplica a todo uso del sitio, Servicio, demos, runs, APIs, outputs y entregables.</p>
+
+          <h3>2. Usos prohibidos</h3>
+          <p>El usuario no podrá utilizar Denario para:</p>
+          <ul>
+            <li>Actividades ilegales, fraudulentas, engañosas, abusivas o no autorizadas.</li>
+            <li>Asesoramiento financiero personalizado, captación de clientes, promoción de valores negociables, gestión de carteras, intermediación, recepción o transmisión de órdenes, o emisión de research regulado sin contar con las autorizaciones correspondientes.</li>
+            <li>Manipulación de mercado, abuso de información privilegiada, insider trading, front-running, rumor spreading, pump and dump, spoofing, layering, wash trades, scalping engañoso o prácticas similares.</li>
+            <li>Automatizar trading, señales operativas, órdenes, alertas de ejecución o estrategias de inversión destinadas a operar sin revisión humana y sin cumplimiento regulatorio.</li>
+            <li>Cargar información privilegiada, confidencial, sensible o de terceros sin autorización.</li>
+            <li>Eludir licencias de datos, restricciones de proveedores, derechos de autor, marcas, secretos comerciales o términos de terceros.</li>
+            <li>Revender, redistribuir, publicar masivamente, modificar o explotar comercialmente outputs fuera de la licencia contratada.</li>
+            <li>Desarrollar un producto competidor mediante extracción sistemática, scraping, ingeniería inversa, benchmarking no autorizado o copia de workflows, outputs, prompts, diseños o metodología.</li>
+            <li>Introducir malware, explotar vulnerabilidades, realizar pruebas de intrusión no autorizadas, saturar servicios, evadir controles, acceder a cuentas ajenas o comprometer seguridad.</li>
+            <li>Usar el Servicio en jurisdicciones, sectores, instrumentos o actividades donde esté prohibido o requiera autorización no obtenida.</li>
+          </ul>
+
+          <h3>3. Revisión y suspensión</h3>
+          <p>Denario puede revisar señales de abuso, limitar requests, suspender accesos, rechazar runs, eliminar contenido, cancelar cuentas o terminar relaciones cuando exista sospecha razonable de incumplimiento, riesgo legal, riesgo regulatorio, riesgo reputacional, seguridad o uso indebido.</p>
+
+          <h3>4. Reportes</h3>
+          <p>Para reportar uso indebido, vulnerabilidades o violaciones de esta Política, escribir a <a href="mailto:legal@denario.lat">legal@denario.lat</a> o <a href="mailto:soporte@denario.lat">soporte@denario.lat</a>.</p>
+        </section>
+
+        <!-- ── DOC 6: CANCELACIONES ── -->
+        <section class="legal-doc" id="cancelaciones">
+          <span class="legal-doc__label">Documento 06</span>
+          <h2>Política de Cancelación, Arrepentimiento, Baja y Reembolsos</h2>
+
+          <h3 class="no-border">1. Alcance</h3>
+          <p>Esta política aplica a compras, suscripciones, planes, demos pagas, runs individuales, paquetes de research, licencias, servicios enterprise y otros servicios ofrecidos por Denario, salvo que una propuesta, contrato o ley aplicable establezca condiciones distintas.</p>
+
+          <h3>2. Derecho de arrepentimiento para consumidores</h3>
+          <p>Cuando el usuario contrate como consumidor a través de medios digitales y la normativa aplicable reconozca un derecho de arrepentimiento, Denario pondrá a disposición un canal claro para ejercerlo dentro del plazo legal. Si corresponde por ley, el sitio deberá incluir un "Botón de Arrepentimiento" visible, de acceso fácil y directo desde la página de inicio.</p>
+          <p>Para ejercer el arrepentimiento, el usuario deberá completar el formulario o escribir a <a href="mailto:soporte@denario.lat">soporte@denario.lat</a> indicando nombre, email, fecha de contratación, servicio contratado, comprobante y motivo opcional. Denario informará un código o constancia de recepción en el plazo exigido por la ley aplicable.</p>
+
+          <h3>3. Baja de suscripciones</h3>
+          <p>Las suscripciones recurrentes podrán darse de baja hacia adelante desde el panel de cuenta, el botón o enlace de baja disponible, o escribiendo a <a href="mailto:soporte@denario.lat">soporte@denario.lat</a>. Si la ley aplicable exige botón de baja, Denario deberá implementarlo en lugar visible, accesible y directo.</p>
+          <p>La baja no implica pérdida inmediata de acceso ya pagado salvo que la modalidad del plan lo disponga, ni reembolso automático de períodos ya iniciados, salvo obligación legal o acuerdo escrito distinto.</p>
+
+          <h3>4. Runs y entregables ya ejecutados</h3>
+          <p>Dado que los runs pueden generar entregables digitales, personalizados o bajo demanda, los montos asociados a runs ya ejecutados, reportes ya generados, archivos descargados, análisis personalizados, integraciones, setup, consultoría o costos de terceros incurridos no serán reembolsables, salvo obligación legal, falla atribuible a Denario o acuerdo escrito distinto.</p>
+
+          <h3>5. Fallas del Servicio</h3>
+          <p>Si un run falla por causa atribuible a Denario y no se entrega un resultado utilizable, Denario podrá, a su criterio y según la modalidad contratada: reintentar el run, otorgar crédito, extender límites, reemplazar el entregable o reembolsar el monto específico del run fallido. Esta solución no aplica cuando la falla derive de datos externos indisponibles, ticker inexistente, información insuficiente, restricciones de proveedores, uso indebido, fuerza mayor o instrucciones incorrectas del usuario.</p>
+
+          <h3>6. Cambios de plan</h3>
+          <p>Los upgrades, downgrades, créditos, prorrateos o migraciones de plan se regirán por las condiciones comerciales vigentes al momento del cambio. Denario puede rechazar cambios que busquen eludir límites de uso, restricciones de licencia o pagos devengados.</p>
+
+          <h3>7. Contratos enterprise</h3>
+          <p>Los contratos enterprise, pilotos pagos, integraciones, licencias anuales, paquetes a medida, servicios profesionales y acuerdos B2B se regirán por la propuesta o contrato firmado. Salvo pacto escrito distinto, los pagos comprometidos por servicios empresariales no son cancelables ni reembolsables una vez aceptada la propuesta o iniciado el trabajo.</p>
+
+          <h3>8. Contacto</h3>
+          <p>Para cancelaciones, arrepentimiento, baja o reembolsos, escribir a <a href="mailto:soporte@denario.lat">soporte@denario.lat</a>.</p>
+        </section>
+
+        <!-- ── DOC 7: AVISO LEGAL ── -->
+        <section class="legal-doc" id="aviso-legal">
+          <span class="legal-doc__label">Documento 07</span>
+          <h2>Aviso Legal del Sitio</h2>
+
+          <div class="legal-callout legal-callout--green">
+            <p>Denario / DeepFlow es un servicio de research automatizado y no personalizado. La información publicada en este sitio y los materiales generados por el Servicio tienen finalidad informativa, educativa e investigativa general. No constituyen asesoramiento financiero, recomendación personalizada de inversión, oferta pública, solicitud de compra o venta, intermediación, gestión de cartera, asesoramiento legal, fiscal o contable, ni garantía de resultados.</p>
+          </div>
+
+          <p>Los mercados financieros son riesgosos y el usuario puede perder parte o la totalidad del capital invertido. Los modelos, escenarios, rangos de valuación y precios objetivo son estimaciones sujetas a supuestos, errores, demoras e incertidumbre. El usuario debe verificar toda información y consultar asesores debidamente autorizados antes de tomar decisiones.</p>
+          <p>Denario no recibe ni ejecuta órdenes, no custodia activos, no administra carteras y no reemplaza el juicio profesional humano. El uso del sitio implica aceptación de los <a href="#terminos">Términos y Condiciones</a>, <a href="#privacidad">Política de Privacidad</a>, <a href="#cookies">Política de Cookies</a> y <a href="#aviso-riesgo">Aviso de No Asesoramiento Financiero</a>.</p>
+        </section>
+
+      </div><!-- /.legal-content -->
+    </div><!-- /.legal-layout -->
+
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <span class="footer__brand">DeepFlow <em>by Denario</em></span>
+      <span class="footer__note">Research auditable. Decisión humana.</span>
+      <span class="footer__legal">© 2026 Denario. DeepFlow no es asesoramiento financiero ni un bot de trading.</span>
+    </div>
+  </footer>
+
+  <script>
+    // Theme toggle
+    const themeBtn = document.getElementById('theme-toggle');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', () => {
+        document.body.classList.toggle('light');
+        localStorage.setItem('df-theme', document.body.classList.contains('light') ? 'light' : 'dark');
+      });
+    }
+
+    // Sidebar scrollspy
+    const sections = document.querySelectorAll('.legal-doc[id]');
+    const navLinks = document.querySelectorAll('#legal-nav a');
+
+    function updateActive() {
+      let current = '';
+      sections.forEach(sec => {
+        if (window.scrollY >= sec.offsetTop - 120) current = sec.id;
+      });
+      navLinks.forEach(a => {
+        a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+      });
+    }
+
+    window.addEventListener('scroll', updateActive, { passive: true });
+    updateActive();
+
+    // Smooth scroll for sidebar links
+    navLinks.forEach(a => {
+      a.addEventListener('click', e => {
+        const id = a.getAttribute('href').slice(1);
+        const target = document.getElementById(id);
+        if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+      });
+    });
+
+    // Nav scroll state
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('is-scrolled', window.scrollY > 24);
+    }, { passive: true });
+  </script>
+</body>
+</html>
