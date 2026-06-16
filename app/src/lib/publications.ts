@@ -22,8 +22,11 @@ export interface PublicationsFeed {
   publications: PublicPublication[]
 }
 
-export async function fetchPublicationsFromIndex(indexUrl: string): Promise<PublicPublication[]> {
-  const response = await fetch(indexUrl, { cache: 'no-store' })
+export async function fetchPublicationsFromIndex(
+  indexUrl: string,
+  init: RequestInit = {},
+): Promise<PublicPublication[]> {
+  const response = await fetch(indexUrl, { ...init, cache: 'no-store' })
   if (!response.ok) throw new Error(`${response.status} ${response.statusText}`)
   const raw = (await response.json()) as unknown
   const feed = normalizeFeed(raw)

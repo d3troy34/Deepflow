@@ -9,11 +9,19 @@ import {
 
 const BASE = ((import.meta.env.VITE_API_BASE as string | undefined) ?? '').replace(/\/$/, '')
 const PUBLICATIONS_INDEX_URL = (
-  (import.meta.env.VITE_PUBLICATIONS_INDEX_URL as string | undefined) ?? ''
+  (import.meta.env.VITE_PUBLICATIONS_INDEX_URL as string | undefined) ?? '/api/publications/feed'
 ).trim()
 
 export const hasPublicationsFeed = PUBLICATIONS_INDEX_URL.length > 0
 export type { PublicPublication, PublicationsFeed }
+
+type AuthTokenProvider = () => string | null | Promise<string | null>
+
+let authTokenProvider: AuthTokenProvider | null = null
+
+export function setApiAuthTokenProvider(provider: AuthTokenProvider | null): void {
+  authTokenProvider = provider
+}
 
 export interface RunSummary {
   run_id: string
@@ -74,7 +82,9 @@ export interface RunDetail {
 }
 
 async function getJSON<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}${path}`)
+  const token = authTokenProvider ? await authTokenProvider() : null
+  const headers = token ? { authorization: `Bearer ${token}` } : undefined
+  const res = await fetch(`${BASE}${path}`, { headers })
   if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
   return (await res.json()) as T
 }
@@ -86,9 +96,23 @@ export async function fetchRuns(): Promise<RunSummary[]> {
   return obj.runs ?? obj.items ?? []
 }
 
-export function fetchPublications(): Promise<PublicPublication[]> {
+export async function fetchPublications(): Promise<PublicPublication[]> {
   if (!hasPublicationsFeed) return Promise.resolve([])
-  return fetchPublicationsFromIndex(PUBLICATIONS_INDEX_URL)
+  const token = shouldSendAuthToken(PUBLICATIONS_INDEX_URL) && authTokenProvider
+    ? await authTokenProvider()
+    : null
+  const headers = token ? { authorization: `Bearer ${token}` } : undefined
+  return fetchPublicationsFromIndex(PUBLICATIONS_INDEX_URL, { headers })
+}
+
+function shouldSendAuthToken(url: string): boolean {
+  if (url.startsWith('/')) return true
+  if (typeof window === 'undefined') return false
+  try {
+    return new URL(url, window.location.href).origin === window.location.origin
+  } catch {
+    return false
+  }
 }
 
 export function fetchRun(runId: string): Promise<RunDetail> {

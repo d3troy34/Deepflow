@@ -6,12 +6,20 @@ import {
   fetchRuns,
   hasPublicationsFeed,
   reportUrl,
+  setApiAuthTokenProvider,
   type Gate,
   type PublicPublication,
   type Recommendation,
   type RunDetail,
   type RunSummary,
 } from './lib/api'
+import {
+  getInitialAuthSession,
+  onAuthSessionChange,
+  signInWithGoogle,
+  supabaseAuthConfig,
+  type AuthSession,
+} from './lib/supabase'
 import { getPins, isPinned, pin, unpin, type Pin } from './lib/watchlist'
 
 /* ---------- helpers ---------- */
@@ -122,18 +130,22 @@ const SearchIcon = ({ className = '' }: IconProps) => (
     <path d="m21 21-4.3-4.3" />
   </svg>
 )
-const BellIcon = ({ className = '' }: IconProps) => (
-  <svg className={className} width="16" height="16" {...svgBase}>
-    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
-    <path d="M13.7 21a2 2 0 0 1-3.4 0" />
-  </svg>
-)
-const UserIcon = ({ className = '' }: IconProps) => (
-  <svg className={className} width="16" height="16" {...svgBase}>
-    <circle cx="12" cy="8" r="4" />
-    <path d="M6 21v-1a6 6 0 0 1 12 0v1" />
-  </svg>
-)
+const ThemeIcon = ({ light }: { light: boolean }) =>
+  light ? (
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M13.5 8.7A6 6 0 0 1 7.3 2.5a6 6 0 1 0 6.2 6.2z" fill="currentColor" />
+    </svg>
+  ) : (
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <circle cx="8" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.4" />
+      <path
+        d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.1 3.1l1.06 1.06M11.84 11.84l1.06 1.06M3.1 12.9l1.06-1.06M11.84 4.16l1.06-1.06"
+        stroke="currentColor"
+        strokeWidth="1.3"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
 const DocIcon = ({ className = '' }: IconProps) => (
   <svg className={className} width="15" height="15" {...svgBase}>
     <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
@@ -332,46 +344,76 @@ function CandidateRow({
 
 /* ---------- sections ---------- */
 
+interface AuthNavState {
+  configured: boolean
+  loading: boolean
+  email: string | null
+}
+
 function NavBar({
-  q,
-  setQ,
   light,
   toggleTheme,
 }: {
-  q: string
-  setQ: (v: string) => void
   light: boolean
   toggleTheme: () => void
 }) {
   return (
-    <header className="sticky top-0 z-20 border-b border-line bg-ink">
-      <div className="mx-auto max-w-container px-6 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-8">
-          <span className="font-display text-[20px] text-bone">DeepFlow</span>
-          <nav className="hidden md:flex items-center gap-6 text-[13px]">
-            <a className="text-bone border-b-2 border-green pb-1 cursor-default">Research</a>
-            <a className="text-muted hover:text-bone cursor-pointer">Projects</a>
-            <a className="text-muted hover:text-bone cursor-pointer">Docs</a>
-          </nav>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="relative hidden sm:block">
-            <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search research…"
-              className="pl-8 pr-3 py-1.5 rounded-md border border-line-strong bg-ink-2 text-[12.5px] text-bone outline-none focus:border-green w-56"
-            />
-          </div>
-          <button onClick={toggleTheme} className="text-muted hover:text-bone text-[14px]" title="Tema">
-            {light ? '◐' : '◑'}
+    <header className="nav">
+      <div className="nav__inner">
+        <a className="nav__brand" href="/">
+          <span className="nav__dot" aria-hidden="true"></span>
+          <span className="nav__logo">DeepFlow</span>
+          <span className="nav__sep" aria-hidden="true">{'\u00b7'}</span>
+          <span className="nav__by">by Denario</span>
+        </a>
+        <nav className="nav__links" aria-label="DeepFlow">
+          <a href="/#producto">Producto</a>
+          <a href="/#proceso">{'C\u00f3mo funciona'}</a>
+          <a href="/#muestra">Muestra</a>
+        </nav>
+        <div className="nav__actions">
+          <a href="/app/" className="btn btn--small">
+            {'Tracker \u2192'}
+          </a>
+          <a href="/#contacto" className="btn btn--small btn--nav-cta">
+            {'Hablemos \u2192'}
+          </a>
+          <button
+            type="button"
+            className="theme-toggle"
+            onClick={toggleTheme}
+            aria-label={light ? 'Cambiar a tema oscuro' : 'Cambiar a tema claro'}
+          >
+            <ThemeIcon light={light} />
           </button>
-          <BellIcon className="text-muted" />
-          <UserIcon className="text-muted" />
         </div>
       </div>
     </header>
+  )
+}
+
+function ResearchSearch({
+  q,
+  setQ,
+  placeholder = 'Search research...',
+}: {
+  q: string
+  setQ: (value: string) => void
+  placeholder?: string
+}) {
+  return (
+    <div className="mt-6 flex justify-center md:justify-end">
+      <label className="relative block w-full max-w-[320px]">
+        <span className="sr-only">Search research</span>
+        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder={placeholder}
+          className="w-full rounded-pill border border-line-strong bg-ink-2 py-2 pl-9 pr-4 text-[13px] text-bone outline-none transition-colors placeholder:text-muted focus:border-green"
+        />
+      </label>
+    </div>
   )
 }
 
@@ -393,6 +435,7 @@ function Hero() {
 }
 
 type Stats = { total: number; ratio: string; pending: number; coverage: number }
+type StatTile = { label: string; value: string; color: string; sub?: string }
 
 function computeStats(runs: RunSummary[]): Stats {
   const L = (r: RunSummary) => (r.recommendation || '').toUpperCase()
@@ -412,8 +455,8 @@ function computeStats(runs: RunSummary[]): Stats {
   return { total, ratio, pending, coverage }
 }
 
-function StatsBar({ stats }: { stats: Stats }) {
-  const items = [
+function internalStatItems(stats: Stats): StatTile[] {
+  return [
     { label: 'Total Analyses', value: stats.total.toLocaleString('en-US'), color: 'var(--bone)' },
     { label: 'Buy/Hold Ratio', value: stats.ratio, color: 'var(--bone)' },
     {
@@ -424,6 +467,9 @@ function StatsBar({ stats }: { stats: Stats }) {
     },
     { label: 'Model Coverage', value: `${stats.coverage}%`, color: 'var(--green)' },
   ]
+}
+
+function StatsBar({ items }: { items: StatTile[] }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 rounded-xl border border-line bg-ink-2 overflow-hidden">
       {items.map((it, i) => (
@@ -570,15 +616,45 @@ function AuditCard({ stats }: { stats: Stats }) {
   )
 }
 
+function PublicEvidenceAuditCard({ publications }: { publications: PublicPublication[] }) {
+  const completePackages = publications.filter(
+    (publication) =>
+      Boolean(publication.memo_short_url) &&
+      Boolean(publication.memo_long_url) &&
+      Boolean(publication.memo_full_url),
+  ).length
+  const status =
+    publications.length === 0
+      ? 'Awaiting Publications'
+      : completePackages === publications.length
+        ? 'Complete Evidence'
+        : 'Partial Evidence'
+
+  return (
+    <div className="rounded-xl border border-line bg-ink-2 p-5">
+      <div className="text-[13px] text-bone font-medium">Evidence Audit: {status}</div>
+      <div className="text-[11.5px] text-muted mt-1 leading-relaxed">
+        {completePackages}/{publications.length} paquetes públicos incluyen resumen, memo y tesis completa.
+      </div>
+    </div>
+  )
+}
+
 function Footer() {
   return (
     <footer className="border-t border-line mt-16">
       <div className="mx-auto max-w-container px-6 py-6 flex items-center justify-between text-[11px] text-muted font-mono uppercase tracking-wide">
         <span>DeepFlow · by Denario</span>
         <span className="hidden sm:flex gap-6">
-          <a className="hover:text-bone cursor-pointer">Privacy</a>
-          <a className="hover:text-bone cursor-pointer">Terms</a>
-          <a className="hover:text-bone cursor-pointer">Guidelines</a>
+          <a href="/legal.html#privacidad" className="hover:text-bone">
+            Privacy
+          </a>
+          <a href="/legal.html#terminos" className="hover:text-bone">
+            Terms
+          </a>
+          <a href="/legal.html#uso-aceptable" className="hover:text-bone">
+            Guidelines
+          </a>
         </span>
       </div>
     </footer>
@@ -592,13 +668,63 @@ function publicationStatusLabel(value: string): string {
   return value.replace(/_/g, ' ').toUpperCase()
 }
 
-function publicationStats(publications: PublicPublication[]): Stats {
-  return {
-    total: publications.length,
-    ratio: '3 HTMLs',
-    pending: 0,
-    coverage: publications.length > 0 ? 100 : 0,
-  }
+function publicStatItems(
+  publications: PublicPublication[],
+  livePrices: Record<string, number | null>,
+): StatTile[] {
+  const sorted = [...publications].sort(
+    (a, b) => new Date(b.published_at).valueOf() - new Date(a.published_at).valueOf(),
+  )
+  const latest = sorted[0] ?? null
+  const completePackages = publications.filter(
+    (publication) =>
+      Boolean(publication.memo_short_url) &&
+      Boolean(publication.memo_long_url) &&
+      Boolean(publication.memo_full_url),
+  ).length
+  const drifts = publications
+    .map((publication) => {
+      const livePrice = livePrices[publication.ticker]
+      if (publication.memo_price == null || livePrice == null) return null
+      return ((livePrice - publication.memo_price) / publication.memo_price) * 100
+    })
+    .filter((value): value is number => value !== null && Number.isFinite(value))
+  const averageDrift = drifts.length
+    ? drifts.reduce((sum, value) => sum + value, 0) / drifts.length
+    : null
+  const driftSign = averageDrift != null && averageDrift > 0 ? '+' : ''
+
+  return [
+    {
+      label: 'Public Theses',
+      value: publications.length.toLocaleString('en-US'),
+      color: 'var(--bone)',
+      sub: publications.length > 0 ? 'curated feed' : undefined,
+    },
+    {
+      label: 'Latest Memo',
+      value: latest?.ticker ?? 'n/d',
+      color: 'var(--bone)',
+      sub: latest ? publicDate(latest.published_at) : 'sin publicaciones',
+    },
+    {
+      label: 'Evidence Packages',
+      value: publications.length > 0 ? `${completePackages}/${publications.length}` : '0',
+      color: 'var(--green)',
+      sub: publications.length > 0 ? 'complete' : undefined,
+    },
+    {
+      label: 'Price Drift',
+      value: averageDrift == null ? 'n/d' : `${driftSign}${averageDrift.toFixed(1)}%`,
+      color:
+        averageDrift == null
+          ? 'var(--muted)'
+          : averageDrift >= 0
+            ? 'var(--green)'
+            : 'var(--red)',
+      sub: drifts.length > 0 ? `${drifts.length} live ${drifts.length === 1 ? 'quote' : 'quotes'}` : undefined,
+    },
+  ]
 }
 
 function publicDate(value: string): string {
@@ -806,6 +932,7 @@ function PublicEvidenceView({
   setQ,
   light,
   toggleTheme,
+  authError,
 }: {
   publications: PublicPublication[] | null
   livePrices: Record<string, number | null>
@@ -814,6 +941,7 @@ function PublicEvidenceView({
   setQ: (value: string) => void
   light: boolean
   toggleTheme: () => void
+  authError: string | null
 }) {
   const filtered = useMemo(() => {
     if (!publications) return []
@@ -825,16 +953,21 @@ function PublicEvidenceView({
         (publication.company_name || '').toUpperCase().includes(needle),
     )
   }, [publications, q])
-  const stats = useMemo(() => publicationStats(publications || []), [publications])
+  const publicStats = useMemo(
+    () => publicStatItems(publications || [], livePrices),
+    [publications, livePrices],
+  )
   const featured = filtered[0] ?? null
 
   return (
     <div className="min-h-screen">
-      <NavBar q={q} setQ={setQ} light={light} toggleTheme={toggleTheme} />
+      <NavBar light={light} toggleTheme={toggleTheme} />
       <main className="mx-auto max-w-container px-6">
         <Hero />
-        <StatsBar stats={stats} />
+        <StatsBar items={publicStats} />
+        <ResearchSearch q={q} setQ={setQ} />
 
+        {authError && <p className="text-red text-[13px] mt-6">Auth error: {authError}</p>}
         {error && <p className="text-red text-[13px] mt-6">No se pudo cargar el feed: {error}</p>}
         {!publications && !error && (
           <p className="text-muted text-[13px] mt-6">Cargando publicaciones...</p>
@@ -849,8 +982,59 @@ function PublicEvidenceView({
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 mt-10">
           <PublicFeaturedMemo publication={featured} />
-          <AuditCard stats={stats} />
+          <PublicEvidenceAuditCard publications={publications || []} />
         </div>
+      </main>
+      <Footer />
+    </div>
+  )
+}
+
+function AuthGate({
+  light,
+  toggleTheme,
+  auth,
+  authError,
+  onSignIn,
+  eyebrow = 'Denario operator access',
+  title = 'Sign in to continue',
+  body = 'Internal research views use Supabase Auth with Google sign-in.',
+  buttonLabel = 'Sign in with Google',
+}: {
+  light: boolean
+  toggleTheme: () => void
+  auth: AuthNavState
+  authError: string | null
+  onSignIn: () => void
+  eyebrow?: string
+  title?: string
+  body?: string
+  buttonLabel?: string
+}) {
+  return (
+    <div className="min-h-screen">
+      <NavBar light={light} toggleTheme={toggleTheme} />
+      <main className="mx-auto max-w-container px-6">
+        <section className="pt-24 max-w-[560px]">
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-green">
+            {eyebrow}
+          </span>
+          <h1 className="font-display text-[44px] leading-tight text-bone mt-4">
+            {title}
+          </h1>
+          <p className="text-[14px] text-bone-dim leading-relaxed mt-4">
+            {body}
+          </p>
+          <button
+            type="button"
+            onClick={onSignIn}
+            disabled={auth.loading}
+            className="mt-7 rounded-md border border-line-strong px-4 py-2 font-mono text-[11px] uppercase tracking-wide text-bone hover:border-green disabled:cursor-wait disabled:text-muted"
+          >
+            {auth.loading ? 'Checking...' : buttonLabel}
+          </button>
+          {authError && <p className="text-red text-[13px] mt-5">Auth error: {authError}</p>}
+        </section>
       </main>
       <Footer />
     </div>
@@ -859,8 +1043,13 @@ function PublicEvidenceView({
 
 /* ---------- app ---------- */
 
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error)
+}
+
 export default function App() {
   const publicMode = hasPublicationsFeed
+  const requiresAuth = supabaseAuthConfig.enabled
   const [runs, setRuns] = useState<RunSummary[] | null>(null)
   const [details, setDetails] = useState<Record<string, RunDetail>>({})
   const [publications, setPublications] = useState<PublicPublication[] | null>(null)
@@ -871,20 +1060,64 @@ export default function App() {
   const [light, setLight] = useState(document.body.classList.contains('light'))
   const [pins, setPins] = useState<Pin[]>(() => getPins())
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [authSession, setAuthSession] = useState<AuthSession | null>(null)
+  const [authLoading, setAuthLoading] = useState(supabaseAuthConfig.enabled)
+  const [authError, setAuthError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!supabaseAuthConfig.enabled) return
+
+    let cancelled = false
+    getInitialAuthSession()
+      .then((session) => {
+        if (!cancelled) setAuthSession(session)
+      })
+      .catch((e) => {
+        if (!cancelled) setAuthError(errorMessage(e))
+      })
+      .finally(() => {
+        if (!cancelled) setAuthLoading(false)
+      })
+
+    const unsubscribe = onAuthSessionChange((session) => {
+      if (cancelled) return
+      setAuthSession(session)
+      setAuthLoading(false)
+      if (session) setAuthError(null)
+      else {
+        setRuns(null)
+        setDetails({})
+        setPublications(null)
+        setLivePrices({})
+      }
+    })
+
+    return () => {
+      cancelled = true
+      unsubscribe()
+    }
+  }, [])
+
+  useEffect(() => {
+    setApiAuthTokenProvider(() => authSession?.access_token ?? null)
+    return () => setApiAuthTokenProvider(null)
+  }, [authSession])
 
   useEffect(() => {
     if (publicMode) return
+    if (requiresAuth && (authLoading || !authSession)) return
     fetchRuns()
       .then((r) => setRuns(r.filter((x) => x.workflow_type === 'deepflow')))
       .catch((e) => setError(String(e)))
-  }, [publicMode])
+  }, [publicMode, requiresAuth, authLoading, authSession])
 
   useEffect(() => {
     if (!publicMode) return
+    if (requiresAuth && (authLoading || !authSession)) return
     fetchPublications()
       .then((items) => setPublications(items))
       .catch((e) => setPublicationError(String(e)))
-  }, [publicMode])
+  }, [publicMode, requiresAuth, authLoading, authSession])
 
   useEffect(() => {
     if (!publicMode || !publications || publications.length === 0) return
@@ -895,6 +1128,7 @@ export default function App() {
   // Throttled detail loader (max 4 concurrent) — fills quality/status/notes without an N+1 burst.
   useEffect(() => {
     if (publicMode) return
+    if (requiresAuth && !authSession) return
     if (!runs) return
     let cancelled = false
     const queue = [...runs]
@@ -920,7 +1154,7 @@ export default function App() {
     return () => {
       cancelled = true
     }
-  }, [publicMode, runs])
+  }, [publicMode, requiresAuth, runs, authSession])
 
   const stats = useMemo(() => computeStats(runs || []), [runs])
   const filtered = useMemo(() => {
@@ -941,12 +1175,38 @@ export default function App() {
     return (buy || withThesis[0]) as { r: RunSummary; d: RunDetail }
   }, [runs, details])
   const refreshPins = () => setPins(getPins())
+  const auth = useMemo<AuthNavState>(() => ({
+    configured: requiresAuth,
+    loading: authLoading,
+    email: authSession?.user.email ?? null,
+  }), [requiresAuth, authLoading, authSession])
+
+  const handleSignIn = () => {
+    setAuthError(null)
+    void signInWithGoogle().catch((e) => setAuthError(errorMessage(e)))
+  }
 
   const toggleTheme = () => {
     const next = !light
     document.body.classList.toggle('light', next)
     localStorage.setItem('df-theme', next ? 'light' : 'dark')
     setLight(next)
+  }
+
+  if (publicMode && requiresAuth && (authLoading || !authSession)) {
+    return (
+      <AuthGate
+        light={light}
+        toggleTheme={toggleTheme}
+        auth={auth}
+        authError={authError}
+        onSignIn={handleSignIn}
+        eyebrow="Free research access"
+        title="Log in to view Research Tracker"
+        body="Use Google to create a free Denario session before reading the tracker and memos. No payment is required."
+        buttonLabel="Continue with Google"
+      />
+    )
   }
 
   if (publicMode) {
@@ -959,17 +1219,32 @@ export default function App() {
         setQ={setQ}
         light={light}
         toggleTheme={toggleTheme}
+        authError={authError}
+      />
+    )
+  }
+
+  if (requiresAuth && (authLoading || !authSession)) {
+    return (
+      <AuthGate
+        light={light}
+        toggleTheme={toggleTheme}
+        auth={auth}
+        authError={authError}
+        onSignIn={handleSignIn}
       />
     )
   }
 
   return (
     <div className="min-h-screen">
-      <NavBar q={q} setQ={setQ} light={light} toggleTheme={toggleTheme} />
+      <NavBar light={light} toggleTheme={toggleTheme} />
       <main className="mx-auto max-w-container px-6">
         <Hero />
-        <StatsBar stats={stats} />
+        <StatsBar items={internalStatItems(stats)} />
+        <ResearchSearch q={q} setQ={setQ} />
 
+        {authError && <p className="text-red text-[13px] mt-6">Auth error: {authError}</p>}
         {error && (
           <p className="text-red text-[13px] mt-6">
             No se pudo cargar /api/runs: {error}. ¿Está corriendo el backend en :8000?

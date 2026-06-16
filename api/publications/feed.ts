@@ -1,4 +1,3 @@
-import { BlobNotFoundError, get } from '@vercel/blob'
 import {
   INDEX_PATH,
   emptyFeed,
@@ -6,15 +5,18 @@ import {
   jsonResponse,
   normalizeFeed,
   optionsResponse,
+  readPublicJsonBlob,
   type PublicationsFeed,
 } from '../_publicationTypes.js'
 import { sendResponse, type NodeRequest, type NodeResponse } from '../_node.js'
+import { assertSupabaseUser } from '../_supabaseAuth.js'
 
 export default async function handler(request: NodeRequest, response: NodeResponse): Promise<void> {
   if (request.method === 'OPTIONS') return sendResponse(response, optionsResponse())
   if (request.method !== 'GET') return sendResponse(response, jsonResponse({ error: 'method not allowed' }, 405))
 
   try {
+    await assertSupabaseUser(request)
     return sendResponse(response, jsonResponse(await readFeed()))
   } catch (error) {
     return sendResponse(response, errorResponse(error))
@@ -22,17 +24,6 @@ export default async function handler(request: NodeRequest, response: NodeRespon
 }
 
 async function readFeed(): Promise<PublicationsFeed> {
-  try {
-    const result = await get(INDEX_PATH, { access: 'public', useCache: false })
-    if (!result || result.statusCode !== 200 || !result.stream) return emptyFeed()
-    const raw = await new Response(result.stream).json()
-    return normalizeFeed(raw)
-  } catch (error) {
-    if (error instanceof BlobNotFoundError || isMissingFeedBlobError(error)) return emptyFeed()
-    throw error
-  }
-}
-
-function isMissingFeedBlobError(error: unknown): boolean {
-  return error instanceof Error && /Failed to fetch blob: 400 Bad Request/i.test(error.message)
+  const raw = await readPublicJsonBlob(INDEX_PATH)
+  return raw === null ? emptyFeed() : normalizeFeed(raw)
 }

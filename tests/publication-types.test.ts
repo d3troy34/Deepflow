@@ -1,0 +1,97 @@
+import assert from 'node:assert/strict'
+import { test } from 'node:test'
+import { gzipSync } from 'node:zlib'
+
+import {
+  decodeHtmlGzipBase64,
+  publicationHtmlPath,
+  removePublication,
+  parseDeleteBody,
+  parsePublishBody,
+} from '../api/_publicationTypes.ts'
+
+function gzipBase64(value: string): string {
+  return gzipSync(Buffer.from(value, 'utf8')).toString('base64')
+}
+
+test('parsePublishBody accepts gzipped public HTML documents', () => {
+  const body = parsePublishBody({
+    run_id: 'NOW-20260616T192437-2dc50a',
+    ticker: 'NOW',
+    company_name: 'ServiceNow',
+    public_slug: '2026/now/NOW-20260616T192437-2dc50a',
+    publishability_status: 'Publicado',
+    confidence: null,
+    system_label: 'Comprar',
+    editor_note: null,
+    memo_price: 101.57,
+    memo_price_currency: 'USD',
+    memo_price_as_of: null,
+    memo_long_html_gzip_base64: gzipBase64('<!doctype html><html><body>memo</body></html>'),
+    memo_short_html_gzip_base64: gzipBase64('<html><body>resumen</body></html>'),
+    memo_full_html_gzip_base64: gzipBase64('<html><body>tesis</body></html>'),
+  })
+
+  assert.equal(body.memo_long_url, '')
+  assert.equal(body.memo_short_url, '')
+  assert.equal(
+    decodeHtmlGzipBase64(body.memo_long_html_gzip_base64, 'memo').toString('utf8'),
+    '<!doctype html><html><body>memo</body></html>',
+  )
+  assert.equal(
+    decodeHtmlGzipBase64(body.memo_full_html_gzip_base64!, 'tesis').toString('utf8'),
+    '<html><body>tesis</body></html>',
+  )
+})
+
+test('publicationHtmlPath uses stable public document filenames', () => {
+  assert.equal(
+    publicationHtmlPath('2026/now/RUN', 'memo_long'),
+    'publications/2026/now/RUN/memo.html',
+  )
+  assert.equal(
+    publicationHtmlPath('2026/now/RUN', 'memo_short'),
+    'publications/2026/now/RUN/resumen.html',
+  )
+  assert.equal(
+    publicationHtmlPath('2026/now/RUN', 'memo_full'),
+    'publications/2026/now/RUN/tesis-completa.html',
+  )
+})
+
+test('removePublication removes the slug from the public feed', () => {
+  const feed = removePublication({
+    schema_version: 1,
+    updated_at: 'old',
+    publications: [
+      {
+        run_id: 'RUN-1',
+        ticker: 'NOW',
+        company_name: 'ServiceNow',
+        public_slug: '2026/now/RUN-1',
+        published_at: '2026-06-16T20:00:00.000Z',
+        publishability_status: 'Publicado',
+        confidence: null,
+        system_label: 'Comprar',
+        memo_long_url: 'https://blob/memo.html',
+        memo_short_url: 'https://blob/resumen.html',
+        memo_full_url: 'https://blob/tesis-completa.html',
+        metadata_url: 'https://blob/metadata.json',
+        editor_note: null,
+        memo_price: null,
+        memo_price_currency: null,
+        memo_price_as_of: null,
+      },
+    ],
+  }, '2026/now/RUN-1', '2026-06-16T21:00:00.000Z')
+
+  assert.equal(feed.updated_at, '2026-06-16T21:00:00.000Z')
+  assert.deepEqual(feed.publications, [])
+})
+
+test('parseDeleteBody requires a public slug', () => {
+  assert.deepEqual(parseDeleteBody({ public_slug: '2026/now/RUN-1' }), {
+    public_slug: '2026/now/RUN-1',
+  })
+  assert.throws(() => parseDeleteBody({}), /public_slug is required/)
+})

@@ -1,13 +1,13 @@
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client'
 import {
   PDF_MAX_BYTES,
-  assertPublishToken,
   errorResponse,
   jsonResponse,
   optionsResponse,
   parseUploadClientPayload,
   validateUploadPath,
 } from './_publicationTypes.js'
+import { assertPublishTokenOrSupabaseAdmin } from './_supabaseAuth.js'
 import {
   nodeRequestUrl,
   readJsonBody,
@@ -17,13 +17,17 @@ import {
 } from './_node.js'
 
 export default async function handler(request: NodeRequest, response: NodeResponse): Promise<void> {
-  if (request.method === 'OPTIONS') return sendResponse(response, optionsResponse())
-  if (request.method !== 'POST') return sendResponse(response, jsonResponse({ error: 'method not allowed' }, 405))
+  if (request.method === 'OPTIONS') return sendResponse(response, optionsResponse('write'))
+  if (request.method !== 'POST') {
+    return sendResponse(response, jsonResponse({ error: 'method not allowed' }, 405, 'write'))
+  }
 
   try {
     const body = (await readJsonBody(request)) as HandleUploadBody
     const webRequest = toWebRequest(request)
-    if (body.type === 'blob.generate-client-token') assertPublishToken(request)
+    if (body.type === 'blob.generate-client-token') {
+      await assertPublishTokenOrSupabaseAdmin(request)
+    }
 
     const result = await handleUpload({
       request: webRequest,
@@ -42,9 +46,9 @@ export default async function handler(request: NodeRequest, response: NodeRespon
       },
       onUploadCompleted: async () => {},
     })
-    return sendResponse(response, jsonResponse(result))
+    return sendResponse(response, jsonResponse(result, 200, 'write'))
   } catch (error) {
-    return sendResponse(response, errorResponse(error))
+    return sendResponse(response, errorResponse(error, 'write'))
   }
 }
 

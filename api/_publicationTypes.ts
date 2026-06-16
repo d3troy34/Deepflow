@@ -1,22 +1,39 @@
+import { gunzipSync } from 'node:zlib'
+
 export const INDEX_PATH = 'publications/index.json'
 export const PDF_MAX_BYTES = 100 * 1024 * 1024
+export const HTML_MAX_BYTES = 20 * 1024 * 1024
+export const HTML_GZIP_MAX_BYTES = 10 * 1024 * 1024
 
-export const corsHeaders = {
+export const publicCorsHeaders = {
   'access-control-allow-origin': '*',
-  'access-control-allow-methods': 'GET, POST, OPTIONS',
+  'access-control-allow-methods': 'GET, OPTIONS',
   'access-control-allow-headers': 'authorization, content-type',
 }
 
+export const corsHeaders = publicCorsHeaders
+
+export function writeCorsHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {
+    'access-control-allow-methods': 'POST, OPTIONS',
+    'access-control-allow-headers': 'authorization, content-type',
+  }
+  const allowedOrigin = (process.env.DEEPFLOW_PUBLISH_ALLOWED_ORIGIN || '').trim()
+  if (allowedOrigin) headers['access-control-allow-origin'] = allowedOrigin
+  return headers
+}
+
 export class HttpError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-  ) {
+  status: number
+
+  constructor(status: number, message: string) {
     super(message)
+    this.status = status
   }
 }
 
 export type MemoKind = 'memo_long' | 'memo_short'
+export type HtmlMemoKind = MemoKind | 'memo_full'
 
 export interface UploadClientPayload {
   run_id: string
@@ -40,6 +57,16 @@ export interface PublicationCommitBody {
   memo_price_as_of: string | null
 }
 
+export interface PublicationPublishBody extends PublicationCommitBody {
+  memo_long_html_gzip_base64: string
+  memo_short_html_gzip_base64: string
+  memo_full_html_gzip_base64: string | null
+}
+
+export interface PublicationDeleteBody {
+  public_slug: string
+}
+
 export interface PublicPublication {
   run_id: string
   ticker: string
@@ -51,6 +78,7 @@ export interface PublicPublication {
   system_label: string | null
   memo_long_url: string
   memo_short_url: string
+  memo_full_url: string | null
   metadata_url: string | null
   editor_note: string | null
   memo_price: number | null
@@ -64,20 +92,39 @@ export interface PublicationsFeed {
   publications: PublicPublication[]
 }
 
-export function optionsResponse(): Response {
-  return new Response(null, { status: 204, headers: corsHeaders })
+export function optionsResponse(scope: 'public' | 'write' = 'public'): Response {
+  return new Response(null, {
+    status: 204,
+    headers: scope === 'write' ? writeCorsHeaders() : publicCorsHeaders,
+  })
 }
 
-export function jsonResponse(body: unknown, status = 200): Response {
-  return Response.json(body, { status, headers: corsHeaders })
+export function jsonResponse(
+  body: unknown,
+  status = 200,
+  scope: 'public' | 'write' = 'public',
+): Response {
+  return Response.json(body, {
+    status,
+    headers: scope === 'write' ? writeCorsHeaders() : publicCorsHeaders,
+  })
 }
 
-export function errorResponse(error: unknown): Response {
-  if (error instanceof HttpError) {
-    return jsonResponse({ error: error.message }, error.status)
+export function errorResponse(error: unknown, scope: 'public' | 'write' = 'public'): Response {
+  if (error instanceof HttpError || isHttpErrorLike(error)) {
+    return jsonResponse({ error: error.message }, error.status, scope)
   }
   const message = error instanceof Error ? error.message : 'unknown error'
-  return jsonResponse({ error: message }, 500)
+  return jsonResponse({ error: message }, 500, scope)
+}
+
+function isHttpErrorLike(error: unknown): error is { status: number; message: string } {
+  return Boolean(
+    error &&
+      typeof error === 'object' &&
+      typeof (error as { status?: unknown }).status === 'number' &&
+      typeof (error as { message?: unknown }).message === 'string',
+  )
 }
 
 export function assertPublishToken(request: Request | { headers: Record<string, string | string[] | undefined> }): void {
@@ -136,8 +183,8 @@ export function parseCommitBody(raw: unknown): PublicationCommitBody {
     publishability_status: stringField(obj, 'publishability_status'),
     confidence: nullableStringField(obj, 'confidence'),
     system_label: nullableStringField(obj, 'system_label'),
-    memo_long_url: urlField(obj, 'memo_long_url'),
-    memo_short_url: urlField(obj, 'memo_short_url'),
+    memo_long_url: blobUrlField(obj, 'memo_long_url', publicSlug, 'memo-largo.pdf'),
+    memo_short_url: blobUrlField(obj, 'memo_short_url', publicSlug, 'memo-corto.pdf'),
     editor_note: nullableStringField(obj, 'editor_note'),
     memo_price: nullableNumberField(obj, 'memo_price'),
     memo_price_currency: nullableStringField(obj, 'memo_price_currency'),
@@ -145,9 +192,114 @@ export function parseCommitBody(raw: unknown): PublicationCommitBody {
   }
 }
 
+export function parsePublishBody(raw: unknown): PublicationPublishBody {
+  const obj = asRecord(raw)
+  const publicSlug = stringField(obj, 'public_slug')
+  validatePublicSlug(publicSlug)
+  return {
+    run_id: stringField(obj, 'run_id'),
+    ticker: stringField(obj, 'ticker'),
+    company_name: nullableStringField(obj, 'company_name'),
+    public_slug: publicSlug,
+    publishability_status: stringField(obj, 'publishability_status'),
+    confidence: nullableStringField(obj, 'confidence'),
+    system_label: nullableStringField(obj, 'system_label'),
+    memo_long_url: '',
+    memo_short_url: '',
+    editor_note: nullableStringField(obj, 'editor_note'),
+    memo_price: nullableNumberField(obj, 'memo_price'),
+    memo_price_currency: nullableStringField(obj, 'memo_price_currency'),
+    memo_price_as_of: nullableStringField(obj, 'memo_price_as_of'),
+    memo_long_html_gzip_base64: stringField(obj, 'memo_long_html_gzip_base64'),
+    memo_short_html_gzip_base64: stringField(obj, 'memo_short_html_gzip_base64'),
+    memo_full_html_gzip_base64: nullableStringField(obj, 'memo_full_html_gzip_base64'),
+  }
+}
+
+export function parseDeleteBody(raw: unknown): PublicationDeleteBody {
+  const obj = asRecord(raw)
+  const publicSlug = stringField(obj, 'public_slug')
+  validatePublicSlug(publicSlug)
+  return { public_slug: publicSlug }
+}
+
 export function publicationMetadataPath(publicSlug: string): string {
   validatePublicSlug(publicSlug)
   return `publications/${publicSlug}/metadata.json`
+}
+
+export function publicationPdfPath(publicSlug: string, kind: MemoKind): string {
+  validatePublicSlug(publicSlug)
+  const file = kind === 'memo_long' ? 'memo-largo.pdf' : 'memo-corto.pdf'
+  return `publications/${publicSlug}/${file}`
+}
+
+export function publicationHtmlPath(publicSlug: string, kind: HtmlMemoKind): string {
+  validatePublicSlug(publicSlug)
+  const file = kind === 'memo_long'
+    ? 'memo.html'
+    : kind === 'memo_short'
+      ? 'resumen.html'
+      : 'tesis-completa.html'
+  return `publications/${publicSlug}/${file}`
+}
+
+export function publicBlobUrl(pathname: string): string {
+  const storeId = (process.env.BLOB_STORE_ID || '').trim()
+  if (!storeId) throw new HttpError(500, 'BLOB_STORE_ID is not configured')
+  const normalizedStoreId = storeId.replace(/^store_/i, '').toLowerCase()
+  const normalizedPathname = pathname.replace(/^\/+/, '')
+  return `https://${normalizedStoreId}.public.blob.vercel-storage.com/${normalizedPathname}`
+}
+
+export async function readPublicJsonBlob(pathname: string): Promise<unknown | null> {
+  const url = new URL(publicBlobUrl(pathname))
+  url.searchParams.set('cacheBust', String(Date.now()))
+  const response = await fetch(url, {
+    cache: 'no-store',
+    headers: { accept: 'application/json' },
+  })
+  if (response.status === 404) return null
+  if (!response.ok) {
+    throw new HttpError(502, `failed to read public blob ${pathname}: ${response.status}`)
+  }
+  return response.json()
+}
+
+export function decodeHtmlGzipBase64(value: string, label: string): Buffer {
+  const compressed = Buffer.from(value, 'base64')
+  if (compressed.length <= 0) throw new HttpError(400, `${label} is empty`)
+  if (compressed.length > HTML_GZIP_MAX_BYTES) {
+    throw new HttpError(413, `${label} compressed payload exceeds size limit`)
+  }
+  let data: Buffer
+  try {
+    data = gunzipSync(compressed)
+  } catch {
+    throw new HttpError(400, `${label} must be gzip-compressed base64`)
+  }
+  if (data.length <= 0) throw new HttpError(400, `${label} is empty`)
+  if (data.length > HTML_MAX_BYTES) throw new HttpError(413, `${label} exceeds size limit`)
+  const prefix = data.subarray(0, 256).toString('utf8').toLowerCase()
+  if (!prefix.includes('<html') && !prefix.includes('<!doctype html')) {
+    throw new HttpError(400, `${label} is not an HTML document`)
+  }
+  return data
+}
+
+export function decodePdfBase64(value: string, label: string): Buffer {
+  let data: Buffer
+  try {
+    data = Buffer.from(value, 'base64')
+  } catch {
+    throw new HttpError(400, `${label} must be base64`)
+  }
+  if (data.length <= 0) throw new HttpError(400, `${label} is empty`)
+  if (data.length > PDF_MAX_BYTES) throw new HttpError(413, `${label} exceeds size limit`)
+  if (!data.subarray(0, 5).equals(Buffer.from('%PDF-'))) {
+    throw new HttpError(400, `${label} is not a PDF`)
+  }
+  return data
 }
 
 export function emptyFeed(): PublicationsFeed {
@@ -165,6 +317,18 @@ export function upsertPublication(
     schema_version: 1,
     updated_at: publication.published_at,
     publications: next,
+  }
+}
+
+export function removePublication(
+  feed: PublicationsFeed,
+  publicSlug: string,
+  updatedAt = new Date().toISOString(),
+): PublicationsFeed {
+  return {
+    schema_version: 1,
+    updated_at: updatedAt,
+    publications: feed.publications.filter((item) => item.public_slug !== publicSlug),
   }
 }
 
@@ -193,6 +357,35 @@ function urlField(obj: Record<string, unknown>, key: string): string {
   } catch {
     throw new HttpError(400, `${key} must be an absolute URL`)
   }
+}
+
+function blobUrlField(
+  obj: Record<string, unknown>,
+  key: string,
+  publicSlug: string,
+  expectedFile: 'memo-largo.pdf' | 'memo-corto.pdf',
+): string {
+  const value = urlField(obj, key)
+  const url = new URL(value)
+  if (url.protocol !== 'https:') throw new HttpError(400, `${key} must use https`)
+  if (!isAllowedBlobHost(url.hostname)) {
+    throw new HttpError(400, `${key} host is not allowed`)
+  }
+  const path = decodeURIComponent(url.pathname).replace(/^\/+/, '')
+  const expectedSuffix = `publications/${publicSlug}/${expectedFile}`
+  if (!path.endsWith(expectedSuffix)) {
+    throw new HttpError(400, `${key} path does not match the publication slug`)
+  }
+  return url.toString()
+}
+
+function isAllowedBlobHost(hostname: string): boolean {
+  const configured = (process.env.DEEPFLOW_BLOB_ALLOWED_HOSTS || '')
+    .split(',')
+    .map((item) => item.trim().toLowerCase())
+    .filter(Boolean)
+  if (configured.length > 0) return configured.includes(hostname.toLowerCase())
+  return hostname.toLowerCase().endsWith('.public.blob.vercel-storage.com')
 }
 
 function stringField(obj: Record<string, unknown>, key: string): string {
