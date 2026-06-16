@@ -12,14 +12,15 @@ import {
   upsertPublication,
   type PublicationsFeed,
 } from '../_publicationTypes.js'
+import { readJsonBody, sendResponse, type NodeRequest, type NodeResponse } from '../_node.js'
 
-export default async function handler(request: Request): Promise<Response> {
-  if (request.method === 'OPTIONS') return optionsResponse()
-  if (request.method !== 'POST') return jsonResponse({ error: 'method not allowed' }, 405)
+export default async function handler(request: NodeRequest, response: NodeResponse): Promise<void> {
+  if (request.method === 'OPTIONS') return sendResponse(response, optionsResponse())
+  if (request.method !== 'POST') return sendResponse(response, jsonResponse({ error: 'method not allowed' }, 405))
 
   try {
     assertPublishToken(request)
-    const body = parseCommitBody(await request.json())
+    const body = parseCommitBody(await readJsonBody(request))
     const publishedAt = new Date().toISOString()
     const metadataPath = publicationMetadataPath(body.public_slug)
     const publication = {
@@ -55,13 +56,13 @@ export default async function handler(request: Request): Promise<Response> {
       cacheControlMaxAge: 60,
     })
 
-    return jsonResponse({
+    return sendResponse(response, jsonResponse({
       publication: item,
       metadata_url: metadataBlob.url,
       index_url: indexBlob.url,
-    })
+    }))
   } catch (error) {
-    return errorResponse(error)
+    return sendResponse(response, errorResponse(error))
   }
 }
 

@@ -8,15 +8,16 @@ import {
   optionsResponse,
   type PublicationsFeed,
 } from '../_publicationTypes.js'
+import { sendResponse, type NodeRequest, type NodeResponse } from '../_node.js'
 
-export default async function handler(request: Request): Promise<Response> {
-  if (request.method === 'OPTIONS') return optionsResponse()
-  if (request.method !== 'GET') return jsonResponse({ error: 'method not allowed' }, 405)
+export default async function handler(request: NodeRequest, response: NodeResponse): Promise<void> {
+  if (request.method === 'OPTIONS') return sendResponse(response, optionsResponse())
+  if (request.method !== 'GET') return sendResponse(response, jsonResponse({ error: 'method not allowed' }, 405))
 
   try {
-    return jsonResponse(await readFeed())
+    return sendResponse(response, jsonResponse(await readFeed()))
   } catch (error) {
-    return errorResponse(error)
+    return sendResponse(response, errorResponse(error))
   }
 }
 

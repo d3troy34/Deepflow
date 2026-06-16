@@ -80,11 +80,18 @@ export function errorResponse(error: unknown): Response {
   return jsonResponse({ error: message }, 500)
 }
 
-export function assertPublishToken(request: Request): void {
+export function assertPublishToken(request: Request | { headers: Record<string, string | string[] | undefined> }): void {
   const expected = process.env.DEEPFLOW_PUBLISH_TOKEN
   if (!expected) throw new HttpError(500, 'DEEPFLOW_PUBLISH_TOKEN is not configured')
-  const actual = request.headers.get('authorization') ?? ''
+  const actual = request.headers instanceof Headers
+    ? request.headers.get('authorization') ?? ''
+    : headerValue(request.headers.authorization)
   if (actual !== `Bearer ${expected}`) throw new HttpError(401, 'invalid publish token')
+}
+
+function headerValue(value: string | string[] | undefined): string {
+  if (Array.isArray(value)) return value[0] ?? ''
+  return value ?? ''
 }
 
 export function parseUploadClientPayload(raw: string | null): UploadClientPayload {

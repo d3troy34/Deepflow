@@ -1,13 +1,14 @@
 import yahooFinance from 'yahoo-finance2'
 import { corsHeaders, jsonResponse, optionsResponse } from '../_publicationTypes.js'
+import { nodeRequestUrl, sendResponse, type NodeRequest, type NodeResponse } from '../_node.js'
 
 const CACHE_SECONDS = 120
 
-export default async function handler(request: Request): Promise<Response> {
-  if (request.method === 'OPTIONS') return optionsResponse()
-  if (request.method !== 'GET') return jsonResponse({ error: 'method not allowed' }, 405)
+export default async function handler(request: NodeRequest, response: NodeResponse): Promise<void> {
+  if (request.method === 'OPTIONS') return sendResponse(response, optionsResponse())
+  if (request.method !== 'GET') return sendResponse(response, jsonResponse({ error: 'method not allowed' }, 405))
 
-  const url = new URL(request.url)
+  const url = new URL(nodeRequestUrl(request))
   const tickersParam = url.searchParams.get('tickers') ?? ''
   const tickers = tickersParam
     .split(',')
@@ -16,7 +17,7 @@ export default async function handler(request: Request): Promise<Response> {
     .slice(0, 20)
 
   if (tickers.length === 0) {
-    return jsonResponse({ prices: {} })
+    return sendResponse(response, jsonResponse({ prices: {} }))
   }
 
   const prices: Record<string, number | null> = {}
@@ -31,12 +32,12 @@ export default async function handler(request: Request): Promise<Response> {
     }),
   )
 
-  return new Response(JSON.stringify({ prices }), {
+  return sendResponse(response, new Response(JSON.stringify({ prices }), {
     status: 200,
     headers: {
       ...corsHeaders,
       'content-type': 'application/json',
       'cache-control': `public, s-maxage=${CACHE_SECONDS}, stale-while-revalidate=30`,
     },
-  })
+  }))
 }
