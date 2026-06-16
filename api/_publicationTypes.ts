@@ -35,6 +35,9 @@ export interface PublicationCommitBody {
   memo_long_url: string
   memo_short_url: string
   editor_note: string | null
+  memo_price: number | null
+  memo_price_currency: string | null
+  memo_price_as_of: string | null
 }
 
 export interface PublicPublication {
@@ -50,6 +53,9 @@ export interface PublicPublication {
   memo_short_url: string
   metadata_url: string | null
   editor_note: string | null
+  memo_price: number | null
+  memo_price_currency: string | null
+  memo_price_as_of: string | null
 }
 
 export interface PublicationsFeed {
@@ -126,6 +132,9 @@ export function parseCommitBody(raw: unknown): PublicationCommitBody {
     memo_long_url: urlField(obj, 'memo_long_url'),
     memo_short_url: urlField(obj, 'memo_short_url'),
     editor_note: nullableStringField(obj, 'editor_note'),
+    memo_price: nullableNumberField(obj, 'memo_price'),
+    memo_price_currency: nullableStringField(obj, 'memo_price_currency'),
+    memo_price_as_of: nullableStringField(obj, 'memo_price_as_of'),
   }
 }
 
@@ -192,6 +201,15 @@ function nullableStringField(obj: Record<string, unknown>, key: string): string 
   if (value === null || value === undefined || value === '') return null
   if (typeof value !== 'string') throw new HttpError(400, `${key} must be a string`)
   return value.trim()
+}
+
+function nullableNumberField(obj: Record<string, unknown>, key: string): number | null {
+  const value = obj[key]
+  if (value === null || value === undefined) return null
+  if (typeof value !== 'number' || !isFinite(value)) {
+    throw new HttpError(400, `${key} must be a finite number`)
+  }
+  return value
 }
 
 function asRecord(value: unknown): Record<string, unknown> {

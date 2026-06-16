@@ -35,6 +35,9 @@ export default async function handler(request: Request): Promise<Response> {
       memo_short_url: body.memo_short_url,
       metadata_url: null,
       editor_note: body.editor_note,
+      memo_price: body.memo_price,
+      memo_price_currency: body.memo_price_currency,
+      memo_price_as_of: body.memo_price_as_of,
     }
 
     const metadataBlob = await put(metadataPath, JSON.stringify(publication, null, 2), {

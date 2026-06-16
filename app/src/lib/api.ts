@@ -101,3 +101,18 @@ export const execSummaryPdfUrl = (runId: string) =>
 export const reportHtmlUrl = (runId: string) => `${BASE}/api/runs/${runId}/report/html`
 export const reportUrl = (runId: string, kind: 'pdf' | 'html' | 'json' | 'xlsx') =>
   `${BASE}/api/runs/${runId}/report/${kind}`
+
+export async function fetchLivePrices(
+  tickers: string[],
+): Promise<Record<string, number | null>> {
+  if (tickers.length === 0) return {}
+  try {
+    const params = new URLSearchParams({ tickers: tickers.join(',') })
+    const res = await fetch(`/api/market/live-prices?${params}`)
+    if (!res.ok) return Object.fromEntries(tickers.map((t) => [t, null]))
+    const data = (await res.json()) as { prices?: Record<string, number | null> }
+    return data.prices ?? Object.fromEntries(tickers.map((t) => [t, null]))
+  } catch {
+    return Object.fromEntries(tickers.map((t) => [t, null]))
+  }
+}

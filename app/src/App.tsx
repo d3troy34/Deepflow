@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
+  fetchLivePrices,
   fetchPublications,
   fetchRun,
   fetchRuns,
@@ -606,7 +607,34 @@ function publicDate(value: string): string {
   return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' })
 }
 
-function PublicPublicationRow({ publication }: { publication: PublicPublication }) {
+function formatPrice(value: number | null | undefined, currency: string | null | undefined): string {
+  if (value == null) return 'n/d'
+  const prefix = (!currency || currency === 'USD') ? '$' : `${currency} `
+  return `${prefix}${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
+
+function PriceChange({ memoPrice, livePrice }: { memoPrice: number | null; livePrice: number | null | undefined }) {
+  if (memoPrice == null || livePrice == null) {
+    return <span className="font-mono text-[12px] text-muted">n/d</span>
+  }
+  const pct = ((livePrice - memoPrice) / memoPrice) * 100
+  const sign = pct > 0 ? '+' : ''
+  const color = pct > 0 ? 'var(--green)' : pct < 0 ? 'var(--red)' : 'var(--muted)'
+  return (
+    <span className="font-mono text-[12px] font-medium" style={{ color }}>
+      {sign}{pct.toFixed(2)}%
+    </span>
+  )
+}
+
+function PublicPublicationRow({
+  publication,
+  livePrices,
+}: {
+  publication: PublicPublication
+  livePrices: Record<string, number | null>
+}) {
+  const livePrice = livePrices[publication.ticker] ?? null
   return (
     <tr className="border-t border-line hover:bg-ink-3 transition-colors">
       <td className="py-3.5 pl-4 pr-4 align-middle">
@@ -632,6 +660,19 @@ function PublicPublicationRow({ publication }: { publication: PublicPublication 
         <span className="font-mono text-[11px] text-muted block truncate">
           {publication.public_slug}
         </span>
+      </td>
+      <td className="py-3.5 pr-4 align-middle whitespace-nowrap">
+        <span className="font-mono text-[12px] text-bone-dim">
+          {formatPrice(publication.memo_price, publication.memo_price_currency)}
+        </span>
+      </td>
+      <td className="py-3.5 pr-4 align-middle whitespace-nowrap">
+        <span className="font-mono text-[12px] text-bone-dim">
+          {formatPrice(livePrice, publication.memo_price_currency)}
+        </span>
+      </td>
+      <td className="py-3.5 pr-4 align-middle whitespace-nowrap">
+        <PriceChange memoPrice={publication.memo_price} livePrice={livePrice} />
       </td>
       <td className="py-3.5 pr-4 align-middle">
         <div className="flex items-center gap-3 text-muted">
@@ -661,9 +702,15 @@ function PublicPublicationRow({ publication }: { publication: PublicPublication 
   )
 }
 
-function PublicPublicationsTable({ publications }: { publications: PublicPublication[] }) {
+function PublicPublicationsTable({
+  publications,
+  livePrices,
+}: {
+  publications: PublicPublication[]
+  livePrices: Record<string, number | null>
+}) {
   return (
-    <div className="mt-6 rounded-xl border border-line bg-ink-2 overflow-hidden">
+    <div className="mt-6 rounded-xl border border-line bg-ink-2 overflow-x-auto">
       <table className="w-full text-left">
         <thead>
           <tr className="text-muted font-mono text-[10px] uppercase tracking-[0.1em] border-b border-line">
@@ -671,12 +718,19 @@ function PublicPublicationsTable({ publications }: { publications: PublicPublica
             <th className="py-3 pr-4 font-normal">Status</th>
             <th className="py-3 pr-4 font-normal">Published</th>
             <th className="py-3 pr-4 font-normal">Evidence path</th>
+            <th className="py-3 pr-4 font-normal">Memo price</th>
+            <th className="py-3 pr-4 font-normal">Live price</th>
+            <th className="py-3 pr-4 font-normal">Since memo</th>
             <th className="py-3 pr-4 font-normal">PDFs</th>
           </tr>
         </thead>
         <tbody>
           {publications.map((publication) => (
-            <PublicPublicationRow key={publication.run_id} publication={publication} />
+            <PublicPublicationRow
+              key={publication.run_id}
+              publication={publication}
+              livePrices={livePrices}
+            />
           ))}
         </tbody>
       </table>
@@ -724,6 +778,7 @@ function PublicFeaturedMemo({ publication }: { publication: PublicPublication | 
 
 function PublicEvidenceView({
   publications,
+  livePrices,
   error,
   q,
   setQ,
@@ -731,6 +786,7 @@ function PublicEvidenceView({
   toggleTheme,
 }: {
   publications: PublicPublication[] | null
+  livePrices: Record<string, number | null>
   error: string | null
   q: string
   setQ: (value: string) => void
@@ -765,7 +821,9 @@ function PublicEvidenceView({
           <p className="text-muted text-[13px] mt-6">No hay publicaciones todavia.</p>
         )}
 
-        {filtered.length > 0 && <PublicPublicationsTable publications={filtered} />}
+        {filtered.length > 0 && (
+          <PublicPublicationsTable publications={filtered} livePrices={livePrices} />
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 mt-10">
           <PublicFeaturedMemo publication={featured} />
@@ -785,6 +843,7 @@ export default function App() {
   const [details, setDetails] = useState<Record<string, RunDetail>>({})
   const [publications, setPublications] = useState<PublicPublication[] | null>(null)
   const [publicationError, setPublicationError] = useState<string | null>(null)
+  const [livePrices, setLivePrices] = useState<Record<string, number | null>>({})
   const [error, setError] = useState<string | null>(null)
   const [q, setQ] = useState('')
   const [light, setLight] = useState(document.body.classList.contains('light'))
@@ -804,6 +863,12 @@ export default function App() {
       .then((items) => setPublications(items))
       .catch((e) => setPublicationError(String(e)))
   }, [publicMode])
+
+  useEffect(() => {
+    if (!publicMode || !publications || publications.length === 0) return
+    const tickers = [...new Set(publications.map((p) => p.ticker).filter(Boolean))]
+    fetchLivePrices(tickers).then(setLivePrices).catch(() => {})
+  }, [publicMode, publications])
 
   // Throttled detail loader (max 4 concurrent) — fills quality/status/notes without an N+1 burst.
   useEffect(() => {
@@ -866,6 +931,7 @@ export default function App() {
     return (
       <PublicEvidenceView
         publications={publications}
+        livePrices={livePrices}
         error={publicationError}
         q={q}
         setQ={setQ}
