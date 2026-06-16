@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react'
 // Prod: set VITE_API_BASE to the deployed API origin instead.
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/app/',
   plugins: [react()],
   server: {
     proxy: {

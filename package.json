@@ -1,0 +1,15 @@
+{
+  "name": "deepflow-tracker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "npm --prefix app install && npm --prefix app run build && node scripts/build-static.mjs"
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.2",
+    "typescript": "~6.0.3"
+  }
+}

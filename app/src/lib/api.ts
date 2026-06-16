@@ -1,7 +1,19 @@
 // Typed client for the Denario Control Room API (read-only surface used by the tracker).
 // Field shapes mirror api/schemas.py: RunSummaryOut, RunDetailOut, RecommendationOut, GateOut.
 
+import {
+  fetchPublicationsFromIndex,
+  type PublicPublication,
+  type PublicationsFeed,
+} from './publications'
+
 const BASE = ((import.meta.env.VITE_API_BASE as string | undefined) ?? '').replace(/\/$/, '')
+const PUBLICATIONS_INDEX_URL = (
+  (import.meta.env.VITE_PUBLICATIONS_INDEX_URL as string | undefined) ?? ''
+).trim()
+
+export const hasPublicationsFeed = PUBLICATIONS_INDEX_URL.length > 0
+export type { PublicPublication, PublicationsFeed }
 
 export interface RunSummary {
   run_id: string
@@ -74,11 +86,18 @@ export async function fetchRuns(): Promise<RunSummary[]> {
   return obj.runs ?? obj.items ?? []
 }
 
+export function fetchPublications(): Promise<PublicPublication[]> {
+  if (!hasPublicationsFeed) return Promise.resolve([])
+  return fetchPublicationsFromIndex(PUBLICATIONS_INDEX_URL)
+}
+
 export function fetchRun(runId: string): Promise<RunDetail> {
   return getJSON<RunDetail>(`/api/runs/${runId}`)
 }
 
 export const reportPdfUrl = (runId: string) => `${BASE}/api/runs/${runId}/report/pdf`
+export const execSummaryPdfUrl = (runId: string) =>
+  `${BASE}/api/runs/${runId}/report/exec-summary-pdf`
 export const reportHtmlUrl = (runId: string) => `${BASE}/api/runs/${runId}/report/html`
 export const reportUrl = (runId: string, kind: 'pdf' | 'html' | 'json' | 'xlsx') =>
   `${BASE}/api/runs/${runId}/report/${kind}`

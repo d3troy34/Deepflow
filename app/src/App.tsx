@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
+  fetchPublications,
   fetchRun,
   fetchRuns,
+  hasPublicationsFeed,
   reportUrl,
   type Gate,
+  type PublicPublication,
   type Recommendation,
   type RunDetail,
   type RunSummary,
@@ -581,11 +584,207 @@ function Footer() {
   )
 }
 
+function publicationStatusLabel(value: string): string {
+  const status = value.toLowerCase()
+  if (status === 'full_deepflow_investment_memo') return 'FULL MEMO'
+  if (status === 'full_with_disclosed_limitations') return 'FULL + LIMITATIONS'
+  return value.replace(/_/g, ' ').toUpperCase()
+}
+
+function publicationStats(publications: PublicPublication[]): Stats {
+  return {
+    total: publications.length,
+    ratio: '2 PDFs',
+    pending: 0,
+    coverage: publications.length > 0 ? 100 : 0,
+  }
+}
+
+function publicDate(value: string): string {
+  const date = new Date(value)
+  if (Number.isNaN(date.valueOf())) return 'n/d'
+  return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' })
+}
+
+function PublicPublicationRow({ publication }: { publication: PublicPublication }) {
+  return (
+    <tr className="border-t border-line hover:bg-ink-3 transition-colors">
+      <td className="py-3.5 pl-4 pr-4 align-middle">
+        <div className="flex items-center gap-3">
+          <span className="grid h-9 w-9 place-items-center rounded-md bg-ink-3 border border-line text-bone font-display text-[16px]">
+            {(publication.ticker || '?').slice(0, 1)}
+          </span>
+          <div className="min-w-0">
+            <div className="text-bone text-[14px] font-medium truncate">
+              {publication.company_name || publication.ticker}
+            </div>
+            <div className="font-mono text-[11px] text-muted uppercase">{publication.ticker}</div>
+          </div>
+        </div>
+      </td>
+      <td className="py-3.5 pr-4 align-middle">
+        <Pill text={publicationStatusLabel(publication.publishability_status)} tone="green" />
+      </td>
+      <td className="py-3.5 pr-4 align-middle">
+        <span className="text-[12.5px] text-bone-dim">{publicDate(publication.published_at)}</span>
+      </td>
+      <td className="py-3.5 pr-4 align-middle max-w-[320px]">
+        <span className="font-mono text-[11px] text-muted block truncate">
+          {publication.public_slug}
+        </span>
+      </td>
+      <td className="py-3.5 pr-4 align-middle">
+        <div className="flex items-center gap-3 text-muted">
+          <a
+            href={publication.memo_short_url}
+            target="_blank"
+            rel="noreferrer"
+            title="Memo corto PDF"
+            className="inline-flex items-center gap-1.5 hover:text-green text-[12px]"
+          >
+            <DocIcon />
+            Corto
+          </a>
+          <a
+            href={publication.memo_long_url}
+            target="_blank"
+            rel="noreferrer"
+            title="Memo largo PDF"
+            className="inline-flex items-center gap-1.5 hover:text-green text-[12px]"
+          >
+            <DocIcon />
+            Largo
+          </a>
+        </div>
+      </td>
+    </tr>
+  )
+}
+
+function PublicPublicationsTable({ publications }: { publications: PublicPublication[] }) {
+  return (
+    <div className="mt-6 rounded-xl border border-line bg-ink-2 overflow-hidden">
+      <table className="w-full text-left">
+        <thead>
+          <tr className="text-muted font-mono text-[10px] uppercase tracking-[0.1em] border-b border-line">
+            <th className="py-3 pl-4 pr-4 font-normal">Research</th>
+            <th className="py-3 pr-4 font-normal">Status</th>
+            <th className="py-3 pr-4 font-normal">Published</th>
+            <th className="py-3 pr-4 font-normal">Evidence path</th>
+            <th className="py-3 pr-4 font-normal">PDFs</th>
+          </tr>
+        </thead>
+        <tbody>
+          {publications.map((publication) => (
+            <PublicPublicationRow key={publication.run_id} publication={publication} />
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+function PublicFeaturedMemo({ publication }: { publication: PublicPublication | null }) {
+  if (!publication) {
+    return (
+      <div className="rounded-xl border border-line bg-ink-2 p-6 text-muted text-[13px]">
+        Sin publicaciones todavia.
+      </div>
+    )
+  }
+  return (
+    <div className="rounded-xl border border-line bg-ink-2 p-6">
+      <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
+        Published memo · {publication.ticker}
+      </div>
+      <h3 className="font-display text-[26px] text-bone mt-2 leading-tight">
+        {publication.company_name || publication.ticker}
+      </h3>
+      <div className="mt-4 flex flex-wrap gap-3">
+        <a
+          href={publication.memo_short_url}
+          target="_blank"
+          rel="noreferrer"
+          className="font-mono text-[11px] uppercase tracking-wide text-green hover:underline"
+        >
+          Memo corto PDF
+        </a>
+        <a
+          href={publication.memo_long_url}
+          target="_blank"
+          rel="noreferrer"
+          className="font-mono text-[11px] uppercase tracking-wide text-green hover:underline"
+        >
+          Memo largo PDF
+        </a>
+      </div>
+    </div>
+  )
+}
+
+function PublicEvidenceView({
+  publications,
+  error,
+  q,
+  setQ,
+  light,
+  toggleTheme,
+}: {
+  publications: PublicPublication[] | null
+  error: string | null
+  q: string
+  setQ: (value: string) => void
+  light: boolean
+  toggleTheme: () => void
+}) {
+  const filtered = useMemo(() => {
+    if (!publications) return []
+    const needle = q.trim().toUpperCase()
+    if (!needle) return publications
+    return publications.filter(
+      (publication) =>
+        publication.ticker.toUpperCase().includes(needle) ||
+        (publication.company_name || '').toUpperCase().includes(needle),
+    )
+  }, [publications, q])
+  const stats = useMemo(() => publicationStats(publications || []), [publications])
+  const featured = filtered[0] ?? null
+
+  return (
+    <div className="min-h-screen">
+      <NavBar q={q} setQ={setQ} light={light} toggleTheme={toggleTheme} />
+      <main className="mx-auto max-w-container px-6">
+        <Hero />
+        <StatsBar stats={stats} />
+
+        {error && <p className="text-red text-[13px] mt-6">No se pudo cargar el feed: {error}</p>}
+        {!publications && !error && (
+          <p className="text-muted text-[13px] mt-6">Cargando publicaciones...</p>
+        )}
+        {publications && filtered.length === 0 && !error && (
+          <p className="text-muted text-[13px] mt-6">No hay publicaciones todavia.</p>
+        )}
+
+        {filtered.length > 0 && <PublicPublicationsTable publications={filtered} />}
+
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 mt-10">
+          <PublicFeaturedMemo publication={featured} />
+          <AuditCard stats={stats} />
+        </div>
+      </main>
+      <Footer />
+    </div>
+  )
+}
+
 /* ---------- app ---------- */
 
 export default function App() {
+  const publicMode = hasPublicationsFeed
   const [runs, setRuns] = useState<RunSummary[] | null>(null)
   const [details, setDetails] = useState<Record<string, RunDetail>>({})
+  const [publications, setPublications] = useState<PublicPublication[] | null>(null)
+  const [publicationError, setPublicationError] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [q, setQ] = useState('')
   const [light, setLight] = useState(document.body.classList.contains('light'))
@@ -593,13 +792,22 @@ export default function App() {
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   useEffect(() => {
+    if (publicMode) return
     fetchRuns()
       .then((r) => setRuns(r.filter((x) => x.workflow_type === 'deepflow')))
       .catch((e) => setError(String(e)))
-  }, [])
+  }, [publicMode])
+
+  useEffect(() => {
+    if (!publicMode) return
+    fetchPublications()
+      .then((items) => setPublications(items))
+      .catch((e) => setPublicationError(String(e)))
+  }, [publicMode])
 
   // Throttled detail loader (max 4 concurrent) — fills quality/status/notes without an N+1 burst.
   useEffect(() => {
+    if (publicMode) return
     if (!runs) return
     let cancelled = false
     const queue = [...runs]
@@ -625,7 +833,7 @@ export default function App() {
     return () => {
       cancelled = true
     }
-  }, [runs])
+  }, [publicMode, runs])
 
   const pins = useMemo(() => getPins(), [pinsVersion])
   const stats = useMemo(() => computeStats(runs || []), [runs])
@@ -652,6 +860,19 @@ export default function App() {
     document.body.classList.toggle('light', next)
     localStorage.setItem('df-theme', next ? 'light' : 'dark')
     setLight(next)
+  }
+
+  if (publicMode) {
+    return (
+      <PublicEvidenceView
+        publications={publications}
+        error={publicationError}
+        q={q}
+        setQ={setQ}
+        light={light}
+        toggleTheme={toggleTheme}
+      />
+    )
   }
 
   return (
