@@ -28,7 +28,11 @@ async function readFeed(): Promise<PublicationsFeed> {
     const raw = await new Response(result.stream).json()
     return normalizeFeed(raw)
   } catch (error) {
-    if (error instanceof BlobNotFoundError) return emptyFeed()
+    if (error instanceof BlobNotFoundError || isMissingFeedBlobError(error)) return emptyFeed()
     throw error
   }
+}
+
+function isMissingFeedBlobError(error: unknown): boolean {
+  return error instanceof Error && /Failed to fetch blob: 400 Bad Request/i.test(error.message)
 }
