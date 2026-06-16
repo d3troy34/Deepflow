@@ -251,13 +251,15 @@
   </style>
 </head>
 <body>
-<script>if(localStorage.getItem('df-theme')==='light')document.body.classList.add('light');</script>
+<script>if(localStorage.getItem('df-theme')!=='dark')document.body.classList.add('light');</script>
 
   <!-- NAV -->
   <header class="nav" id="nav">
     <div class="nav__inner">
       <a class="nav__brand" href="/">
+        <span class="nav__dot" aria-hidden="true"></span>
         <span class="nav__logo">DeepFlow</span>
+        <span class="nav__sep" aria-hidden="true">·</span>
         <span class="nav__by">by Denario</span>
       </a>
       <nav class="nav__links">
@@ -265,8 +267,10 @@
         <a href="/#proceso">Cómo funciona</a>
         <a href="/#muestra">Muestra</a>
       </nav>
-      <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema"></button>
-      <a href="/#contacto" class="btn btn--small">Hablemos</a>
+      <div class="nav__actions">
+        <a href="/#contacto" class="btn btn--small btn--nav-cta">Hablemos →</a>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema"></button>
+      </div>
     </div>
   </header>
 

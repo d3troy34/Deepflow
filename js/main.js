@@ -19,7 +19,7 @@
 
   // ---------- theme toggle ----------
   (function () {
-    if (localStorage.getItem("df-theme") === "light") document.body.classList.add("light");
+    if (localStorage.getItem("df-theme") !== "dark") document.body.classList.add("light");
   })();
   const themeToggle = document.getElementById("theme-toggle");
   function setToggleIcon() {

@@ -16,13 +16,15 @@
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
-<script>if(localStorage.getItem('df-theme')==='light')document.body.classList.add('light');</script>
+<script>if(localStorage.getItem('df-theme')!=='dark')document.body.classList.add('light');</script>
 
   <!-- ============ NAV ============ -->
   <header class="nav" id="nav">
     <div class="nav__inner">
       <a class="nav__brand" href="#top">
+        <span class="nav__dot" aria-hidden="true"></span>
         <span class="nav__logo">DeepFlow</span>
+        <span class="nav__sep" aria-hidden="true">·</span>
         <span class="nav__by">by Denario</span>
       </a>
       <nav class="nav__links">
@@ -30,8 +32,10 @@
         <a href="#proceso">Cómo funciona</a>
         <a href="#muestra">Muestra</a>
       </nav>
-      <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema"></button>
-      <a href="#contacto" class="btn btn--small">Hablemos</a>
+      <div class="nav__actions">
+        <a href="#contacto" class="btn btn--small btn--nav-cta">Hablemos →</a>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema"></button>
+      </div>
     </div>
   </header>
 
@@ -50,7 +54,7 @@
             <span class="line"><span>Research de nivel</span></span>
             <span class="line"><span><em>institucional</em>,</span></span>
             <span class="line"><span>en menos de</span></span>
-            <span class="line"><span><em>10 minutos</em>.</span></span>
+            <span class="line"><span><em>10 minutos</em></span></span>
           </h1>
           <p class="hero__sub" data-reveal>
             DeepFlow convierte un ticker en un paquete completo de research:
