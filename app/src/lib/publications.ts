@@ -9,6 +9,7 @@ export interface PublicPublication {
   system_label: string | null
   memo_long_url: string
   memo_short_url: string
+  memo_full_url: string | null
   metadata_url: string | null
   memo_price: number | null
   memo_price_currency: string | null
@@ -55,6 +56,7 @@ function normalizePublication(item: PublicPublication, indexUrl: string): Public
     metadata_url: item.metadata_url ? absoluteUrl(item.metadata_url, indexUrl) : null,
     memo_long_url: absoluteUrl(item.memo_long_url, indexUrl),
     memo_short_url: absoluteUrl(item.memo_short_url, indexUrl),
+    memo_full_url: item.memo_full_url ? absoluteUrl(item.memo_full_url, indexUrl) : null,
     memo_price: item.memo_price ?? null,
     memo_price_currency: item.memo_price_currency ?? null,
     memo_price_as_of: item.memo_price_as_of ?? null,

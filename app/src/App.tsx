@@ -595,7 +595,7 @@ function publicationStatusLabel(value: string): string {
 function publicationStats(publications: PublicPublication[]): Stats {
   return {
     total: publications.length,
-    ratio: '2 PDFs',
+    ratio: '3 HTMLs',
     pending: 0,
     coverage: publications.length > 0 ? 100 : 0,
   }
@@ -680,22 +680,34 @@ function PublicPublicationRow({
             href={publication.memo_short_url}
             target="_blank"
             rel="noreferrer"
-            title="Memo corto PDF"
+            title="Resumen"
             className="inline-flex items-center gap-1.5 hover:text-green text-[12px]"
           >
             <DocIcon />
-            Corto
+            Resumen
           </a>
           <a
             href={publication.memo_long_url}
             target="_blank"
             rel="noreferrer"
-            title="Memo largo PDF"
+            title="Memo"
             className="inline-flex items-center gap-1.5 hover:text-green text-[12px]"
           >
             <DocIcon />
-            Largo
+            Memo
           </a>
+          {publication.memo_full_url && (
+            <a
+              href={publication.memo_full_url}
+              target="_blank"
+              rel="noreferrer"
+              title="Tesis completa"
+              className="inline-flex items-center gap-1.5 hover:text-green text-[12px]"
+            >
+              <DocIcon />
+              Tesis completa
+            </a>
+          )}
         </div>
       </td>
     </tr>
@@ -721,7 +733,7 @@ function PublicPublicationsTable({
             <th className="py-3 pr-4 font-normal">Memo price</th>
             <th className="py-3 pr-4 font-normal">Live price</th>
             <th className="py-3 pr-4 font-normal">Since memo</th>
-            <th className="py-3 pr-4 font-normal">PDFs</th>
+            <th className="py-3 pr-4 font-normal">Documentos</th>
           </tr>
         </thead>
         <tbody>
@@ -761,7 +773,7 @@ function PublicFeaturedMemo({ publication }: { publication: PublicPublication | 
           rel="noreferrer"
           className="font-mono text-[11px] uppercase tracking-wide text-green hover:underline"
         >
-          Memo corto PDF
+          Resumen
         </a>
         <a
           href={publication.memo_long_url}
@@ -769,8 +781,18 @@ function PublicFeaturedMemo({ publication }: { publication: PublicPublication | 
           rel="noreferrer"
           className="font-mono text-[11px] uppercase tracking-wide text-green hover:underline"
         >
-          Memo largo PDF
+          Memo
         </a>
+        {publication.memo_full_url && (
+          <a
+            href={publication.memo_full_url}
+            target="_blank"
+            rel="noreferrer"
+            className="font-mono text-[11px] uppercase tracking-wide text-green hover:underline"
+          >
+            Tesis completa
+          </a>
+        )}
       </div>
     </div>
   )
