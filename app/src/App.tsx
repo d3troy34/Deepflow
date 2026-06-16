@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   fetchLivePrices,
   fetchPublications,
@@ -16,6 +16,7 @@ import {
 import {
   getInitialAuthSession,
   onAuthSessionChange,
+  signOut,
   signInWithGoogle,
   supabaseAuthConfig,
   type AuthSession,
@@ -146,6 +147,12 @@ const ThemeIcon = ({ light }: { light: boolean }) =>
       />
     </svg>
   )
+const UserIcon = () => (
+  <svg width="15" height="15" {...svgBase} aria-hidden="true">
+    <circle cx="12" cy="8" r="3.2" />
+    <path d="M5.5 20a6.7 6.7 0 0 1 13 0" />
+  </svg>
+)
 const DocIcon = ({ className = '' }: IconProps) => (
   <svg className={className} width="15" height="15" {...svgBase}>
     <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
@@ -353,10 +360,43 @@ interface AuthNavState {
 function NavBar({
   light,
   toggleTheme,
+  auth,
+  onSignOut,
 }: {
   light: boolean
   toggleTheme: () => void
+  auth?: AuthNavState
+  onSignOut?: () => void
 }) {
+  const profileRef = useRef<HTMLDivElement | null>(null)
+  const [profileOpen, setProfileOpen] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return new URLSearchParams(window.location.search).get('profile') === '1'
+  })
+  const profileEmail = auth?.email?.trim() || null
+
+  useEffect(() => {
+    if (!profileOpen) return
+
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target
+      if (target instanceof Node && !profileRef.current?.contains(target)) {
+        setProfileOpen(false)
+      }
+    }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setProfileOpen(false)
+    }
+
+    document.addEventListener('mousedown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [profileOpen])
+
   return (
     <header className="nav">
       <div className="nav__inner">
@@ -378,6 +418,46 @@ function NavBar({
           <a href="/#contacto" className="btn btn--small btn--nav-cta">
             {'Hablemos \u2192'}
           </a>
+          <div className="nav__profile" ref={profileRef}>
+            <button
+              type="button"
+              className="profile-button"
+              onClick={() => setProfileOpen((value) => !value)}
+              aria-label="Ver perfil"
+              aria-controls="nav-profile-menu"
+              aria-expanded={profileOpen}
+              title="Ver perfil"
+            >
+              <UserIcon />
+            </button>
+            {profileOpen && (
+              <div className="profile-menu" id="nav-profile-menu" role="dialog" aria-label="Perfil">
+                <span className="profile-menu__eyebrow">Perfil</span>
+                <strong>{profileEmail ?? (auth?.loading ? 'Cargando...' : 'Invitado')}</strong>
+                <span>
+                  {profileEmail
+                    ? 'Sesion Google activa'
+                    : 'Inicia sesion para ver tu perfil de Denario.'}
+                </span>
+                {profileEmail && onSignOut ? (
+                  <button
+                    type="button"
+                    className="profile-menu__action"
+                    onClick={() => {
+                      setProfileOpen(false)
+                      onSignOut()
+                    }}
+                  >
+                    Cerrar sesion
+                  </button>
+                ) : (
+                  <a className="profile-menu__action" href="/app/">
+                    Abrir tracker
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
           <button
             type="button"
             className="theme-toggle"
@@ -937,6 +1017,8 @@ function PublicEvidenceView({
   setQ,
   light,
   toggleTheme,
+  auth,
+  onSignOut,
   authError,
 }: {
   publications: PublicPublication[] | null
@@ -946,6 +1028,8 @@ function PublicEvidenceView({
   setQ: (value: string) => void
   light: boolean
   toggleTheme: () => void
+  auth: AuthNavState
+  onSignOut: () => void
   authError: string | null
 }) {
   const filtered = useMemo(() => {
@@ -967,7 +1051,7 @@ function PublicEvidenceView({
 
   return (
     <div className="min-h-screen">
-      <NavBar light={light} toggleTheme={toggleTheme} />
+      <NavBar light={light} toggleTheme={toggleTheme} auth={auth} onSignOut={onSignOut} />
       <main className="mx-auto max-w-container px-6">
         <Hero />
         <StatsBar items={publicStats} />
@@ -1019,7 +1103,7 @@ function AuthGate({
 }) {
   return (
     <div className="min-h-screen">
-      <NavBar light={light} toggleTheme={toggleTheme} />
+      <NavBar light={light} toggleTheme={toggleTheme} auth={auth} />
       <main className="mx-auto max-w-container px-6">
         <section className="pt-24 max-w-[560px]">
           <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-green">
@@ -1192,6 +1276,11 @@ export default function App() {
     void signInWithGoogle().catch((e) => setAuthError(errorMessage(e)))
   }
 
+  const handleSignOut = () => {
+    setAuthError(null)
+    void signOut().catch((e) => setAuthError(errorMessage(e)))
+  }
+
   const toggleTheme = () => {
     const next = !light
     document.body.classList.toggle('light', next)
@@ -1225,6 +1314,8 @@ export default function App() {
         setQ={setQ}
         light={light}
         toggleTheme={toggleTheme}
+        auth={auth}
+        onSignOut={handleSignOut}
         authError={authError}
       />
     )
@@ -1244,7 +1335,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
-      <NavBar light={light} toggleTheme={toggleTheme} />
+      <NavBar light={light} toggleTheme={toggleTheme} auth={auth} onSignOut={handleSignOut} />
       <main className="mx-auto max-w-container px-6">
         <Hero />
         <StatsBar items={internalStatItems(stats)} />

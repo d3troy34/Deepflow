@@ -191,6 +191,12 @@
     gap: 10px;
   }
 
+  .nav__profile {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .profile-button,
   .theme-toggle {
     width: 34px;
     height: 34px;
@@ -208,9 +214,77 @@
       border-color 0.2s ease;
   }
 
+  .profile-button {
+    text-decoration: none;
+  }
+
+  .profile-button[aria-expanded='true'],
+  .profile-button:hover,
   .theme-toggle:hover {
     color: var(--bone);
     border-color: var(--bone);
+  }
+
+  .profile-menu {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    width: min(260px, calc(100vw - 32px));
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--ink-2) 94%, transparent);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    padding: 14px;
+    z-index: 110;
+  }
+
+  .profile-menu__eyebrow {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--green);
+  }
+
+  .profile-menu strong {
+    display: block;
+    margin-top: 6px;
+    color: var(--bone);
+    font-size: 13px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .profile-menu span:not(.profile-menu__eyebrow) {
+    display: block;
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .profile-menu__action {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 12px;
+    border: 0;
+    background: transparent;
+    color: var(--green);
+    cursor: pointer;
+    padding: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .profile-menu__action:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
   }
 
   .light .btn--nav-cta {
@@ -240,9 +314,23 @@
       padding-inline: 18px;
     }
 
+    .nav__inner {
+      gap: 12px;
+    }
+
+    .nav__actions {
+      gap: 6px;
+    }
+
     .btn--small {
-      padding: 8px 14px;
-      font-size: 13px;
+      padding: 8px 10px;
+      font-size: 12.5px;
+    }
+
+    .profile-button,
+    .theme-toggle {
+      width: 30px;
+      height: 30px;
     }
   }
 }
