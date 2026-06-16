@@ -105,6 +105,32 @@ export async function fetchPublications(): Promise<PublicPublication[]> {
   return fetchPublicationsFromIndex(PUBLICATIONS_INDEX_URL, { headers })
 }
 
+export async function deletePublication(publicSlug: string): Promise<void> {
+  const slug = publicSlug.trim()
+  if (!slug) throw new Error('public_slug is required')
+
+  const headers: Record<string, string> = { 'content-type': 'application/json' }
+  const token = authTokenProvider ? await authTokenProvider() : null
+  if (token) headers.authorization = `Bearer ${token}`
+
+  const response = await fetch('/api/publications/delete', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ public_slug: slug }),
+  })
+
+  if (response.ok) return
+
+  let message = `${response.status} ${response.statusText}`
+  try {
+    const data = (await response.json()) as { error?: unknown }
+    if (typeof data.error === 'string' && data.error.trim()) message = data.error
+  } catch {
+    // Preserve the HTTP status fallback when the response is not JSON.
+  }
+  throw new Error(message)
+}
+
 function shouldSendAuthToken(url: string): boolean {
   if (url.startsWith('/')) return true
   if (typeof window === 'undefined') return false

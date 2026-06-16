@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import {
+  deletePublication,
   fetchLivePrices,
   fetchPublications,
   fetchRun,
@@ -63,6 +64,19 @@ function Pill({ text, tone, subtle }: { text: string; tone: Tone; subtle?: boole
       {text}
     </span>
   )
+}
+
+function sessionHasAdminRole(session: AuthSession | null): boolean {
+  const metadata = session?.user.app_metadata as unknown
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return false
+
+  const record = metadata as Record<string, unknown>
+  if (record.admin === true) return true
+  if (typeof record.role === 'string' && record.role.toLowerCase() === 'admin') return true
+  if (Array.isArray(record.roles)) {
+    return record.roles.some((role) => typeof role === 'string' && role.toLowerCase() === 'admin')
+  }
+  return false
 }
 
 function gateColor(status?: string): string {
@@ -361,6 +375,7 @@ interface AuthNavState {
   configured: boolean
   loading: boolean
   email: string | null
+  isAdmin: boolean
 }
 
 interface AccountNavState {
@@ -928,9 +943,15 @@ function PriceChange({ memoPrice, livePrice }: { memoPrice: number | null; liveP
 function PublicPublicationRow({
   publication,
   livePrices,
+  canDelete,
+  isDeleting,
+  onDeletePublication,
 }: {
   publication: PublicPublication
   livePrices: Record<string, number | null>
+  canDelete: boolean
+  isDeleting: boolean
+  onDeletePublication: (publication: PublicPublication) => void
 }) {
   const livePrice = livePrices[publication.ticker] ?? null
   return (
@@ -1011,6 +1032,20 @@ function PublicPublicationRow({
           )}
         </div>
       </td>
+      {canDelete && (
+        <td className="py-3.5 pr-4 align-middle whitespace-nowrap">
+          <button
+            type="button"
+            className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-red hover:underline disabled:text-muted disabled:no-underline disabled:cursor-wait"
+            onClick={() => onDeletePublication(publication)}
+            disabled={isDeleting}
+            aria-label={`Eliminar ${publication.company_name || publication.ticker}`}
+            title="Eliminar memo publicado"
+          >
+            {isDeleting ? 'Eliminando...' : 'Eliminar'}
+          </button>
+        </td>
+      )}
     </tr>
   )
 }
@@ -1018,9 +1053,15 @@ function PublicPublicationRow({
 function PublicPublicationsTable({
   publications,
   livePrices,
+  canDelete,
+  deletingSlug,
+  onDeletePublication,
 }: {
   publications: PublicPublication[]
   livePrices: Record<string, number | null>
+  canDelete: boolean
+  deletingSlug: string | null
+  onDeletePublication: (publication: PublicPublication) => void
 }) {
   return (
     <div className="mt-6 rounded-xl border border-line bg-ink-2 overflow-x-auto">
@@ -1035,6 +1076,7 @@ function PublicPublicationsTable({
             <th className="py-3 pr-4 font-normal">Live price</th>
             <th className="py-3 pr-4 font-normal">Since thesis</th>
             <th className="py-3 pr-4 font-normal">Documentos</th>
+            {canDelete && <th className="py-3 pr-4 font-normal">Admin</th>}
           </tr>
         </thead>
         <tbody>
@@ -1043,6 +1085,9 @@ function PublicPublicationsTable({
               key={publication.run_id}
               publication={publication}
               livePrices={livePrices}
+              canDelete={canDelete}
+              isDeleting={deletingSlug === publication.public_slug}
+              onDeletePublication={onDeletePublication}
             />
           ))}
         </tbody>
@@ -1134,6 +1179,10 @@ function PublicEvidenceView({
   onProfileSave,
   onSignOut,
   authError,
+  canManagePublications,
+  deletingPublicationSlug,
+  deletePublicationError,
+  onDeletePublication,
 }: {
   publications: PublicPublication[] | null
   livePrices: Record<string, number | null>
@@ -1147,6 +1196,10 @@ function PublicEvidenceView({
   onProfileSave: (input: AccountProfileUpdate) => void
   onSignOut: () => void
   authError: string | null
+  canManagePublications: boolean
+  deletingPublicationSlug: string | null
+  deletePublicationError: string | null
+  onDeletePublication: (publication: PublicPublication) => void
 }) {
   const filtered = useMemo(() => {
     if (!publications) return []
@@ -1182,6 +1235,11 @@ function PublicEvidenceView({
 
         {authError && <p className="text-red text-[13px] mt-6">Auth error: {authError}</p>}
         {error && <p className="text-red text-[13px] mt-6">No se pudo cargar el feed: {error}</p>}
+        {deletePublicationError && (
+          <p className="text-red text-[13px] mt-6">
+            No se pudo eliminar el memo: {deletePublicationError}
+          </p>
+        )}
         {!publications && !error && (
           <p className="text-muted text-[13px] mt-6">Cargando publicaciones...</p>
         )}
@@ -1190,7 +1248,13 @@ function PublicEvidenceView({
         )}
 
         {filtered.length > 0 && (
-          <PublicPublicationsTable publications={filtered} livePrices={livePrices} />
+          <PublicPublicationsTable
+            publications={filtered}
+            livePrices={livePrices}
+            canDelete={canManagePublications}
+            deletingSlug={deletingPublicationSlug}
+            onDeletePublication={onDeletePublication}
+          />
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 mt-10">
@@ -1267,6 +1331,8 @@ export default function App() {
   const [details, setDetails] = useState<Record<string, RunDetail>>({})
   const [publications, setPublications] = useState<PublicPublication[] | null>(null)
   const [publicationError, setPublicationError] = useState<string | null>(null)
+  const [deletingPublicationSlug, setDeletingPublicationSlug] = useState<string | null>(null)
+  const [deletePublicationError, setDeletePublicationError] = useState<string | null>(null)
   const [livePrices, setLivePrices] = useState<Record<string, number | null>>({})
   const [error, setError] = useState<string | null>(null)
   const [q, setQ] = useState('')
@@ -1432,6 +1498,7 @@ export default function App() {
     configured: requiresAuth,
     loading: authLoading,
     email: authSession?.user.email ?? null,
+    isAdmin: sessionHasAdminRole(authSession),
   }), [requiresAuth, authLoading, authSession])
   const account = useMemo<AccountNavState>(() => ({
     profile: accountProfile,
@@ -1441,6 +1508,7 @@ export default function App() {
     error: accountError,
     saved: accountSaved,
   }), [accountProfile, accountEntitlement, accountLoading, accountSaving, accountError, accountSaved])
+  const canManagePublications = auth.isAdmin || accountProfile?.tier?.toLowerCase() === 'admin'
 
   const handleSignIn = () => {
     setAuthError(null)
@@ -1468,6 +1536,33 @@ export default function App() {
       })
       .finally(() => {
         setAccountSaving(false)
+      })
+  }
+
+  const handleDeletePublication = (publication: PublicPublication) => {
+    if (!canManagePublications || deletingPublicationSlug) return
+    const label = publication.company_name
+      ? `${publication.company_name} (${publication.ticker})`
+      : publication.ticker
+    const confirmed = window.confirm(
+      `Eliminar el memo publicado de ${label}? Esta accion no se puede deshacer.`,
+    )
+    if (!confirmed) return
+
+    setDeletingPublicationSlug(publication.public_slug)
+    setDeletePublicationError(null)
+
+    void deletePublication(publication.public_slug)
+      .then(() => {
+        setPublications((items) =>
+          items ? items.filter((item) => item.public_slug !== publication.public_slug) : items,
+        )
+      })
+      .catch((e) => {
+        setDeletePublicationError(errorMessage(e))
+      })
+      .finally(() => {
+        setDeletingPublicationSlug(null)
       })
   }
 
@@ -1509,6 +1604,10 @@ export default function App() {
         onProfileSave={handleProfileSave}
         onSignOut={handleSignOut}
         authError={authError}
+        canManagePublications={canManagePublications}
+        deletingPublicationSlug={deletingPublicationSlug}
+        deletePublicationError={deletePublicationError}
+        onDeletePublication={handleDeletePublication}
       />
     )
   }
