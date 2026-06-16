@@ -869,7 +869,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
   const [q, setQ] = useState('')
   const [light, setLight] = useState(document.body.classList.contains('light'))
-  const [pinsVersion, setPinsVersion] = useState(0)
+  const [pins, setPins] = useState<Pin[]>(() => getPins())
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -922,7 +922,6 @@ export default function App() {
     }
   }, [publicMode, runs])
 
-  const pins = useMemo(() => getPins(), [pinsVersion])
   const stats = useMemo(() => computeStats(runs || []), [runs])
   const filtered = useMemo(() => {
     if (!runs) return []
@@ -941,6 +940,7 @@ export default function App() {
     const buy = withThesis.find((x) => (x.r.recommendation || '').toUpperCase().includes('BUY'))
     return (buy || withThesis[0]) as { r: RunSummary; d: RunDetail }
   }, [runs, details])
+  const refreshPins = () => setPins(getPins())
 
   const toggleTheme = () => {
     const next = !light
@@ -986,14 +986,14 @@ export default function App() {
             details={details}
             expandedId={expandedId}
             setExpandedId={setExpandedId}
-            onPinChange={() => setPinsVersion((v) => v + 1)}
+            onPinChange={refreshPins}
           />
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 mt-10">
           <FeaturedMemo featured={featured} />
           <div className="flex flex-col gap-4">
-            <WatchlistCard pins={pins} onPinChange={() => setPinsVersion((v) => v + 1)} />
+            <WatchlistCard pins={pins} onPinChange={refreshPins} />
             <AuditCard stats={stats} />
           </div>
         </div>
