@@ -4,7 +4,10 @@ import { gzipSync } from 'node:zlib'
 
 import {
   decodeHtmlGzipBase64,
+  inlineHtmlDocumentHeaders,
+  parsePublishedHtmlDocumentRequest,
   publicationHtmlPath,
+  publicationHtmlUrlForKind,
   removePublication,
   parseDeleteBody,
   parsePublishBody,
@@ -57,6 +60,58 @@ test('publicationHtmlPath uses stable public document filenames', () => {
     publicationHtmlPath('2026/now/RUN', 'memo_full'),
     'publications/2026/now/RUN/tesis-completa.html',
   )
+})
+
+test('parsePublishedHtmlDocumentRequest accepts only known published HTML documents', () => {
+  assert.deepEqual(
+    parsePublishedHtmlDocumentRequest('/api/publications/view?slug=2026%2Fnow%2FRUN-1&kind=memo'),
+    { public_slug: '2026/now/RUN-1', kind: 'memo' },
+  )
+
+  assert.throws(
+    () => parsePublishedHtmlDocumentRequest('/api/publications/view?slug=2026%2Fnow%2FRUN-1&kind=download'),
+    /invalid document kind/,
+  )
+  assert.throws(
+    () => parsePublishedHtmlDocumentRequest('/api/publications/view?slug=../secret&kind=memo'),
+    /invalid public slug/,
+  )
+})
+
+test('publicationHtmlUrlForKind selects the existing document url', () => {
+  const publication = {
+    run_id: 'RUN-1',
+    ticker: 'NOW',
+    company_name: 'ServiceNow',
+    public_slug: '2026/now/RUN-1',
+    published_at: '2026-06-16T20:00:00.000Z',
+    publishability_status: 'Publicado',
+    confidence: null,
+    system_label: 'Comprar',
+    memo_long_url: 'https://blob/memo.html',
+    memo_short_url: 'https://blob/resumen.html',
+    memo_full_url: null,
+    metadata_url: 'https://blob/metadata.json',
+    editor_note: null,
+    memo_price: null,
+    memo_price_currency: null,
+    memo_price_as_of: null,
+  }
+
+  assert.equal(publicationHtmlUrlForKind(publication, 'resumen'), 'https://blob/resumen.html')
+  assert.equal(publicationHtmlUrlForKind(publication, 'memo'), 'https://blob/memo.html')
+  assert.equal(publicationHtmlUrlForKind(publication, 'tesis-completa'), null)
+})
+
+test('inlineHtmlDocumentHeaders forces browser rendering instead of attachment download', () => {
+  assert.deepEqual(inlineHtmlDocumentHeaders('memo.html'), {
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET, OPTIONS',
+    'access-control-allow-headers': 'authorization, content-type',
+    'cache-control': 'public, max-age=60',
+    'content-disposition': 'inline; filename="memo.html"',
+    'content-type': 'text/html; charset=utf-8',
+  })
 })
 
 test('removePublication removes the slug from the public feed', () => {

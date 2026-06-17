@@ -4,10 +4,13 @@ export type PublicationDocumentLink = {
 }
 
 type PublicationDocumentSource = {
+  public_slug: string
   memo_short_url?: string | null
   memo_long_url?: string | null
   memo_full_url?: string | null
 }
+
+type PublicationDocumentKind = 'resumen' | 'memo' | 'tesis-completa'
 
 export function formatPublicationDate(value: string): string {
   const date = new Date(value)
@@ -37,8 +40,27 @@ export function publicationDocumentLinks(
   publication: PublicationDocumentSource,
 ): PublicationDocumentLink[] {
   return [
-    { label: 'Resumen', url: publication.memo_short_url },
-    { label: 'Memo', url: publication.memo_long_url },
-    { label: 'Tesis completa', url: publication.memo_full_url },
-  ].filter((link): link is PublicationDocumentLink => Boolean(link.url))
+    {
+      label: 'Resumen',
+      url: documentViewerUrl(publication.public_slug, 'resumen'),
+      available: publication.memo_short_url,
+    },
+    {
+      label: 'Memo',
+      url: documentViewerUrl(publication.public_slug, 'memo'),
+      available: publication.memo_long_url,
+    },
+    {
+      label: 'Tesis completa',
+      url: documentViewerUrl(publication.public_slug, 'tesis-completa'),
+      available: publication.memo_full_url,
+    },
+  ]
+    .filter((link) => Boolean(link.available))
+    .map(({ label, url }) => ({ label, url }))
+}
+
+function documentViewerUrl(publicSlug: string, kind: PublicationDocumentKind): string {
+  const params = new URLSearchParams({ slug: publicSlug, kind })
+  return `/api/publications/view?${params.toString()}`
 }

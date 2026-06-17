@@ -34,6 +34,13 @@ export class HttpError extends Error {
 
 export type MemoKind = 'memo_long' | 'memo_short'
 export type HtmlMemoKind = MemoKind | 'memo_full'
+export type PublishedHtmlDocumentKind = 'resumen' | 'memo' | 'tesis-completa'
+
+const publishedHtmlDocumentFilenames: Record<PublishedHtmlDocumentKind, string> = {
+  resumen: 'resumen.html',
+  memo: 'memo.html',
+  'tesis-completa': 'tesis-completa.html',
+}
 
 export interface UploadClientPayload {
   run_id: string
@@ -223,6 +230,19 @@ export function parseDeleteBody(raw: unknown): PublicationDeleteBody {
   return { public_slug: publicSlug }
 }
 
+export function parsePublishedHtmlDocumentRequest(
+  rawUrl: string | URL,
+): { public_slug: string; kind: PublishedHtmlDocumentKind } {
+  const url = rawUrl instanceof URL ? rawUrl : new URL(rawUrl, 'https://deepflow.local')
+  const publicSlug = url.searchParams.get('slug')?.trim() ?? ''
+  validatePublicSlug(publicSlug)
+
+  const kind = url.searchParams.get('kind')
+  if (!isPublishedHtmlDocumentKind(kind)) throw new HttpError(400, 'invalid document kind')
+
+  return { public_slug: publicSlug, kind }
+}
+
 export function publicationMetadataPath(publicSlug: string): string {
   validatePublicSlug(publicSlug)
   return `publications/${publicSlug}/metadata.json`
@@ -242,6 +262,28 @@ export function publicationHtmlPath(publicSlug: string, kind: HtmlMemoKind): str
       ? 'resumen.html'
       : 'tesis-completa.html'
   return `publications/${publicSlug}/${file}`
+}
+
+export function publicationHtmlFilename(kind: PublishedHtmlDocumentKind): string {
+  return publishedHtmlDocumentFilenames[kind]
+}
+
+export function publicationHtmlUrlForKind(
+  publication: PublicPublication,
+  kind: PublishedHtmlDocumentKind,
+): string | null {
+  if (kind === 'resumen') return publication.memo_short_url
+  if (kind === 'memo') return publication.memo_long_url
+  return publication.memo_full_url
+}
+
+export function inlineHtmlDocumentHeaders(filename: string): Record<string, string> {
+  return {
+    ...publicCorsHeaders,
+    'cache-control': 'public, max-age=60',
+    'content-disposition': `inline; filename="${filename}"`,
+    'content-type': 'text/html; charset=utf-8',
+  }
 }
 
 export function publicBlobUrl(pathname: string): string {
@@ -346,6 +388,10 @@ function validatePublicSlug(value: string): void {
   if (!/^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(value)) {
     throw new HttpError(400, 'invalid public slug')
   }
+}
+
+function isPublishedHtmlDocumentKind(value: string | null): value is PublishedHtmlDocumentKind {
+  return value === 'resumen' || value === 'memo' || value === 'tesis-completa'
 }
 
 function urlField(obj: Record<string, unknown>, key: string): string {

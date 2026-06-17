@@ -21,14 +21,15 @@ test('formatPublicationPrice uses USD symbol and keeps two decimals', () => {
 test('publicationDocumentLinks returns separated HTML document destinations', () => {
   assert.deepEqual(
     publicationDocumentLinks({
+      public_slug: '2026/now/RUN-1',
       memo_short_url: 'https://example.com/resumen.html',
       memo_long_url: 'https://example.com/memo.html',
       memo_full_url: 'https://example.com/tesis-completa.html',
     }),
     [
-      { label: 'Resumen', url: 'https://example.com/resumen.html' },
-      { label: 'Memo', url: 'https://example.com/memo.html' },
-      { label: 'Tesis completa', url: 'https://example.com/tesis-completa.html' },
+      { label: 'Resumen', url: '/api/publications/view?slug=2026%2Fnow%2FRUN-1&kind=resumen' },
+      { label: 'Memo', url: '/api/publications/view?slug=2026%2Fnow%2FRUN-1&kind=memo' },
+      { label: 'Tesis completa', url: '/api/publications/view?slug=2026%2Fnow%2FRUN-1&kind=tesis-completa' },
     ],
   )
 })
