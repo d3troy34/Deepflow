@@ -386,6 +386,7 @@ export async function readPrivateJsonBlob(pathname: string): Promise<unknown | n
 export async function readPublicationIndexBlob(): Promise<unknown | null> {
   const privateFeed = await readPrivateJsonBlob(INDEX_PATH)
   if (privateFeed !== null) return privateFeed
+  if (!(process.env.BLOB_STORE_ID || '').trim()) return null
   return readPublicJsonBlob(INDEX_PATH)
 }
 
