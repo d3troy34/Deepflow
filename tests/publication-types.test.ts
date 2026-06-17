@@ -7,10 +7,12 @@ import {
   inlineHtmlDocumentHeaders,
   parsePublishedHtmlDocumentRequest,
   publicationHtmlPath,
+  publicationHtmlStoragePathForKind,
   publicationHtmlUrlForKind,
   removePublication,
   parseDeleteBody,
   parsePublishBody,
+  sanitizePublicationsFeedForClient,
 } from '../api/_publicationTypes.ts'
 
 function gzipBase64(value: string): string {
@@ -103,14 +105,93 @@ test('publicationHtmlUrlForKind selects the existing document url', () => {
   assert.equal(publicationHtmlUrlForKind(publication, 'tesis-completa'), null)
 })
 
+test('publicationHtmlStoragePathForKind resolves private blob paths before urls', () => {
+  const publication = {
+    run_id: 'RUN-1',
+    ticker: 'NOW',
+    company_name: 'ServiceNow',
+    public_slug: '2026/now/RUN-1',
+    published_at: '2026-06-16T20:00:00.000Z',
+    publishability_status: 'Publicado',
+    confidence: null,
+    system_label: 'Comprar',
+    memo_long_path: 'publications/2026/now/RUN-1/memo.html',
+    memo_short_path: 'publications/2026/now/RUN-1/resumen.html',
+    memo_full_path: null,
+    memo_long_url: 'https://blob/memo.html',
+    memo_short_url: 'https://blob/resumen.html',
+    memo_full_url: 'https://blob/tesis-completa.html',
+    metadata_url: 'https://blob/metadata.json',
+    editor_note: null,
+    memo_price: null,
+    memo_price_currency: null,
+    memo_price_as_of: null,
+  }
+
+  assert.equal(
+    publicationHtmlStoragePathForKind(publication, 'resumen'),
+    'publications/2026/now/RUN-1/resumen.html',
+  )
+  assert.equal(
+    publicationHtmlStoragePathForKind(publication, 'memo'),
+    'publications/2026/now/RUN-1/memo.html',
+  )
+  assert.equal(
+    publicationHtmlStoragePathForKind(publication, 'tesis-completa'),
+    null,
+  )
+})
+
+test('sanitizePublicationsFeedForClient removes blob storage urls from the client feed', () => {
+  const feed = sanitizePublicationsFeedForClient({
+    schema_version: 1,
+    updated_at: '2026-06-16T21:00:00.000Z',
+    publications: [
+      {
+        run_id: 'RUN-1',
+        ticker: 'NOW',
+        company_name: 'ServiceNow',
+        public_slug: '2026/now/RUN-1',
+        published_at: '2026-06-16T20:00:00.000Z',
+        publishability_status: 'Publicado',
+        confidence: null,
+        system_label: 'Comprar',
+        memo_long_path: 'publications/2026/now/RUN-1/memo.html',
+        memo_short_path: 'publications/2026/now/RUN-1/resumen.html',
+        memo_full_path: 'publications/2026/now/RUN-1/tesis-completa.html',
+        memo_long_url: 'https://store.public.blob.vercel-storage.com/publications/2026/now/RUN-1/memo.html',
+        memo_short_url: 'https://store.public.blob.vercel-storage.com/publications/2026/now/RUN-1/resumen.html',
+        memo_full_url: 'https://store.public.blob.vercel-storage.com/publications/2026/now/RUN-1/tesis-completa.html',
+        metadata_url: 'https://store.public.blob.vercel-storage.com/publications/2026/now/RUN-1/metadata.json',
+        editor_note: null,
+        memo_price: null,
+        memo_price_currency: null,
+        memo_price_as_of: null,
+      },
+    ],
+  })
+
+  assert.equal(feed.publications[0].memo_short_url, '/api/publications/view?slug=2026%2Fnow%2FRUN-1&kind=resumen')
+  assert.equal(feed.publications[0].memo_long_url, '/api/publications/view?slug=2026%2Fnow%2FRUN-1&kind=memo')
+  assert.equal(
+    feed.publications[0].memo_full_url,
+    '/api/publications/view?slug=2026%2Fnow%2FRUN-1&kind=tesis-completa',
+  )
+  assert.equal(feed.publications[0].metadata_url, null)
+  assert.equal('memo_long_path' in feed.publications[0], false)
+})
+
 test('inlineHtmlDocumentHeaders forces browser rendering instead of attachment download', () => {
   assert.deepEqual(inlineHtmlDocumentHeaders('memo.html'), {
     'access-control-allow-origin': '*',
     'access-control-allow-methods': 'GET, OPTIONS',
     'access-control-allow-headers': 'authorization, content-type',
-    'cache-control': 'public, max-age=60',
+    'cache-control': 'private, no-store',
     'content-disposition': 'inline; filename="memo.html"',
     'content-type': 'text/html; charset=utf-8',
+    'referrer-policy': 'no-referrer',
+    'x-content-type-options': 'nosniff',
+    'x-robots-tag': 'noindex',
   })
 })
 

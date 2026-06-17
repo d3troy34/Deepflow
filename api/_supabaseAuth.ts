@@ -1,10 +1,16 @@
 type HeaderRecord = Record<string, string | string[] | undefined>
 type AuthRequest = Request | { headers: HeaderRecord }
 
+export const DEEPFLOW_ACCESS_TOKEN_COOKIE = 'deepflow_access_token'
+
 export interface SupabaseAuthUser {
   id: string
   email: string | null
   app_metadata?: Record<string, unknown> | null
+}
+
+export interface SupabaseUserAuthOptions {
+  allowCookie?: boolean
 }
 
 class AuthHttpError extends Error {
@@ -16,8 +22,11 @@ class AuthHttpError extends Error {
   }
 }
 
-export async function assertSupabaseUser(request: AuthRequest): Promise<SupabaseAuthUser> {
-  const token = bearerToken(request)
+export async function assertSupabaseUser(
+  request: AuthRequest,
+  options: SupabaseUserAuthOptions = {},
+): Promise<SupabaseAuthUser> {
+  const token = authToken(request, options)
   const supabaseUrl = configuredEnv('SUPABASE_URL', 'VITE_SUPABASE_URL')
   const publishableKey = configuredEnv(
     'SUPABASE_PUBLISHABLE_KEY',
@@ -87,13 +96,35 @@ export function isSupabaseAdminUser(user: SupabaseAuthUser): boolean {
     .includes(email)
 }
 
-function bearerToken(request: AuthRequest): string {
+function authToken(request: AuthRequest, options: SupabaseUserAuthOptions): string {
   const header = requestHeader(request, 'authorization')
   const prefix = 'Bearer '
-  if (!header.startsWith(prefix)) throw new AuthHttpError(401, 'login required')
-  const token = header.slice(prefix.length).trim()
-  if (!token) throw new AuthHttpError(401, 'login required')
-  return token
+  if (header.startsWith(prefix)) {
+    const token = header.slice(prefix.length).trim()
+    if (token) return token
+  }
+
+  if (options.allowCookie) {
+    const token = cookieValue(requestHeader(request, 'cookie'), DEEPFLOW_ACCESS_TOKEN_COOKIE)
+    if (token) return token
+  }
+
+  throw new AuthHttpError(401, 'login required')
+}
+
+function cookieValue(header: string, name: string): string {
+  const match = header
+    .split(';')
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`${name}=`))
+  if (!match) return ''
+  const raw = match.slice(name.length + 1).trim()
+  if (!raw) return ''
+  try {
+    return decodeURIComponent(raw)
+  } catch {
+    return raw
+  }
 }
 
 function requestHeader(request: AuthRequest, name: string): string {

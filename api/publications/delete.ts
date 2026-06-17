@@ -10,7 +10,7 @@ import {
   publicationHtmlPath,
   publicationMetadataPath,
   publicationPdfPath,
-  readPublicJsonBlob,
+  readPublicationIndexBlob,
   removePublication,
   type PublicationsFeed,
 } from '../_publicationTypes.js'
@@ -37,17 +37,21 @@ export default async function handler(request: NodeRequest, response: NodeRespon
       publicationMetadataPath(body.public_slug),
     ])
     if (existing) {
-      deleteTargets.add(existing.memo_long_url)
-      deleteTargets.add(existing.memo_short_url)
+      if (existing.memo_long_url) deleteTargets.add(existing.memo_long_url)
+      if (existing.memo_short_url) deleteTargets.add(existing.memo_short_url)
       if (existing.memo_full_url) deleteTargets.add(existing.memo_full_url)
+      if (existing.memo_long_path) deleteTargets.add(existing.memo_long_path)
+      if (existing.memo_short_path) deleteTargets.add(existing.memo_short_path)
+      if (existing.memo_full_path) deleteTargets.add(existing.memo_full_path)
       if (existing.metadata_url) deleteTargets.add(existing.metadata_url)
+      if (existing.metadata_path) deleteTargets.add(existing.metadata_path)
     }
 
     await del([...deleteTargets])
 
     const nextFeed = removePublication(feed, body.public_slug)
     const indexBlob = await put(INDEX_PATH, JSON.stringify(nextFeed, null, 2), {
-      access: 'public',
+      access: 'private',
       addRandomSuffix: false,
       allowOverwrite: true,
       contentType: 'application/json',
@@ -65,6 +69,6 @@ export default async function handler(request: NodeRequest, response: NodeRespon
 }
 
 async function readFeed(): Promise<PublicationsFeed> {
-  const raw = await readPublicJsonBlob(INDEX_PATH)
+  const raw = await readPublicationIndexBlob()
   return raw === null ? emptyFeed() : normalizeFeed(raw)
 }

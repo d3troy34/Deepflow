@@ -8,7 +8,7 @@ import {
   optionsResponse,
   parseCommitBody,
   publicationMetadataPath,
-  readPublicJsonBlob,
+  readPublicationIndexBlob,
   upsertPublication,
   type PublicationsFeed,
 } from '../_publicationTypes.js'
@@ -39,6 +39,7 @@ export default async function handler(request: NodeRequest, response: NodeRespon
       memo_short_url: body.memo_short_url,
       memo_full_url: null,
       metadata_url: null,
+      metadata_path: metadataPath,
       editor_note: body.editor_note,
       memo_price: body.memo_price,
       memo_price_currency: body.memo_price_currency,
@@ -46,7 +47,7 @@ export default async function handler(request: NodeRequest, response: NodeRespon
     }
 
     const metadataBlob = await put(metadataPath, JSON.stringify(publication, null, 2), {
-      access: 'public',
+      access: 'private',
       addRandomSuffix: false,
       allowOverwrite: true,
       contentType: 'application/json',
@@ -55,7 +56,7 @@ export default async function handler(request: NodeRequest, response: NodeRespon
     const item = { ...publication, metadata_url: metadataBlob.url }
     const feed = upsertPublication(await readFeed(), item)
     const indexBlob = await put(INDEX_PATH, JSON.stringify(feed, null, 2), {
-      access: 'public',
+      access: 'private',
       addRandomSuffix: false,
       allowOverwrite: true,
       contentType: 'application/json',
@@ -73,6 +74,6 @@ export default async function handler(request: NodeRequest, response: NodeRespon
 }
 
 async function readFeed(): Promise<PublicationsFeed> {
-  const raw = await readPublicJsonBlob(INDEX_PATH)
+  const raw = await readPublicationIndexBlob()
   return raw === null ? emptyFeed() : normalizeFeed(raw)
 }

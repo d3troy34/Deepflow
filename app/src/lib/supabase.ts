@@ -64,6 +64,7 @@ const ENTITLEMENT_COLUMNS = [
 ].join(',')
 
 const USERNAME_RE = /^[a-z0-9_]{3,24}$/
+const API_ACCESS_TOKEN_COOKIE = 'deepflow_access_token'
 
 export const supabaseAuthConfig = resolveSupabaseAuthConfig(
   import.meta.env as Record<string, string | undefined>,
@@ -94,6 +95,27 @@ export function onAuthSessionChange(
     callback(session)
   })
   return () => data.subscription.unsubscribe()
+}
+
+export function syncApiAuthCookie(session: AuthSession | null): void {
+  if (typeof document === 'undefined') return
+
+  if (!session?.access_token) {
+    document.cookie = `${API_ACCESS_TOKEN_COOKIE}=; Path=/api/publications; Max-Age=0; SameSite=Strict`
+    return
+  }
+
+  const expiresIn = session.expires_at
+    ? Math.max(60, session.expires_at - Math.floor(Date.now() / 1000))
+    : 3600
+  const secure = window.location.protocol === 'https:' ? '; Secure' : ''
+  document.cookie = [
+    `${API_ACCESS_TOKEN_COOKIE}=${encodeURIComponent(session.access_token)}`,
+    'Path=/api/publications',
+    `Max-Age=${expiresIn}`,
+    'SameSite=Strict',
+    secure,
+  ].filter(Boolean).join('; ')
 }
 
 export async function signInWithGoogle(): Promise<void> {

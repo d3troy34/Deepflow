@@ -10,7 +10,7 @@ import {
   parsePublishBody,
   publicationHtmlPath,
   publicationMetadataPath,
-  readPublicJsonBlob,
+  readPublicationIndexBlob,
   upsertPublication,
   type PublicationsFeed,
 } from '../_publicationTypes.js'
@@ -38,30 +38,34 @@ export default async function handler(request: NodeRequest, response: NodeRespon
       ? decodeHtmlGzipBase64(body.memo_full_html_gzip_base64, 'memo_full_html_gzip_base64')
       : null
     const publishedAt = new Date().toISOString()
+    const memoLongPath = publicationHtmlPath(body.public_slug, 'memo_long')
+    const memoShortPath = publicationHtmlPath(body.public_slug, 'memo_short')
+    const memoFullPath = memoFull ? publicationHtmlPath(body.public_slug, 'memo_full') : null
 
-    const longBlob = await put(publicationHtmlPath(body.public_slug, 'memo_long'), memoLong, {
-      access: 'public',
+    const longBlob = await put(memoLongPath, memoLong, {
+      access: 'private',
       addRandomSuffix: false,
       allowOverwrite: false,
       contentType: 'text/html; charset=utf-8',
       cacheControlMaxAge: 60,
     })
-    const shortBlob = await put(publicationHtmlPath(body.public_slug, 'memo_short'), memoShort, {
-      access: 'public',
+    const shortBlob = await put(memoShortPath, memoShort, {
+      access: 'private',
       addRandomSuffix: false,
       allowOverwrite: false,
       contentType: 'text/html; charset=utf-8',
       cacheControlMaxAge: 60,
     })
     const fullBlob = memoFull
-      ? await put(publicationHtmlPath(body.public_slug, 'memo_full'), memoFull, {
-        access: 'public',
+      ? await put(memoFullPath!, memoFull, {
+        access: 'private',
         addRandomSuffix: false,
         allowOverwrite: false,
         contentType: 'text/html; charset=utf-8',
         cacheControlMaxAge: 60,
       })
       : null
+    const metadataPath = publicationMetadataPath(body.public_slug)
 
     const publication = {
       run_id: body.run_id,
@@ -75,7 +79,11 @@ export default async function handler(request: NodeRequest, response: NodeRespon
       memo_long_url: longBlob.url,
       memo_short_url: shortBlob.url,
       memo_full_url: fullBlob?.url ?? null,
+      memo_long_path: memoLongPath,
+      memo_short_path: memoShortPath,
+      memo_full_path: memoFullPath,
       metadata_url: null,
+      metadata_path: metadataPath,
       editor_note: body.editor_note,
       memo_price: body.memo_price,
       memo_price_currency: body.memo_price_currency,
@@ -83,10 +91,10 @@ export default async function handler(request: NodeRequest, response: NodeRespon
     }
 
     const metadataBlob = await put(
-      publicationMetadataPath(body.public_slug),
+      metadataPath,
       JSON.stringify(publication, null, 2),
       {
-        access: 'public',
+        access: 'private',
         addRandomSuffix: false,
         allowOverwrite: false,
         contentType: 'application/json',
@@ -96,7 +104,7 @@ export default async function handler(request: NodeRequest, response: NodeRespon
     const item = { ...publication, metadata_url: metadataBlob.url }
     const feed = upsertPublication(await readFeed(), item)
     const indexBlob = await put(INDEX_PATH, JSON.stringify(feed, null, 2), {
-      access: 'public',
+      access: 'private',
       addRandomSuffix: false,
       allowOverwrite: true,
       contentType: 'application/json',
@@ -114,6 +122,6 @@ export default async function handler(request: NodeRequest, response: NodeRespon
 }
 
 async function readFeed(): Promise<PublicationsFeed> {
-  const raw = await readPublicJsonBlob(INDEX_PATH)
+  const raw = await readPublicationIndexBlob()
   return raw === null ? emptyFeed() : normalizeFeed(raw)
 }

@@ -1,4 +1,5 @@
 import { gunzipSync } from 'node:zlib'
+import { get } from '@vercel/blob'
 
 export const INDEX_PATH = 'publications/index.json'
 export const PDF_MAX_BYTES = 100 * 1024 * 1024
@@ -83,10 +84,14 @@ export interface PublicPublication {
   publishability_status: string
   confidence: string | null
   system_label: string | null
-  memo_long_url: string
-  memo_short_url: string
+  memo_long_url: string | null
+  memo_short_url: string | null
   memo_full_url: string | null
+  memo_long_path?: string | null
+  memo_short_path?: string | null
+  memo_full_path?: string | null
   metadata_url: string | null
+  metadata_path?: string | null
   editor_note: string | null
   memo_price: number | null
   memo_price_currency: string | null
@@ -268,6 +273,12 @@ export function publicationHtmlFilename(kind: PublishedHtmlDocumentKind): string
   return publishedHtmlDocumentFilenames[kind]
 }
 
+export function publicationViewerPath(publicSlug: string, kind: PublishedHtmlDocumentKind): string {
+  validatePublicSlug(publicSlug)
+  const params = new URLSearchParams({ slug: publicSlug, kind })
+  return `/api/publications/view?${params.toString()}`
+}
+
 export function publicationHtmlUrlForKind(
   publication: PublicPublication,
   kind: PublishedHtmlDocumentKind,
@@ -277,12 +288,67 @@ export function publicationHtmlUrlForKind(
   return publication.memo_full_url
 }
 
+export function publicationHtmlStoragePathForKind(
+  publication: PublicPublication,
+  kind: PublishedHtmlDocumentKind,
+): string | null {
+  if (kind === 'resumen') {
+    return publication.memo_short_path ?? null
+  }
+  if (kind === 'memo') {
+    return publication.memo_long_path ?? null
+  }
+  return publication.memo_full_path ?? null
+}
+
+export function publicationHasHtmlDocument(
+  publication: PublicPublication,
+  kind: PublishedHtmlDocumentKind,
+): boolean {
+  return Boolean(
+    publicationHtmlStoragePathForKind(publication, kind) ||
+      publicationHtmlUrlForKind(publication, kind),
+  )
+}
+
+export function sanitizePublicationsFeedForClient(feed: PublicationsFeed): PublicationsFeed {
+  return {
+    ...feed,
+    publications: feed.publications.map((publication) => {
+      const {
+        memo_short_path: _memoShortPath,
+        memo_long_path: _memoLongPath,
+        memo_full_path: _memoFullPath,
+        metadata_path: _metadataPath,
+        ...clientPublication
+      } = publication
+
+      return {
+        ...clientPublication,
+        memo_short_url: publicationHasHtmlDocument(publication, 'resumen')
+          ? publicationViewerPath(publication.public_slug, 'resumen')
+          : null,
+        memo_long_url: publicationHasHtmlDocument(publication, 'memo')
+          ? publicationViewerPath(publication.public_slug, 'memo')
+          : null,
+        memo_full_url: publicationHasHtmlDocument(publication, 'tesis-completa')
+          ? publicationViewerPath(publication.public_slug, 'tesis-completa')
+          : null,
+        metadata_url: null,
+      }
+    }),
+  }
+}
+
 export function inlineHtmlDocumentHeaders(filename: string): Record<string, string> {
   return {
     ...publicCorsHeaders,
-    'cache-control': 'public, max-age=60',
+    'cache-control': 'private, no-store',
     'content-disposition': `inline; filename="${filename}"`,
     'content-type': 'text/html; charset=utf-8',
+    'referrer-policy': 'no-referrer',
+    'x-content-type-options': 'nosniff',
+    'x-robots-tag': 'noindex',
   }
 }
 
@@ -306,6 +372,21 @@ export async function readPublicJsonBlob(pathname: string): Promise<unknown | nu
     throw new HttpError(502, `failed to read public blob ${pathname}: ${response.status}`)
   }
   return response.json()
+}
+
+export async function readPrivateJsonBlob(pathname: string): Promise<unknown | null> {
+  const result = await get(pathname, {
+    access: 'private',
+    useCache: false,
+  })
+  if (!result || result.statusCode !== 200 || !result.stream) return null
+  return new Response(result.stream).json()
+}
+
+export async function readPublicationIndexBlob(): Promise<unknown | null> {
+  const privateFeed = await readPrivateJsonBlob(INDEX_PATH)
+  if (privateFeed !== null) return privateFeed
+  return readPublicJsonBlob(INDEX_PATH)
 }
 
 export function decodeHtmlGzipBase64(value: string, label: string): Buffer {

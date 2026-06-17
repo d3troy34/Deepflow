@@ -25,6 +25,7 @@ import {
   onAuthSessionChange,
   signOut,
   signInWithGoogle,
+  syncApiAuthCookie,
   supabaseAuthConfig,
   updateAccountProfile,
   validateUsername,
@@ -1301,7 +1302,9 @@ export default function App() {
     let cancelled = false
     getInitialAuthSession()
       .then((session) => {
-        if (!cancelled) setAuthSession(session)
+        if (cancelled) return
+        syncApiAuthCookie(session)
+        setAuthSession(session)
       })
       .catch((e) => {
         if (!cancelled) setAuthError(errorMessage(e))
@@ -1312,6 +1315,7 @@ export default function App() {
 
     const unsubscribe = onAuthSessionChange((session) => {
       if (cancelled) return
+      syncApiAuthCookie(session)
       setAuthSession(session)
       setAuthLoading(false)
       if (session) setAuthError(null)

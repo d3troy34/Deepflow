@@ -1,11 +1,11 @@
 import {
-  INDEX_PATH,
   emptyFeed,
   errorResponse,
   jsonResponse,
   normalizeFeed,
   optionsResponse,
-  readPublicJsonBlob,
+  readPublicationIndexBlob,
+  sanitizePublicationsFeedForClient,
   type PublicationsFeed,
 } from '../_publicationTypes.js'
 import { sendResponse, type NodeRequest, type NodeResponse } from '../_node.js'
@@ -17,13 +17,13 @@ export default async function handler(request: NodeRequest, response: NodeRespon
 
   try {
     await assertSupabaseUser(request)
-    return sendResponse(response, jsonResponse(await readFeed()))
+    return sendResponse(response, jsonResponse(sanitizePublicationsFeedForClient(await readFeed())))
   } catch (error) {
     return sendResponse(response, errorResponse(error))
   }
 }
 
 async function readFeed(): Promise<PublicationsFeed> {
-  const raw = await readPublicJsonBlob(INDEX_PATH)
+  const raw = await readPublicationIndexBlob()
   return raw === null ? emptyFeed() : normalizeFeed(raw)
 }

@@ -1,6 +1,6 @@
+import { get } from '@vercel/blob'
 import {
   HTML_MAX_BYTES,
-  INDEX_PATH,
   HttpError,
   emptyFeed,
   errorResponse,
@@ -10,10 +10,12 @@ import {
   optionsResponse,
   parsePublishedHtmlDocumentRequest,
   publicationHtmlFilename,
+  publicationHtmlStoragePathForKind,
   publicationHtmlUrlForKind,
-  readPublicJsonBlob,
+  readPublicationIndexBlob,
 } from '../_publicationTypes.js'
 import { nodeRequestUrl, sendResponse, type NodeRequest, type NodeResponse } from '../_node.js'
+import { assertSupabaseUser } from '../_supabaseAuth.js'
 
 export default async function handler(request: NodeRequest, response: NodeResponse): Promise<void> {
   if (request.method === 'OPTIONS') return sendResponse(response, optionsResponse())
@@ -22,29 +24,25 @@ export default async function handler(request: NodeRequest, response: NodeRespon
   }
 
   try {
+    await assertSupabaseUser(request, { allowCookie: true })
     const { public_slug: publicSlug, kind } = parsePublishedHtmlDocumentRequest(nodeRequestUrl(request))
-    const rawFeed = await readPublicJsonBlob(INDEX_PATH)
+    const rawFeed = await readPublicationIndexBlob()
     const feed = rawFeed === null ? emptyFeed() : normalizeFeed(rawFeed)
     const publication = feed.publications.find((item) => item.public_slug === publicSlug)
     if (!publication) throw new HttpError(404, 'publication not found')
 
-    const documentUrl = publicationHtmlUrlForKind(publication, kind)
-    if (!documentUrl) throw new HttpError(404, 'document not found')
+    const document = await readPublishedHtmlDocument(
+      publicationHtmlStoragePathForKind(publication, kind),
+      publicationHtmlUrlForKind(publication, kind),
+    )
+    if (!document) throw new HttpError(404, 'document not found')
 
-    const upstream = await fetch(documentUrl, {
-      cache: 'no-store',
-      headers: { accept: 'text/html' },
-    })
-    if (!upstream.ok) {
-      throw new HttpError(502, `failed to read document: ${upstream.status}`)
-    }
-
-    const contentType = upstream.headers.get('content-type')?.toLowerCase() ?? ''
+    const contentType = document.contentType.toLowerCase()
     if (!contentType.includes('text/html')) {
       throw new HttpError(502, 'document is not HTML')
     }
 
-    const body = await upstream.arrayBuffer()
+    const body = document.body
     if (body.byteLength > HTML_MAX_BYTES) throw new HttpError(502, 'document exceeds size limit')
 
     return sendResponse(response, new Response(body, {
@@ -52,5 +50,35 @@ export default async function handler(request: NodeRequest, response: NodeRespon
     }))
   } catch (error) {
     return sendResponse(response, errorResponse(error))
+  }
+}
+
+async function readPublishedHtmlDocument(
+  privatePath: string | null,
+  fallbackUrl: string | null,
+): Promise<{ body: ArrayBuffer; contentType: string } | null> {
+  if (privatePath) {
+    const result = await get(privatePath, {
+      access: 'private',
+      useCache: false,
+    })
+    if (result?.statusCode === 200 && result.stream) {
+      return {
+        body: await new Response(result.stream).arrayBuffer(),
+        contentType: result.blob.contentType,
+      }
+    }
+  }
+
+  if (!fallbackUrl) return null
+  const upstream = await fetch(fallbackUrl, {
+    cache: 'no-store',
+    headers: { accept: 'text/html' },
+  })
+  if (upstream.status === 404) return null
+  if (!upstream.ok) throw new HttpError(502, `failed to read document: ${upstream.status}`)
+  return {
+    body: await upstream.arrayBuffer(),
+    contentType: upstream.headers.get('content-type') ?? '',
   }
 }

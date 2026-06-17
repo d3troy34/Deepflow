@@ -61,6 +61,35 @@ test('assertSupabaseUser validates bearer token against Supabase Auth', async ()
   assert.equal(user.email, 'reader@example.com')
 })
 
+test('assertSupabaseUser accepts the scoped auth cookie only when explicitly allowed', async () => {
+  process.env.SUPABASE_URL = 'https://project.supabase.co'
+  process.env.SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_test'
+  let observedAuthorization = ''
+
+  globalThis.fetch = async (_input, init) => {
+    const headers = new Headers(init?.headers)
+    observedAuthorization = headers.get('authorization') ?? ''
+    return Response.json({
+      id: 'user-id',
+      email: 'reader@example.com',
+      app_metadata: {},
+    })
+  }
+
+  const user = await assertSupabaseUser(
+    { headers: { cookie: 'deepflow_access_token=cookie-token' } },
+    { allowCookie: true },
+  )
+
+  assert.equal(observedAuthorization, 'Bearer cookie-token')
+  assert.equal(user.id, 'user-id')
+
+  await assert.rejects(
+    () => assertSupabaseUser({ headers: { cookie: 'deepflow_access_token=cookie-token' } }),
+    (error) => error instanceof Error && 'status' in error && error.status === 401,
+  )
+})
+
 test('assertSupabaseUser maps rejected Supabase sessions to login required', async () => {
   process.env.SUPABASE_URL = 'https://project.supabase.co'
   process.env.SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_test'
