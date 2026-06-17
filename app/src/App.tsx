@@ -15,6 +15,11 @@ import {
   type RunSummary,
 } from './lib/api'
 import {
+  formatPublicationDate,
+  formatPublicationPrice,
+  publicationDocumentLinks,
+} from './lib/publicationPresentation'
+import {
   fetchAccountProfile,
   getInitialAuthSession,
   onAuthSessionChange,
@@ -630,10 +635,10 @@ function Hero() {
       <span className="inline-block font-mono text-[10px] uppercase tracking-[0.18em] text-green border border-line-strong rounded-pill px-3 py-1">
         Operational Research Hub
       </span>
-      <h1 className="font-display text-[clamp(40px,6vw,72px)] text-bone leading-[1.04] mt-5">
-        Research <span className="text-green">Tracker</span>
+      <h1 className="font-display text-[clamp(36px,9vw,72px)] text-bone leading-[1.04] mt-5">
+        Research <span className="block text-green sm:inline">Tracker</span>
       </h1>
-      <p className="text-[15px] text-bone-dim max-w-[560px] mx-auto mt-4 leading-relaxed">
+      <p className="text-[15px] text-bone-dim w-full max-w-[330px] sm:max-w-[560px] mx-auto mt-4 leading-relaxed">
         Plataforma de análisis institucional para seguimiento de activos. Precisión técnica integrada
         en un entorno editorial de alta velocidad.
       </p>
@@ -678,14 +683,23 @@ function internalStatItems(stats: Stats): StatTile[] {
 
 function StatsBar({ items }: { items: StatTile[] }) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 rounded-xl border border-line bg-ink-2 overflow-hidden">
+    <div className="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:grid-cols-4 rounded-xl border border-line bg-ink-2 overflow-hidden">
       {items.map((it, i) => (
-        <div key={i} className={i > 0 ? 'px-6 py-5 md:border-l border-line' : 'px-6 py-5'}>
-          <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted">{it.label}</div>
+        <div
+          key={i}
+          className={i > 0
+            ? 'min-w-0 px-4 py-5 sm:px-6 md:border-l border-line'
+            : 'min-w-0 px-4 py-5 sm:px-6'}
+        >
+          <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted break-words">
+            {it.label}
+          </div>
           <div className="mt-2 font-display text-[30px] leading-none" style={{ color: it.color }}>
-            {it.value}
+            <span>{it.value}</span>
             {it.sub && (
-              <span className="ml-2 font-body text-[11px] text-amber align-middle">{it.sub}</span>
+              <span className="block mt-1 font-body text-[11px] leading-tight text-amber sm:mt-0 sm:ml-2 sm:inline sm:align-middle">
+                {it.sub}
+              </span>
             )}
           </div>
         </div>
@@ -868,13 +882,6 @@ function Footer() {
   )
 }
 
-function publicationStatusLabel(value: string): string {
-  const status = value.toLowerCase()
-  if (status === 'full_deepflow_investment_memo') return 'FULL MEMO'
-  if (status === 'full_with_disclosed_limitations') return 'FULL + LIMITATIONS'
-  return value.replace(/_/g, ' ').toUpperCase()
-}
-
 function publicStatItems(publications: PublicPublication[]): StatTile[] {
   const sorted = [...publications].sort(
     (a, b) => new Date(b.published_at).valueOf() - new Date(a.published_at).valueOf(),
@@ -898,7 +905,7 @@ function publicStatItems(publications: PublicPublication[]): StatTile[] {
       label: 'Latest Memo',
       value: latest?.ticker ?? 'n/d',
       color: 'var(--bone)',
-      sub: latest ? publicDate(latest.published_at) : 'sin publicaciones',
+      sub: latest ? formatPublicationDate(latest.published_at) : 'sin publicaciones',
     },
     {
       label: 'Evidence Packages',
@@ -912,18 +919,6 @@ function publicStatItems(publications: PublicPublication[]): StatTile[] {
       color: 'var(--bone)',
     },
   ]
-}
-
-function publicDate(value: string): string {
-  const date = new Date(value)
-  if (Number.isNaN(date.valueOf())) return 'n/d'
-  return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' })
-}
-
-function formatPrice(value: number | null | undefined, currency: string | null | undefined): string {
-  if (value == null) return 'n/d'
-  const prefix = (!currency || currency === 'USD') ? '$' : `${currency} `
-  return `${prefix}${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
 function PriceChange({ memoPrice, livePrice }: { memoPrice: number | null; livePrice: number | null | undefined }) {
@@ -954,98 +949,65 @@ function PublicPublicationRow({
   onDeletePublication: (publication: PublicPublication) => void
 }) {
   const livePrice = livePrices[publication.ticker] ?? null
+  const documentLinks = publicationDocumentLinks(publication)
   return (
     <tr className="border-t border-line hover:bg-ink-3 transition-colors">
       <td className="py-3.5 pl-4 pr-4 align-middle">
-        <div className="flex items-center gap-3">
-          <span className="grid h-9 w-9 place-items-center rounded-md bg-ink-3 border border-line text-bone font-display text-[16px]">
-            {(publication.ticker || '?').slice(0, 1)}
-          </span>
-          <div className="min-w-0">
-            <div className="text-bone text-[14px] font-medium truncate">
-              {publication.company_name || publication.ticker}
-            </div>
-            <div className="font-mono text-[11px] text-muted uppercase">{publication.ticker}</div>
+        <div className="min-w-[140px]">
+          <div className="font-mono text-[13px] font-medium uppercase text-bone">
+            {publication.ticker}
           </div>
+          <div className="mt-0.5 text-[12px] text-muted truncate">
+            {publication.company_name || publication.ticker}
+          </div>
+          {canDelete && (
+            <button
+              type="button"
+              className="mt-1 font-mono text-[10px] uppercase tracking-[0.08em] text-red hover:underline disabled:text-muted disabled:no-underline disabled:cursor-wait"
+              onClick={() => onDeletePublication(publication)}
+              disabled={isDeleting}
+              aria-label={`Eliminar ${publication.company_name || publication.ticker}`}
+              title="Eliminar memo publicado"
+            >
+              {isDeleting ? 'Eliminando...' : 'Eliminar'}
+            </button>
+          )}
         </div>
       </td>
-      <td className="py-3.5 pr-4 align-middle">
-        <Pill text={publicationStatusLabel(publication.publishability_status)} tone="green" />
-      </td>
-      <td className="py-3.5 pr-4 align-middle">
-        <span className="text-[12.5px] text-bone-dim">{publicDate(publication.published_at)}</span>
-      </td>
-      <td className="py-3.5 pr-4 align-middle max-w-[320px]">
-        <span className="font-mono text-[11px] text-muted block truncate">
-          {publication.public_slug}
+      <td className="py-3.5 pr-4 align-middle whitespace-nowrap">
+        <span className="text-[12.5px] text-bone-dim">
+          {formatPublicationDate(publication.published_at)}
         </span>
       </td>
       <td className="py-3.5 pr-4 align-middle whitespace-nowrap">
         <span className="font-mono text-[12px] text-bone-dim">
-          {formatPrice(publication.memo_price, publication.memo_price_currency)}
+          {formatPublicationPrice(publication.memo_price, publication.memo_price_currency)}
         </span>
       </td>
       <td className="py-3.5 pr-4 align-middle whitespace-nowrap">
         <span className="font-mono text-[12px] text-bone-dim block">
-          {formatPrice(livePrice, publication.memo_price_currency)}
-        </span>
-        <span className="font-mono text-[9.5px] uppercase tracking-[0.12em] text-muted">
-          Yahoo Finance
+          {formatPublicationPrice(livePrice, publication.memo_price_currency)}
         </span>
       </td>
       <td className="py-3.5 pr-4 align-middle whitespace-nowrap">
         <PriceChange memoPrice={publication.memo_price} livePrice={livePrice} />
       </td>
-      <td className="py-3.5 pr-4 align-middle">
-        <div className="flex items-center gap-3 text-muted">
-          <a
-            href={publication.memo_short_url}
-            target="_blank"
-            rel="noreferrer"
-            title="Resumen"
-            className="inline-flex items-center gap-1.5 hover:text-green text-[12px]"
-          >
-            <DocIcon />
-            Resumen
-          </a>
-          <a
-            href={publication.memo_long_url}
-            target="_blank"
-            rel="noreferrer"
-            title="Memo"
-            className="inline-flex items-center gap-1.5 hover:text-green text-[12px]"
-          >
-            <DocIcon />
-            Memo
-          </a>
-          {publication.memo_full_url && (
+      <td className="py-3.5 pr-4 align-middle text-center">
+        <div className="inline-grid grid-cols-3 overflow-hidden rounded-md border border-line divide-x divide-line text-muted">
+          {documentLinks.map((link) => (
             <a
-              href={publication.memo_full_url}
-              target="_blank"
+              key={link.label}
+              href={link.url}
               rel="noreferrer"
-              title="Tesis completa"
-              className="inline-flex items-center gap-1.5 hover:text-green text-[12px]"
+              title={link.label}
+              className="inline-flex min-h-9 min-w-[92px] items-center justify-center gap-1.5 px-3 text-[11.5px] transition-colors hover:bg-green-dim hover:text-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-green"
             >
               <DocIcon />
-              Tesis completa
+              <span>{link.label}</span>
             </a>
-          )}
+          ))}
         </div>
       </td>
-      {canDelete && (
-        <td className="py-3.5 pr-4 align-middle whitespace-nowrap">
-          <button
-            type="button"
-            className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-red hover:underline disabled:text-muted disabled:no-underline disabled:cursor-wait"
-            onClick={() => onDeletePublication(publication)}
-            disabled={isDeleting}
-            aria-label={`Eliminar ${publication.company_name || publication.ticker}`}
-            title="Eliminar memo publicado"
-          >
-            {isDeleting ? 'Eliminando...' : 'Eliminar'}
-          </button>
-        </td>
-      )}
     </tr>
   )
 }
@@ -1068,15 +1030,12 @@ function PublicPublicationsTable({
       <table className="w-full text-left">
         <thead>
           <tr className="text-muted font-mono text-[10px] uppercase tracking-[0.1em] border-b border-line">
-            <th className="py-3 pl-4 pr-4 font-normal">Research</th>
-            <th className="py-3 pr-4 font-normal">Status</th>
-            <th className="py-3 pr-4 font-normal">Published</th>
-            <th className="py-3 pr-4 font-normal">Evidence path</th>
-            <th className="py-3 pr-4 font-normal">Memo price</th>
+            <th className="py-3 pl-4 pr-4 font-normal">Ticker</th>
+            <th className="py-3 pr-4 font-normal">Date published</th>
+            <th className="py-3 pr-4 font-normal">Inception price</th>
             <th className="py-3 pr-4 font-normal">Live price</th>
-            <th className="py-3 pr-4 font-normal">Since thesis</th>
-            <th className="py-3 pr-4 font-normal">Documentos</th>
-            {canDelete && <th className="py-3 pr-4 font-normal">Admin</th>}
+            <th className="py-3 pr-4 font-normal">% change</th>
+            <th className="py-3 pr-4 font-normal text-center">Documentos</th>
           </tr>
         </thead>
         <tbody>
@@ -1110,53 +1069,40 @@ function PublicFeaturedMemo({
       </div>
     )
   }
+  const documentLinks = publicationDocumentLinks(publication)
   return (
-    <div className="rounded-xl border border-line bg-ink-2 p-6">
-      <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
-        Published memo · {publication.ticker}
-      </div>
-      <h3 className="font-display text-[26px] text-bone mt-2 leading-tight">
-        {publication.company_name || publication.ticker}
-      </h3>
-      <div className="mt-4 flex flex-wrap gap-3">
-        <a
-          href={publication.memo_short_url}
-          target="_blank"
-          rel="noreferrer"
-          className="font-mono text-[11px] uppercase tracking-wide text-green hover:underline"
-        >
-          Resumen
-        </a>
-        <a
-          href={publication.memo_long_url}
-          target="_blank"
-          rel="noreferrer"
-          className="font-mono text-[11px] uppercase tracking-wide text-green hover:underline"
-        >
-          Memo
-        </a>
-        {publication.memo_full_url && (
-          <a
-            href={publication.memo_full_url}
-            target="_blank"
-            rel="noreferrer"
-            className="font-mono text-[11px] uppercase tracking-wide text-green hover:underline"
-          >
-            Tesis completa
-          </a>
-        )}
-      </div>
-      <div className="mt-6 flex justify-end">
-        <div className="min-w-[190px] rounded-lg border border-line bg-ink-3 px-4 py-3 text-right">
+    <div className="rounded-xl border border-line bg-ink-2 p-5">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
+            {'Latest memo \u00b7 '}{publication.ticker}
+          </div>
+          <h3 className="font-display text-[24px] text-bone mt-1.5 leading-tight">
+            {publication.company_name || publication.ticker}
+          </h3>
+          <div className="mt-4 inline-grid grid-cols-3 overflow-hidden rounded-md border border-line divide-x divide-line text-muted">
+            {documentLinks.map((link) => (
+              <a
+                key={link.label}
+                href={link.url}
+                rel="noreferrer"
+                className="inline-flex min-h-8 items-center justify-center px-3 font-mono text-[10.5px] uppercase tracking-[0.08em] transition-colors hover:bg-green-dim hover:text-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-green"
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
+        </div>
+        <div className="w-full rounded-lg border border-line bg-ink-3 px-4 py-3 sm:w-auto sm:min-w-[180px] sm:text-right">
           <div className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted">
-            Live price · Yahoo Finance
+            Live price
           </div>
           <div className="mt-1 font-display text-[22px] leading-none text-bone">
-            {formatPrice(livePrice, publication.memo_price_currency)}
+            {formatPublicationPrice(livePrice, publication.memo_price_currency)}
           </div>
-          <div className="mt-2 flex items-center justify-end gap-2">
+          <div className="mt-2 flex items-center gap-2 sm:justify-end">
             <span className="font-mono text-[9.5px] uppercase tracking-[0.12em] text-muted">
-              Since thesis
+              % change
             </span>
             <PriceChange memoPrice={publication.memo_price} livePrice={livePrice} />
           </div>
