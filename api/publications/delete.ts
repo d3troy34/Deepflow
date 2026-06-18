@@ -15,6 +15,7 @@ import {
   type PublicationsFeed,
 } from '../_publicationTypes.js'
 import { readJsonBody, sendResponse, type NodeRequest, type NodeResponse } from '../_node.js'
+import { assertRateLimit } from '../_rateLimit.js'
 import { assertPublishTokenOrSupabaseAdmin } from '../_supabaseAuth.js'
 
 export default async function handler(request: NodeRequest, response: NodeResponse): Promise<void> {
@@ -24,6 +25,7 @@ export default async function handler(request: NodeRequest, response: NodeRespon
   }
 
   try {
+    assertRateLimit(request, { scope: 'publication-write', limit: 60, windowMs: 60_000 })
     await assertPublishTokenOrSupabaseAdmin(request)
     const body = parseDeleteBody(await readJsonBody(request))
     const feed = await readFeed()

@@ -7,6 +7,7 @@ import {
   parseUploadClientPayload,
   validateUploadPath,
 } from './_publicationTypes.js'
+import { assertRateLimit } from './_rateLimit.js'
 import { assertPublishTokenOrSupabaseAdmin } from './_supabaseAuth.js'
 import {
   nodeRequestUrl,
@@ -23,6 +24,7 @@ export default async function handler(request: NodeRequest, response: NodeRespon
   }
 
   try {
+    assertRateLimit(request, { scope: 'publication-write', limit: 60, windowMs: 60_000 })
     const body = (await readJsonBody(request)) as HandleUploadBody
     const webRequest = toWebRequest(request)
     if (body.type === 'blob.generate-client-token') {

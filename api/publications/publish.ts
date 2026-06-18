@@ -15,6 +15,7 @@ import {
   type PublicationsFeed,
 } from '../_publicationTypes.js'
 import { readJsonBody, sendResponse, type NodeRequest, type NodeResponse } from '../_node.js'
+import { assertRateLimit } from '../_rateLimit.js'
 import { assertPublishTokenOrSupabaseAdmin } from '../_supabaseAuth.js'
 
 export default async function handler(request: NodeRequest, response: NodeResponse): Promise<void> {
@@ -24,6 +25,7 @@ export default async function handler(request: NodeRequest, response: NodeRespon
   }
 
   try {
+    assertRateLimit(request, { scope: 'publication-write', limit: 60, windowMs: 60_000 })
     await assertPublishTokenOrSupabaseAdmin(request)
     const body = parsePublishBody(await readJsonBody(request))
     const memoLong = decodeHtmlGzipBase64(
@@ -45,14 +47,14 @@ export default async function handler(request: NodeRequest, response: NodeRespon
     const longBlob = await put(memoLongPath, memoLong, {
       access: 'private',
       addRandomSuffix: false,
-      allowOverwrite: false,
+      allowOverwrite: true,
       contentType: 'text/html; charset=utf-8',
       cacheControlMaxAge: 60,
     })
     const shortBlob = await put(memoShortPath, memoShort, {
       access: 'private',
       addRandomSuffix: false,
-      allowOverwrite: false,
+      allowOverwrite: true,
       contentType: 'text/html; charset=utf-8',
       cacheControlMaxAge: 60,
     })
@@ -60,7 +62,7 @@ export default async function handler(request: NodeRequest, response: NodeRespon
       ? await put(memoFullPath!, memoFull, {
         access: 'private',
         addRandomSuffix: false,
-        allowOverwrite: false,
+        allowOverwrite: true,
         contentType: 'text/html; charset=utf-8',
         cacheControlMaxAge: 60,
       })
@@ -96,7 +98,7 @@ export default async function handler(request: NodeRequest, response: NodeRespon
       {
         access: 'private',
         addRandomSuffix: false,
-        allowOverwrite: false,
+        allowOverwrite: true,
         contentType: 'application/json',
         cacheControlMaxAge: 60,
       },

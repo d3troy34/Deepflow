@@ -1,5 +1,5 @@
 import { gunzipSync } from 'node:zlib'
-import { get } from '@vercel/blob'
+import { get, list } from '@vercel/blob'
 
 export const INDEX_PATH = 'publications/index.json'
 export const PDF_MAX_BYTES = 100 * 1024 * 1024
@@ -344,6 +344,7 @@ export function inlineHtmlDocumentHeaders(filename: string): Record<string, stri
   return {
     ...publicCorsHeaders,
     'cache-control': 'private, no-store',
+    'content-security-policy': "default-src 'none'; script-src 'none'; connect-src 'none'; img-src data: https:; style-src 'unsafe-inline'; font-src data: https:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; sandbox allow-downloads",
     'content-disposition': `inline; filename="${filename}"`,
     'content-type': 'text/html; charset=utf-8',
     'referrer-policy': 'no-referrer',
@@ -384,10 +385,54 @@ export async function readPrivateJsonBlob(pathname: string): Promise<unknown | n
 }
 
 export async function readPublicationIndexBlob(): Promise<unknown | null> {
+  const metadataFeed = await readPublicationMetadataFeed()
+  if (metadataFeed) return metadataFeed
+
   const privateFeed = await readPrivateJsonBlob(INDEX_PATH)
   if (privateFeed !== null) return privateFeed
   if (!(process.env.BLOB_STORE_ID || '').trim()) return null
   return readPublicJsonBlob(INDEX_PATH)
+}
+
+async function readPublicationMetadataFeed(): Promise<PublicationsFeed | null> {
+  let paths: string[]
+  try {
+    paths = await listPublicationMetadataPaths()
+  } catch {
+    return null
+  }
+  if (paths.length === 0) return null
+
+  const rawItems = await Promise.all(paths.map(async (path) => {
+    try {
+      return await readPrivateJsonBlob(path)
+    } catch {
+      return null
+    }
+  }))
+  const publications = rawItems.filter(isPublicPublication)
+  return publications.length === 0 ? null : publicationsFeedFromMetadata(publications)
+}
+
+async function listPublicationMetadataPaths(): Promise<string[]> {
+  const paths: string[] = []
+  let cursor: string | undefined
+
+  do {
+    const page = await list({
+      prefix: 'publications/',
+      cursor,
+      limit: 1000,
+    })
+    for (const blob of page.blobs) {
+      if (blob.pathname !== INDEX_PATH && blob.pathname.endsWith('/metadata.json')) {
+        paths.push(blob.pathname)
+      }
+    }
+    cursor = page.hasMore ? page.cursor : undefined
+  } while (cursor)
+
+  return paths
 }
 
 export function decodeHtmlGzipBase64(value: string, label: string): Buffer {
@@ -430,6 +475,23 @@ export function emptyFeed(): PublicationsFeed {
   return { schema_version: 1, updated_at: null, publications: [] }
 }
 
+export function publicationsFeedFromMetadata(publications: PublicPublication[]): PublicationsFeed {
+  const latestBySlug = new Map<string, PublicPublication>()
+  for (const publication of publications) {
+    const existing = latestBySlug.get(publication.public_slug)
+    if (!existing || publicationTime(publication) >= publicationTime(existing)) {
+      latestBySlug.set(publication.public_slug, publication)
+    }
+  }
+
+  const sorted = [...latestBySlug.values()].sort((a, b) => publicationTime(b) - publicationTime(a))
+  return {
+    schema_version: 1,
+    updated_at: sorted[0]?.published_at ?? null,
+    publications: sorted,
+  }
+}
+
 export function upsertPublication(
   feed: PublicationsFeed,
   publication: PublicPublication,
@@ -470,6 +532,23 @@ function validatePublicSlug(value: string): void {
   if (!/^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(value)) {
     throw new HttpError(400, 'invalid public slug')
   }
+}
+
+function isPublicPublication(value: unknown): value is PublicPublication {
+  if (!value || typeof value !== 'object') return false
+  const item = value as Partial<PublicPublication>
+  return (
+    typeof item.run_id === 'string' &&
+    typeof item.ticker === 'string' &&
+    typeof item.public_slug === 'string' &&
+    typeof item.published_at === 'string' &&
+    typeof item.publishability_status === 'string'
+  )
+}
+
+function publicationTime(publication: PublicPublication): number {
+  const time = Date.parse(publication.published_at)
+  return Number.isFinite(time) ? time : 0
 }
 
 function isPublishedHtmlDocumentKind(value: string | null): value is PublishedHtmlDocumentKind {

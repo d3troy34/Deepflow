@@ -15,6 +15,7 @@ import {
   readPublicationIndexBlob,
 } from '../_publicationTypes.js'
 import { nodeRequestUrl, sendResponse, type NodeRequest, type NodeResponse } from '../_node.js'
+import { assertRateLimit } from '../_rateLimit.js'
 import { assertSupabaseUser } from '../_supabaseAuth.js'
 
 export default async function handler(request: NodeRequest, response: NodeResponse): Promise<void> {
@@ -24,6 +25,7 @@ export default async function handler(request: NodeRequest, response: NodeRespon
   }
 
   try {
+    assertRateLimit(request, { scope: 'publication-read', limit: 240, windowMs: 60_000 })
     await assertSupabaseUser(request, { allowCookie: true })
     const { public_slug: publicSlug, kind } = parsePublishedHtmlDocumentRequest(nodeRequestUrl(request))
     const rawFeed = await readPublicationIndexBlob()

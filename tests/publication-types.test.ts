@@ -9,6 +9,7 @@ import {
   publicationHtmlPath,
   publicationHtmlStoragePathForKind,
   publicationHtmlUrlForKind,
+  publicationsFeedFromMetadata,
   removePublication,
   parseDeleteBody,
   parsePublishBody,
@@ -187,6 +188,7 @@ test('inlineHtmlDocumentHeaders forces browser rendering instead of attachment d
     'access-control-allow-methods': 'GET, OPTIONS',
     'access-control-allow-headers': 'authorization, content-type',
     'cache-control': 'private, no-store',
+    'content-security-policy': "default-src 'none'; script-src 'none'; connect-src 'none'; img-src data: https:; style-src 'unsafe-inline'; font-src data: https:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; sandbox allow-downloads",
     'content-disposition': 'inline; filename="memo.html"',
     'content-type': 'text/html; charset=utf-8',
     'referrer-policy': 'no-referrer',
@@ -223,6 +225,50 @@ test('removePublication removes the slug from the public feed', () => {
 
   assert.equal(feed.updated_at, '2026-06-16T21:00:00.000Z')
   assert.deepEqual(feed.publications, [])
+})
+
+test('publicationsFeedFromMetadata builds the feed from per-publication blobs', () => {
+  const feed = publicationsFeedFromMetadata([
+    {
+      run_id: 'RUN-OLD',
+      ticker: 'MSFT',
+      company_name: 'Microsoft',
+      public_slug: '2026/msft/RUN-OLD',
+      published_at: '2026-06-15T20:00:00.000Z',
+      publishability_status: 'Publicado',
+      confidence: null,
+      system_label: 'Comprar',
+      memo_long_url: 'https://blob/memo.html',
+      memo_short_url: 'https://blob/resumen.html',
+      memo_full_url: null,
+      metadata_url: 'https://blob/old/metadata.json',
+      editor_note: null,
+      memo_price: null,
+      memo_price_currency: null,
+      memo_price_as_of: null,
+    },
+    {
+      run_id: 'RUN-NEW',
+      ticker: 'NOW',
+      company_name: 'ServiceNow',
+      public_slug: '2026/now/RUN-NEW',
+      published_at: '2026-06-16T20:00:00.000Z',
+      publishability_status: 'Publicado',
+      confidence: null,
+      system_label: 'Comprar',
+      memo_long_url: 'https://blob/memo.html',
+      memo_short_url: 'https://blob/resumen.html',
+      memo_full_url: null,
+      metadata_url: 'https://blob/new/metadata.json',
+      editor_note: null,
+      memo_price: null,
+      memo_price_currency: null,
+      memo_price_as_of: null,
+    },
+  ])
+
+  assert.equal(feed.updated_at, '2026-06-16T20:00:00.000Z')
+  assert.deepEqual(feed.publications.map((item) => item.run_id), ['RUN-NEW', 'RUN-OLD'])
 })
 
 test('parseDeleteBody requires a public slug', () => {

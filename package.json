@@ -4,7 +4,11 @@
   "type": "module",
   "scripts": {
     "build": "npm --prefix app install && npm --prefix app run build && node scripts/build-static.mjs",
-    "test": "node --test tests/*.test.ts"
+    "test": "node --test tests/*.test.ts",
+    "lint": "npm --prefix app run lint",
+    "typecheck": "npm --prefix app run typecheck",
+    "check": "npm test && npm run lint && npm run typecheck",
+    "audit:prod": "npm audit --omit=dev --audit-level=moderate && npm --prefix app audit --omit=dev --audit-level=moderate"
   },
   "dependencies": {
     "@vercel/blob": "^2.4.0",
