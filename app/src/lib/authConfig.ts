@@ -32,6 +32,12 @@ export function authRedirectUrl(origin: string, basePath: string): string {
   return new URL(normalizedBase, normalizedOrigin).toString()
 }
 
+export function loginUnavailableUrl(basePath: string): string {
+  const url = new URL(normalizeBasePath(basePath), 'https://deepflow.local')
+  url.searchParams.set('login', '1')
+  return `${url.pathname}${url.search}`
+}
+
 function normalizeBasePath(basePath: string): string {
   const trimmed = basePath.trim()
   if (!trimmed) return '/'

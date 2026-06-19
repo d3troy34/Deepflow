@@ -24,7 +24,6 @@ import {
   getInitialAuthSession,
   onAuthSessionChange,
   signOut,
-  signInWithGoogle,
   syncApiAuthCookie,
   supabaseAuthConfig,
   updateAccountProfile,
@@ -34,6 +33,7 @@ import {
   type AuthSession,
   type UserEntitlement,
 } from './lib/supabase'
+import { loginUnavailableUrl } from './lib/authConfig'
 import { getPins, isPinned, pin, unpin, type Pin } from './lib/watchlist'
 
 /* ---------- helpers ---------- */
@@ -44,6 +44,8 @@ const AXES = [
   { key: 'memo', match: 'memo', label: 'memo' },
   { key: 'news', match: 'news', label: 'news' },
 ]
+
+const LOGIN_UNAVAILABLE_HREF = loginUnavailableUrl(import.meta.env.BASE_URL)
 
 type Tone = 'green' | 'red' | 'amber' | 'muted'
 
@@ -581,10 +583,10 @@ function NavBar({
                     <span>
                       {auth?.loading
                         ? 'Cargando...'
-                        : 'Inicia sesion para ver tu perfil de Denario.'}
+                        : 'El acceso con cuenta estara disponible pronto.'}
                     </span>
-                    <a className="profile-menu__action" href="/app/">
-                      Abrir tracker
+                    <a className="profile-menu__action" href={LOGIN_UNAVAILABLE_HREF}>
+                      Ver proximamente
                     </a>
                   </>
                 )}
@@ -1219,21 +1221,21 @@ function AuthGate({
   toggleTheme,
   auth,
   authError,
-  onSignIn,
   eyebrow = 'Denario operator access',
-  title = 'Sign in to continue',
-  body = 'Internal research views use Supabase Auth with Google sign-in.',
-  buttonLabel = 'Sign in with Google',
+  title = 'Login proximamente',
+  body = 'El acceso con cuenta esta temporalmente deshabilitado mientras preparamos el nuevo flujo.',
+  buttonLabel = 'Ver proximamente',
+  loginHref = LOGIN_UNAVAILABLE_HREF,
 }: {
   light: boolean
   toggleTheme: () => void
   auth: AuthNavState
   authError: string | null
-  onSignIn: () => void
   eyebrow?: string
   title?: string
   body?: string
   buttonLabel?: string
+  loginHref?: string
 }) {
   return (
     <div className="min-h-screen">
@@ -1249,15 +1251,50 @@ function AuthGate({
           <p className="text-[14px] text-bone-dim leading-relaxed mt-4">
             {body}
           </p>
-          <button
-            type="button"
-            onClick={onSignIn}
-            disabled={auth.loading}
+          <a
+            href={loginHref}
             className="mt-7 rounded-md border border-line-strong px-4 py-2 font-mono text-[11px] uppercase tracking-wide text-bone hover:border-green disabled:cursor-wait disabled:text-muted"
           >
-            {auth.loading ? 'Checking...' : buttonLabel}
-          </button>
+            {buttonLabel}
+          </a>
           {authError && <p className="text-red text-[13px] mt-5">Auth error: {authError}</p>}
+        </section>
+      </main>
+      <Footer />
+    </div>
+  )
+}
+
+function LoginComingSoonPage({
+  light,
+  toggleTheme,
+  auth,
+}: {
+  light: boolean
+  toggleTheme: () => void
+  auth: AuthNavState
+}) {
+  return (
+    <div className="min-h-screen">
+      <NavBar light={light} toggleTheme={toggleTheme} auth={auth} />
+      <main className="mx-auto max-w-container px-6">
+        <section className="pt-24 max-w-[560px]">
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-green">
+            Cuenta
+          </span>
+          <h1 className="font-display text-[44px] leading-tight text-bone mt-4">
+            {'Pr\u00f3ximamente'}
+          </h1>
+          <p className="text-[14px] text-bone-dim leading-relaxed mt-4">
+            El login de cuenta esta temporalmente deshabilitado. Estamos preparando una
+            experiencia nueva para acceder al perfil de Denario.
+          </p>
+          <a
+            href="/"
+            className="mt-7 inline-block rounded-md border border-line-strong px-4 py-2 font-mono text-[11px] uppercase tracking-wide text-bone hover:border-green"
+          >
+            Volver al inicio
+          </a>
         </section>
       </main>
       <Footer />
@@ -1274,6 +1311,8 @@ function errorMessage(error: unknown): string {
 export default function App() {
   const publicMode = hasPublicationsFeed
   const requiresAuth = supabaseAuthConfig.enabled
+  const loginUnavailablePage =
+    typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('login') === '1'
   const [runs, setRuns] = useState<RunSummary[] | null>(null)
   const [details, setDetails] = useState<Record<string, RunDetail>>({})
   const [publications, setPublications] = useState<PublicPublication[] | null>(null)
@@ -1287,7 +1326,7 @@ export default function App() {
   const [pins, setPins] = useState<Pin[]>(() => getPins())
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [authSession, setAuthSession] = useState<AuthSession | null>(null)
-  const [authLoading, setAuthLoading] = useState(supabaseAuthConfig.enabled)
+  const [authLoading, setAuthLoading] = useState(supabaseAuthConfig.enabled && !loginUnavailablePage)
   const [authError, setAuthError] = useState<string | null>(null)
   const [accountProfile, setAccountProfile] = useState<AccountProfile | null>(null)
   const [accountEntitlement, setAccountEntitlement] = useState<UserEntitlement | null>(null)
@@ -1297,6 +1336,7 @@ export default function App() {
   const [accountSaved, setAccountSaved] = useState(false)
 
   useEffect(() => {
+    if (loginUnavailablePage) return
     if (!supabaseAuthConfig.enabled) return
 
     let cancelled = false
@@ -1335,7 +1375,7 @@ export default function App() {
       cancelled = true
       unsubscribe()
     }
-  }, [])
+  }, [loginUnavailablePage])
 
   useEffect(() => {
     setApiAuthTokenProvider(() => authSession?.access_token ?? null)
@@ -1460,11 +1500,6 @@ export default function App() {
   }), [accountProfile, accountEntitlement, accountLoading, accountSaving, accountError, accountSaved])
   const canManagePublications = auth.isAdmin || accountProfile?.tier?.toLowerCase() === 'admin'
 
-  const handleSignIn = () => {
-    setAuthError(null)
-    void signInWithGoogle().catch((e) => setAuthError(errorMessage(e)))
-  }
-
   const handleSignOut = () => {
     setAuthError(null)
     void signOut().catch((e) => setAuthError(errorMessage(e)))
@@ -1523,6 +1558,16 @@ export default function App() {
     setLight(next)
   }
 
+  if (loginUnavailablePage) {
+    return (
+      <LoginComingSoonPage
+        light={light}
+        toggleTheme={toggleTheme}
+        auth={auth}
+      />
+    )
+  }
+
   if (publicMode && requiresAuth && (authLoading || !authSession)) {
     return (
       <AuthGate
@@ -1530,11 +1575,10 @@ export default function App() {
         toggleTheme={toggleTheme}
         auth={auth}
         authError={authError}
-        onSignIn={handleSignIn}
         eyebrow="Free research access"
-        title="Log in to view Research Tracker"
-        body="Use Google to create a free Denario session before reading the tracker and memos. No payment is required."
-        buttonLabel="Continue with Google"
+        title="Login proximamente"
+        body="El acceso con cuenta esta temporalmente deshabilitado. Estamos preparando el nuevo flujo antes de abrir el tracker."
+        buttonLabel="Ver proximamente"
       />
     )
   }
@@ -1569,7 +1613,6 @@ export default function App() {
         toggleTheme={toggleTheme}
         auth={auth}
         authError={authError}
-        onSignIn={handleSignIn}
       />
     )
   }

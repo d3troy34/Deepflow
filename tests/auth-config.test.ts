@@ -3,6 +3,7 @@ import { test } from 'node:test'
 
 import {
   authRedirectUrl,
+  loginUnavailableUrl,
   resolveSupabaseAuthConfig,
 } from '../app/src/lib/authConfig.ts'
 
@@ -28,4 +29,10 @@ test('resolveSupabaseAuthConfig trims configured Supabase env values', () => {
 test('authRedirectUrl points OAuth callbacks at the Vite app base path', () => {
   assert.equal(authRedirectUrl('https://deepflow.example', '/app/'), 'https://deepflow.example/app/')
   assert.equal(authRedirectUrl('http://localhost:5173', '/app'), 'http://localhost:5173/app/')
+})
+
+test('loginUnavailableUrl points login attempts at the app coming soon page', () => {
+  assert.equal(loginUnavailableUrl('/app/'), '/app/?login=1')
+  assert.equal(loginUnavailableUrl('/app'), '/app/?login=1')
+  assert.equal(loginUnavailableUrl(''), '/?login=1')
 })
