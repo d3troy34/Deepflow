@@ -270,6 +270,10 @@
       </nav>
       <div class="nav__actions">
         <a href="/#contacto" class="btn btn--small btn--nav-cta">Hablemos →</a>
+        <div class="language-toggle" id="language-toggle" role="group" aria-label="Cambiar idioma">
+          <button type="button" data-lang-option="es" aria-pressed="true">ES</button>
+          <button type="button" data-lang-option="en" aria-pressed="false">EN</button>
+        </div>
         <a href="/app/?profile=1" class="profile-button" aria-label="Ver perfil" title="Ver perfil">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="8" r="3.2"></circle>
@@ -281,7 +285,7 @@
     </div>
   </header>
 
-  <main class="legal-page">
+  <main class="legal-page" data-legal-i18n-root>
 
     <!-- HERO -->
     <div class="legal-hero">
@@ -664,6 +668,7 @@
     </div>
   </footer>
 
+  <script src="js/legal-i18n.js"></script>
   <script>
     // Theme toggle
     const themeBtn = document.getElementById('theme-toggle');

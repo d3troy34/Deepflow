@@ -9,6 +9,15 @@
   const CONTACT_EMAIL = "francobales3@gmail.com";
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const hasGsap = typeof window.gsap !== "undefined" && typeof window.ScrollTrigger !== "undefined";
+  const landingI18n = window.DeepFlowI18n || null;
+
+  function landingLang() {
+    return landingI18n && landingI18n.currentLanguage ? landingI18n.currentLanguage() : "es";
+  }
+
+  function landingText(key, fallback) {
+    return landingI18n && landingI18n.t ? landingI18n.t(key, landingLang()) : fallback;
+  }
 
   // ---------- nav scrolled state (se actualiza en el tick de Lenis si está activo) ----------
   const nav = document.getElementById("nav");
@@ -25,6 +34,7 @@
   function setToggleIcon() {
     if (!themeToggle) return;
     const li = document.body.classList.contains("light");
+    themeToggle.setAttribute("aria-label", landingText(li ? "theme.toDark" : "theme.toLight", "Cambiar tema"));
     themeToggle.innerHTML = li
       ? '<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M13.5 8.7A6 6 0 0 1 7.3 2.5a6 6 0 1 0 6.2 6.2z" fill="currentColor"/></svg>'
       : '<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3.2" stroke="currentColor" stroke-width="1.4"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.1 3.1l1.06 1.06M11.84 11.84l1.06 1.06M3.1 12.9l1.06-1.06M11.84 4.16l1.06-1.06" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
@@ -44,7 +54,7 @@
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const data = new FormData(form);
-      const subject = "DeepFlow — contacto de " + (data.get("name") || "");
+      const subject = landingText("contact.mailSubjectPrefix", "DeepFlow — contacto de ") + (data.get("name") || "");
       const body = data.get("message") + "\n\n— " + data.get("name") + " (" + data.get("email") + ")";
       window.location.href = "mailto:" + CONTACT_EMAIL +
         "?subject=" + encodeURIComponent(subject) +
@@ -240,7 +250,7 @@
   const consoleBody = document.getElementById("console-body");
   const consoleState = document.getElementById("console-state");
 
-  const EVENTS = [
+  const FALLBACK_EVENTS = [
     { t: "00:00.4", m: 'run iniciado · <span class="accent">NVDA</span> · paquete de trabajo creado' },
     { t: "00:03.1", m: "ingesta: SEC/EDGAR · 10-K, 10-Q, 8-K" },
     { t: "00:09.8", m: "ingesta: FMP · Yahoo · Finnhub · news · macro" },
@@ -255,7 +265,7 @@
     { t: "09:12.0", m: 'artifacts: <span class="accent">final_memo.pdf</span> · .html · .md · .json' },
   ];
 
-  const STATES = [
+  const FALLBACK_STATES = [
     "ingiriendo datos…",
     "normalizando paquete…",
     "corriendo gates de calidad…",
@@ -264,31 +274,53 @@
     "run completo · esperando decisión humana",
   ];
 
+  function consoleEvents() {
+    return landingI18n && landingI18n.consoleEvents
+      ? landingI18n.consoleEvents(landingLang())
+      : FALLBACK_EVENTS;
+  }
+
+  function consoleStates() {
+    return landingI18n && landingI18n.consoleStates
+      ? landingI18n.consoleStates(landingLang())
+      : FALLBACK_STATES;
+  }
+
+  let consoleTimer = 0;
   function runConsole() {
     if (!consoleBody) return;
+    clearTimeout(consoleTimer);
+    const events = consoleEvents();
+    const states = consoleStates();
     consoleBody.innerHTML = "";
     let i = 0;
     const tick = () => {
-      if (i >= EVENTS.length) {
-        if (consoleState) consoleState.textContent = STATES[STATES.length - 1];
-        setTimeout(runConsole, 9000);
+      if (i >= events.length) {
+        if (consoleState) consoleState.textContent = states[states.length - 1];
+        consoleTimer = setTimeout(runConsole, 9000);
         return;
       }
-      const ev = EVENTS[i];
+      const ev = events[i];
       const row = document.createElement("div");
       row.className = "console__row";
       row.innerHTML = '<span class="console__time">' + ev.t + "</span>" +
                       '<span class="console__msg">' + ev.m + "</span>";
       consoleBody.appendChild(row);
       if (consoleState) {
-        consoleState.textContent = STATES[Math.min(Math.floor(i / 2), STATES.length - 2)];
+        consoleState.textContent = states[Math.min(Math.floor(i / 2), states.length - 2)];
       }
       i++;
-      setTimeout(tick, reduceMotion ? 0 : 600 + Math.random() * 500);
+      consoleTimer = setTimeout(tick, reduceMotion ? 0 : 600 + Math.random() * 500);
     };
     tick();
   }
   runConsole();
+
+  window.addEventListener("deepflow:languagechange", () => {
+    setToggleIcon();
+    runConsole();
+    if (hasGsap) ScrollTrigger.refresh();
+  });
 
   // ---------- sin GSAP: mostrar todo y salir ----------
   if (!hasGsap || reduceMotion) {
