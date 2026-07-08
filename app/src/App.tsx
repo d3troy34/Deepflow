@@ -1997,7 +1997,9 @@ export default function App() {
 
         {authError && <p className="text-red text-[13px] mt-6">Auth error: {authError}</p>}
         {error && (
-          <p className="text-red text-[13px] mt-6">`n            {t('app.runsError')} {error}. {t('app.backendHint')}`n          </p>
+          <p className="text-red text-[13px] mt-6">
+            {t('app.runsError')} {error}. {t('app.backendHint')}
+          </p>
         )}
         {!runs && !error && <p className="text-muted text-[13px] mt-6">{t('app.loadingRuns')}</p>}
         {runs && filtered.length === 0 && !error && (
