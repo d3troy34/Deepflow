@@ -250,8 +250,7 @@
     }
   </style>
 </head>
-<body>
-<script>if(localStorage.getItem('df-theme')!=='dark')document.body.classList.add('light');</script>
+<body class="light">
 
   <!-- NAV -->
   <header class="nav" id="nav">
@@ -280,7 +279,6 @@
             <path d="M5.5 20a6.7 6.7 0 0 1 13 0"></path>
           </svg>
         </a>
-        <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema"></button>
       </div>
     </div>
   </header>
@@ -670,15 +668,6 @@
 
   <script src="js/legal-i18n.js"></script>
   <script>
-    // Theme toggle
-    const themeBtn = document.getElementById('theme-toggle');
-    if (themeBtn) {
-      themeBtn.addEventListener('click', () => {
-        document.body.classList.toggle('light');
-        localStorage.setItem('df-theme', document.body.classList.contains('light') ? 'light' : 'dark');
-      });
-    }
-
     // Sidebar scrollspy
     const sections = document.querySelectorAll('.legal-doc[id]');
     const navLinks = document.querySelectorAll('#legal-nav a');

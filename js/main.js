@@ -27,28 +27,6 @@
   updateNav();
   window.addEventListener("scroll", updateNav, { passive: true });
 
-  // ---------- theme toggle ----------
-  (function () {
-    if (localStorage.getItem("df-theme") !== "dark") document.body.classList.add("light");
-  })();
-  const themeToggle = document.getElementById("theme-toggle");
-  function setToggleIcon() {
-    if (!themeToggle) return;
-    const li = document.body.classList.contains("light");
-    themeToggle.setAttribute("aria-label", landingText(li ? "theme.toDark" : "theme.toLight", "Cambiar tema"));
-    themeToggle.innerHTML = li
-      ? '<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M13.5 8.7A6 6 0 0 1 7.3 2.5a6 6 0 1 0 6.2 6.2z" fill="currentColor"/></svg>'
-      : '<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3.2" stroke="currentColor" stroke-width="1.4"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.1 3.1l1.06 1.06M11.84 11.84l1.06 1.06M3.1 12.9l1.06-1.06M11.84 4.16l1.06-1.06" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
-  }
-  setToggleIcon();
-  if (themeToggle) {
-    themeToggle.addEventListener("click", function () {
-      document.body.classList.toggle("light");
-      localStorage.setItem("df-theme", document.body.classList.contains("light") ? "light" : "dark");
-      setToggleIcon();
-    });
-  }
-
   // ---------- contact form → mailto ----------
   const form = document.getElementById("contact-form");
   if (form) {
@@ -166,7 +144,6 @@
   // El i18n layer reemplaza innerHTML en [data-i18n-html] (incluye los spans
   // [data-count] de las stats), así que hay que re-observarlos.
   window.addEventListener("deepflow:languagechange", () => {
-    setToggleIcon();
     renderConsole();
     setupCounters();
   });
