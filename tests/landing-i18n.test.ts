@@ -80,6 +80,7 @@ test('landing markup exposes the language switch before the landing script', asy
   assert.match(html, /data-lang-option="en"/)
   assert.match(html, /data-i18n-html="hero\.title\.line1"/)
   assert.match(html, /data-i18n="contact\.submit"/)
+  assert.doesNotMatch(html, /class="btn btn--small" data-i18n="nav\.tracker"/)
   assert.match(html, /<script src="js\/landing-i18n\.js"><\/script>\s*<script src="js\/main\.js"><\/script>/)
 })
 
@@ -121,4 +122,5 @@ test('app shell exposes a persisted language switch with English copy', async ()
   assert.match(source, /Research platform for institutional asset monitoring/)
   assert.match(source, /Terms/)
   assert.match(source, /Privacy/)
+  assert.doesNotMatch(source, /\{t\('nav\.tracker'\)\}/)
 })

@@ -802,9 +802,6 @@ function NavBar({
           <a href="/#roadmap">{t('nav.roadmap')}</a>
         </nav>
         <div className="nav__actions">
-          <a href="/app/" className="btn btn--small">
-            {t('nav.tracker')}
-          </a>
           <a href="/#contacto" className="btn btn--small btn--nav-cta">
             {t('nav.contact')}
           </a>
