@@ -165,6 +165,7 @@ const APP_TEXT = {
     'auth.publicBody': 'El acceso con cuenta esta temporalmente deshabilitado. Estamos preparando el nuevo flujo antes de abrir el tracker.',
     'auth.button': 'Ver proximamente',
     'auth.backHome': 'Volver al inicio',
+    'auth.viewPublic': 'Ver research publico',
     'app.runsError': 'No se pudo cargar /api/runs:',
     'app.backendHint': 'Esta corriendo el backend en :8000?',
     'app.loadingRuns': 'Cargando runs...',
@@ -280,6 +281,7 @@ const APP_TEXT = {
     'auth.publicBody': 'Account access is temporarily disabled. We are preparing the new flow before opening the tracker.',
     'auth.button': 'View coming soon',
     'auth.backHome': 'Back home',
+    'auth.viewPublic': 'View public research',
     'app.runsError': 'Could not load /api/runs:',
     'app.backendHint': 'Is the backend running on :8000?',
     'app.loadingRuns': 'Loading runs...',
@@ -1570,23 +1572,28 @@ function AuthGate({
     <div className="min-h-screen">
       <NavBar light={light} toggleTheme={toggleTheme} auth={auth} />
       <main className="mx-auto max-w-container px-6">
-        <section className="pt-24 max-w-[560px]">
-          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-green">
-            {displayEyebrow}
-          </span>
-          <h1 className="font-display text-[44px] leading-tight text-bone mt-4">
-            {displayTitle}
-          </h1>
-          <p className="text-[14px] text-bone-dim leading-relaxed mt-4">
-            {displayBody}
-          </p>
-          <a
-            href={loginHref}
-            className="mt-7 rounded-md border border-line-strong px-4 py-2 font-mono text-[11px] uppercase tracking-wide text-bone hover:border-green disabled:cursor-wait disabled:text-muted"
-          >
-            {displayButtonLabel}
-          </a>
-          {authError && <p className="text-red text-[13px] mt-5">Auth error: {authError}</p>}
+        <section className="flex min-h-[70vh] items-center justify-center py-16">
+          <div className="w-full max-w-[520px] rounded-xl border border-line bg-ink-2 px-8 py-12 text-center sm:px-12">
+            <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-green">
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--green)' }} aria-hidden="true" />
+              {displayEyebrow}
+            </span>
+            <h1 className="mt-5 font-display text-[clamp(30px,6vw,44px)] leading-[1.08] text-bone">
+              {displayTitle}
+            </h1>
+            <p className="mx-auto mt-4 max-w-[42ch] text-[14.5px] leading-relaxed text-bone-dim">
+              {displayBody}
+            </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <a href={loginHref} className="btn btn--small btn--nav-cta">
+                {displayButtonLabel}
+              </a>
+              <a href="/" className="btn btn--small">
+                {t('auth.backHome')}
+              </a>
+            </div>
+            {authError && <p className="mt-6 text-[13px] text-red">Auth error: {authError}</p>}
+          </div>
         </section>
       </main>
       <Footer />
@@ -1608,22 +1615,31 @@ function LoginComingSoonPage({
     <div className="min-h-screen">
       <NavBar light={light} toggleTheme={toggleTheme} auth={auth} />
       <main className="mx-auto max-w-container px-6">
-        <section className="pt-24 max-w-[560px]">
-          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-green">
-            {t('profile.title')}
-          </span>
-          <h1 className="font-display text-[44px] leading-tight text-bone mt-4">
-            {t('profile.comingSoon')}
-          </h1>
-          <p className="text-[14px] text-bone-dim leading-relaxed mt-4">
-            {t('auth.body')}
-          </p>
-          <a
-            href="/"
-            className="mt-7 inline-block rounded-md border border-line-strong px-4 py-2 font-mono text-[11px] uppercase tracking-wide text-bone hover:border-green"
-          >
-            {t('auth.backHome')}
-          </a>
+        <section className="flex min-h-[70vh] items-center justify-center py-16">
+          <div className="w-full max-w-[520px] rounded-xl border border-line bg-ink-2 px-8 py-12 text-center sm:px-12">
+            <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-green">
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--green)' }} aria-hidden="true" />
+              {t('auth.eyebrow')}
+            </span>
+            <h1 className="mt-5 font-display text-[clamp(30px,6vw,44px)] leading-[1.08] text-bone">
+              {t('auth.title')}
+            </h1>
+            <p className="mx-auto mt-4 max-w-[42ch] text-[14.5px] leading-relaxed text-bone-dim">
+              {t('auth.body')}
+            </p>
+            <span className="mt-6 inline-flex items-center gap-2 rounded-pill border border-line-strong px-3 py-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-muted">
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--amber)' }} aria-hidden="true" />
+              {t('profile.comingSoon')}
+            </span>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <a href="/" className="btn btn--small">
+                {t('auth.backHome')}
+              </a>
+              <a href={import.meta.env.BASE_URL} className="btn btn--small btn--nav-cta">
+                {t('auth.viewPublic')}
+              </a>
+            </div>
+          </div>
         </section>
       </main>
       <Footer />

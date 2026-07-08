@@ -17,6 +17,7 @@
 </head>
 <body>
 <script>if(localStorage.getItem('df-theme')!=='dark')document.body.classList.add('light');</script>
+<script>document.documentElement.classList.add('js-reveal');</script>
 
   <!-- ============ NAV ============ -->
   <header class="nav" id="nav">
@@ -54,10 +55,6 @@
 
     <!-- ============ HERO ============ -->
     <section class="hero">
-      <div class="hero__bg" aria-hidden="true">
-        <canvas id="hero-canvas" aria-hidden="true"></canvas>
-        <!-- anillos 3D de tickers en vivo (datos: Yahoo Finance, fallback estático) -->
-      </div>
       <div class="hero__inner">
         <div class="hero__copy">
           <p class="eyebrow" data-reveal data-i18n="hero.eyebrow">Motor de research · US listed equities</p>
@@ -74,12 +71,11 @@
           </p>
           <div class="hero__cta" data-reveal>
             <a href="/app/" class="btn btn--primary" data-i18n="hero.cta.samples">Ver muestras</a>
-            <a href="/app/" class="btn btn--ghost" data-i18n="hero.cta.tracker">Research Tracker →</a>
             <a href="#proceso" class="btn btn--ghost" data-i18n="hero.cta.process">Cómo funciona</a>
           </div>
         </div>
 
-        <!-- Live run console -->
+        <!-- Run panel: qué hace un run de DeepFlow, en estático -->
         <div class="console" data-reveal aria-label="Simulación de un run de DeepFlow" data-i18n-attrs="aria-label:hero.consoleAria">
           <div class="console__bar">
             <span class="console__dot"></span>
@@ -87,10 +83,23 @@
             <span class="console__dot"></span>
             <span class="console__title">deepflow · run_2041 · NVDA</span>
           </div>
-          <div class="console__body" id="console-body"></div>
+          <div class="console__body" id="console-body">
+            <div class="console__row"><span class="console__time">00:00.4</span><span class="console__msg">run iniciado · <span class="accent">NVDA</span> · paquete de trabajo creado</span></div>
+            <div class="console__row"><span class="console__time">00:03.1</span><span class="console__msg">ingesta: SEC/EDGAR · 10-K, 10-Q, 8-K</span></div>
+            <div class="console__row"><span class="console__time">00:09.8</span><span class="console__msg">ingesta: FMP · Yahoo · Finnhub · news · macro</span></div>
+            <div class="console__row"><span class="console__time">00:21.5</span><span class="console__msg">normalización → CanonicalResearchPacket</span></div>
+            <div class="console__row"><span class="console__time">01:02.0</span><span class="console__msg">gates: datos faltantes <span class="ok">PASS</span> · canaries <span class="ok">PASS</span></span></div>
+            <div class="console__row"><span class="console__time">01:14.3</span><span class="console__msg">gates: consistencia <span class="ok">PASS</span> · source lineage <span class="ok">PASS</span></span></div>
+            <div class="console__row"><span class="console__time">02:38.9</span><span class="console__msg">valuación: DCF · SOTP · reverse DCF · peers</span></div>
+            <div class="console__row"><span class="console__time">03:50.2</span><span class="console__msg">price targets calculados · <span class="warn">workbook.xlsx</span> generado</span></div>
+            <div class="console__row"><span class="console__time">05:06.7</span><span class="console__msg">síntesis narrativa con guardrails determinísticos</span></div>
+            <div class="console__row"><span class="console__time">07:42.1</span><span class="console__msg">memo: IC brief · bull/bear · catalysts · riesgos</span></div>
+            <div class="console__row"><span class="console__time">08:55.4</span><span class="console__msg">publishability: <span class="ok">PUBLISHABLE ✓</span></span></div>
+            <div class="console__row"><span class="console__time">09:12.0</span><span class="console__msg">artifacts: <span class="accent">final_memo.pdf</span> · .html · .md · .json</span></div>
+          </div>
           <div class="console__status">
-            <span class="pulse"></span>
-            <span id="console-state" data-i18n="hero.consoleInitial">inicializando run…</span>
+            <span class="console__status-dot" aria-hidden="true"></span>
+            <span id="console-state">run completo · esperando decisión humana</span>
           </div>
         </div>
       </div>
@@ -119,38 +128,12 @@
       </div>
     </section>
 
-    <!-- ============ MARQUEE ============ -->
-    <div class="marquee" aria-hidden="true">
-      <div class="marquee__track">
-        <span>SEC / EDGAR</span><i>·</i>
-        <span>FMP</span><i>·</i>
-        <span>Yahoo Finance</span><i>·</i>
-        <span>Finnhub</span><i>·</i>
-        <span>Earnings transcripts</span><i>·</i>
-        <span>News</span><i>·</i>
-        <span>Macro</span><i>·</i>
-        <span>Peer context</span><i>·</i>
-        <span>SEC / EDGAR</span><i>·</i>
-        <span>FMP</span><i>·</i>
-        <span>Yahoo Finance</span><i>·</i>
-        <span>Finnhub</span><i>·</i>
-        <span>Earnings transcripts</span><i>·</i>
-        <span>News</span><i>·</i>
-        <span>Macro</span><i>·</i>
-        <span>Peer context</span><i>·</i>
-      </div>
-    </div>
-
     <!-- ============ MANIFESTO / PRODUCTO ============ -->
     <section class="manifesto" id="producto">
-      <div class="manifesto__bg" aria-hidden="true">
-        <div class="manifesto__glow"></div>
-        <canvas id="manifesto-canvas"></canvas>
-      </div>
       <div class="manifesto__inner">
         <p class="eyebrow" data-reveal data-i18n="manifesto.eyebrow">Qué es DeepFlow</p>
         <div class="manifesto__grid">
-          <h2 class="manifesto__text" data-lines data-i18n-html="manifesto.title">
+          <h2 class="manifesto__text" data-reveal data-i18n-html="manifesto.title">
             DeepFlow <em>no</em> es un bot de trading. No promete alpha mágico.
             Es una <em>línea de producción</em> de research: datos verificables,
             modelo reproducible, memo legible y controles estrictos antes de publicar.
@@ -210,20 +193,15 @@
       </div>
     </section>
 
-    <!-- ============ CÓMO FUNCIONA (horizontal pinned scroll) ============ -->
+    <!-- ============ CÓMO FUNCIONA (lista vertical numerada) ============ -->
     <section class="process" id="proceso">
-      <div class="process__top">
-        <div>
-          <p class="eyebrow" data-i18n="process.eyebrow">Cómo funciona</p>
-          <h2 class="process__title" data-i18n="process.title">De un ticker a un memo defendible, en siete pasos.</h2>
-        </div>
-        <div class="process__counter" aria-hidden="true">
-          <span id="proc-current">01</span><span class="process__counter-sep">/</span><span>07</span>
-        </div>
+      <div class="process__top" data-reveal>
+        <p class="eyebrow" data-i18n="process.eyebrow">Cómo funciona</p>
+        <h2 class="process__title" data-i18n="process.title">De un ticker a un memo defendible, en siete pasos.</h2>
       </div>
 
       <div class="process__track" id="process-track">
-        <article class="pstep">
+        <article class="pstep" data-reveal>
           <span class="pstep__num">01</span>
           <div class="pstep__body">
             <h3 data-i18n="process.step1.title">Entrada</h3>
@@ -231,7 +209,7 @@
           </div>
           <code class="step__code" data-i18n="process.step1.code">un ticker → un run</code>
         </article>
-        <article class="pstep">
+        <article class="pstep" data-reveal>
           <span class="pstep__num">02</span>
           <div class="pstep__body">
             <h3 data-i18n="process.step2.title">Ingesta de datos</h3>
@@ -239,7 +217,7 @@
           </div>
           <code class="step__code" data-i18n="process.step2.code">datos con fuente</code>
         </article>
-        <article class="pstep">
+        <article class="pstep" data-reveal>
           <span class="pstep__num">03</span>
           <div class="pstep__body">
             <h3 data-i18n="process.step3.title">Normalización</h3>
@@ -247,7 +225,7 @@
           </div>
           <code class="step__code" data-i18n="process.step3.code">research packet</code>
         </article>
-        <article class="pstep">
+        <article class="pstep" data-reveal>
           <span class="pstep__num">04</span>
           <div class="pstep__body">
             <h3 data-i18n="process.step4.title">Gates de calidad</h3>
@@ -255,7 +233,7 @@
           </div>
           <code class="step__code" data-i18n="process.step4.code">control de calidad</code>
         </article>
-        <article class="pstep">
+        <article class="pstep" data-reveal>
           <span class="pstep__num">05</span>
           <div class="pstep__body">
             <h3 data-i18n="process.step5.title">Valuación</h3>
@@ -263,7 +241,7 @@
           </div>
           <code class="step__code" data-i18n="process.step5.code">modelo + price targets</code>
         </article>
-        <article class="pstep">
+        <article class="pstep" data-reveal>
           <span class="pstep__num">06</span>
           <div class="pstep__body">
             <h3 data-i18n="process.step6.title">Análisis</h3>
@@ -271,7 +249,7 @@
           </div>
           <code class="step__code" data-i18n="process.step6.code">análisis con control</code>
         </article>
-        <article class="pstep">
+        <article class="pstep" data-reveal>
           <span class="pstep__num">07</span>
           <div class="pstep__body">
             <h3 data-i18n="process.step7.title">Memo</h3>
@@ -280,19 +258,10 @@
           <code class="step__code" data-i18n="process.step7.code">memo + evidencia</code>
         </article>
       </div>
-
-      <div class="process__bar" aria-hidden="true">
-        <div class="process__chartwrap">
-          <span class="process__chart-base"></span>
-          <span class="process__chart-fill"></span>
-          <span class="process__tip" id="proc-tip"></span>
-        </div>
-      </div>
     </section>
 
     <!-- ============ QUÉ SOLUCIONA ============ -->
     <section class="solves" id="soluciona">
-      <canvas class="bg-canvas" id="solves-canvas" aria-hidden="true"></canvas>
       <div class="solves__inner">
         <p class="eyebrow" data-reveal data-i18n="solves.eyebrow">Para qué sirve</p>
         <h2 class="h2" data-reveal data-i18n-html="solves.title">El research serio toma semanas.<br />DeepFlow lo vuelve una operación de minutos.</h2>
@@ -324,7 +293,6 @@
 
     <!-- ============ MUESTRA ============ -->
     <section class="sample" id="muestra">
-      <canvas class="bg-canvas" id="sample-canvas" aria-hidden="true"></canvas>
       <div class="sample__inner">
         <p class="eyebrow" data-reveal data-i18n="sample.eyebrow">La muestra</p>
         <h2 class="h2" data-reveal data-i18n="sample.title">Así se ve un memo de DeepFlow.</h2>
@@ -435,11 +403,10 @@
 
     <!-- ============ CONTACTO ============ -->
     <section class="contact" id="contacto">
-      <canvas class="bg-canvas" id="contact-canvas" aria-hidden="true"></canvas>
       <div class="contact__inner">
         <div class="contact__copy">
           <p class="eyebrow" data-reveal data-i18n="contact.eyebrow">Contacto</p>
-          <h2 class="contact__title" data-lines data-i18n-html="contact.title">¿Querés ver qué dice DeepFlow sobre <em>tu</em> próxima inversión?</h2>
+          <h2 class="contact__title" data-reveal data-i18n-html="contact.title">¿Querés ver qué dice DeepFlow sobre <em>tu</em> próxima inversión?</h2>
           <p class="contact__sub" data-reveal data-i18n="contact.sub">Escribime y te mando una muestra real, o corremos un run sobre el ticker que vos elijas.</p>
           <div class="contact__channels" data-reveal>
             <a href="mailto:francobales3@gmail.com?subject=Quiero%20ver%20una%20muestra%20de%20DeepFlow" class="channel" data-i18n-attrs="href:contact.emailHref">
@@ -495,9 +462,6 @@
     </div>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
   <script src="js/landing-i18n.js"></script>
   <script src="js/main.js"></script>
 </body>
