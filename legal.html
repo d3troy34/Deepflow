@@ -251,10 +251,21 @@
   </style>
 </head>
 <body>
-<script>if(localStorage.getItem('df-theme')!=='dark')document.body.classList.add('light');</script>
+<script>
+  (function () {
+    var theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    try {
+      theme = localStorage.getItem('df-theme') || theme;
+    } catch (_error) {
+      // The system preference still provides a stable fallback.
+    }
+    document.documentElement.dataset.theme = theme;
+    document.body.classList.toggle('light', theme === 'light');
+  })();
+</script>
 
   <!-- NAV -->
-  <header class="nav" id="nav">
+  <header class="nav nav--legal" id="nav">
     <div class="nav__inner">
       <a class="nav__brand" href="/">
         <span class="nav__dot" aria-hidden="true"></span>
@@ -675,7 +686,9 @@
     if (themeBtn) {
       themeBtn.addEventListener('click', () => {
         document.body.classList.toggle('light');
-        localStorage.setItem('df-theme', document.body.classList.contains('light') ? 'light' : 'dark');
+        const theme = document.body.classList.contains('light') ? 'light' : 'dark';
+        document.documentElement.dataset.theme = theme;
+        try { localStorage.setItem('df-theme', theme); } catch (_error) {}
       });
     }
 

@@ -32,8 +32,8 @@ class FakeDocument {
   documentElement = new FakeElement()
   title = ''
   textEls = [new FakeElement({ 'data-i18n': 'nav.product' })]
-  htmlEls = [new FakeElement({ 'data-i18n-html': 'hero.title.line1' })]
-  attrEls = [new FakeElement({ 'data-i18n-attrs': 'aria-label:nav.profileAria;title:nav.profileTitle' })]
+  htmlEls = [new FakeElement({ 'data-i18n-html': 'hero.title' })]
+  attrEls = [new FakeElement({ 'data-i18n-attrs': 'aria-label:nav.aria;title:theme.toDark' })]
   langButtons = [
     new FakeElement({ 'data-lang-option': 'es' }),
     new FakeElement({ 'data-lang-option': 'en' }),
@@ -69,7 +69,6 @@ async function loadLandingI18n() {
     applyLandingLanguage: (document: FakeDocument, lang: string) => void
     normalizeLanguage: (lang: string | null | undefined) => 'es' | 'en'
     t: (key: string, lang: string) => string
-    consoleState: (index: number, lang: string) => string
   }
 }
 
@@ -78,13 +77,27 @@ test('landing markup exposes the language switch before the landing script', asy
 
   assert.match(html, /id="language-toggle"/)
   assert.match(html, /data-lang-option="en"/)
-  assert.match(html, /data-i18n-html="hero\.title\.line1"/)
+  assert.match(html, /data-i18n-html="hero\.title"/)
   assert.match(html, /data-i18n="contact\.submit"/)
-  assert.doesNotMatch(html, /class="btn btn--small" data-i18n="nav\.tracker"/)
-  assert.match(html, /<script src="js\/landing-i18n\.js"><\/script>\s*<script src="js\/main\.js"><\/script>/)
+  assert.match(html, /class="skip-link"/)
+  assert.match(html, /id="nav-toggle"/)
+  assert.match(html, /class="hero-brief__stage"/)
+  assert.match(html, /data-hero-brief-stage/)
+  assert.match(html, /data-tab-index="01"/)
+  assert.match(html, /data-scrub-accent=/)
+  assert.match(html, /data-i18n="sample\.summary\.thesis"/)
+  assert.match(html, /aria-controls="roadmap-body-1 roadmap-guard-1"/)
+  assert.match(html, /data-roadmap-image="portfolio"/)
+  assert.match(html, /data-roadmap-image="tracking"/)
+  assert.match(html, /data-roadmap-image="macro"/)
+  assert.match(html, /data-roadmap-image="execution"/)
+  assert.doesNotMatch(html, /href="\/app\/"/)
+  assert.doesNotMatch(html, /deepflow-evidence-optimized\.webp/)
+  assert.doesNotMatch(html, /[—–]/)
+  assert.match(html, /<script src="js\/landing-i18n\.js(?:\?[^\"]*)?"><\/script>\s*<script src="js\/main\.js(?:\?[^\"]*)?"><\/script>/)
 })
 
-test('landing i18n applies English text, attributes, metadata, and console copy', async () => {
+test('landing i18n applies English text, attributes, and metadata', async () => {
   const i18n = await loadLandingI18n()
   const document = new FakeDocument()
 
@@ -93,15 +106,33 @@ test('landing i18n applies English text, attributes, metadata, and console copy'
   assert.equal(i18n.normalizeLanguage('en-US'), 'en')
   assert.equal(document.documentElement.getAttribute('lang'), 'en')
   assert.equal(document.textEls[0].textContent, 'Product')
-  assert.match(document.htmlEls[0].innerHTML, /Institutional-grade/)
-  assert.equal(document.attrEls[0].getAttribute('aria-label'), 'View profile')
-  assert.equal(document.attrEls[0].getAttribute('title'), 'View profile')
+  assert.match(document.htmlEls[0].innerHTML, /defensible thesis/)
+  assert.equal(document.attrEls[0].getAttribute('aria-label'), 'Primary navigation')
+  assert.equal(document.attrEls[0].getAttribute('title'), 'Switch to dark theme')
   assert.equal(document.langButtons[0].getAttribute('aria-pressed'), 'false')
   assert.equal(document.langButtons[1].getAttribute('aria-pressed'), 'true')
-  assert.match(document.title, /Institutional US equity research/)
-  assert.match(document.metas.get('meta[name="description"]')?.getAttribute('content') ?? '', /turns a ticker/)
-  assert.equal(i18n.t('contact.submit', 'en'), 'Send message')
-  assert.equal(i18n.consoleState(5, 'en'), 'run complete · waiting for human decision')
+  assert.match(document.title, /auditable evidence/)
+  assert.match(document.metas.get('meta[name="description"]')?.getAttribute('content') ?? '', /Turn a ticker/)
+  assert.equal(i18n.t('contact.submit', 'en'), 'Request a sample')
+})
+
+test('landing translations cover every key used by the markup', async () => {
+  const html = await readFile(join(root, 'index.html'), 'utf8')
+  const source = await readFile(join(root, 'js', 'landing-i18n.js'), 'utf8')
+  const i18n = await loadLandingI18n()
+  const textKeys = [...html.matchAll(/data-i18n(?:-html)?="([^"]+)"/g)].map((match) => match[1])
+  const attributeKeys = [...html.matchAll(/data-i18n-attrs="([^"]+)"/g)].flatMap((match) =>
+    match[1].split(';').map((pair) => pair.split(':').slice(1).join(':').trim()),
+  )
+  const keys = [...new Set([...textKeys, ...attributeKeys])]
+
+  for (const lang of ['es', 'en']) {
+    for (const key of keys) {
+      assert.notEqual(i18n.t(key, lang), key, `missing ${lang} translation for ${key}`)
+    }
+  }
+
+  assert.doesNotMatch(source, /[—–]/)
 })
 
 test('legal page exposes the same Spanish and English language control', async () => {
@@ -110,6 +141,8 @@ test('legal page exposes the same Spanish and English language control', async (
   assert.match(html, /id="language-toggle"/)
   assert.match(html, /data-lang-option="en"/)
   assert.match(html, /data-legal-i18n-root/)
+  assert.match(html, /class="nav nav--legal"/)
+  assert.match(html, /prefers-color-scheme: dark/)
   assert.match(html, /<script src="js\/legal-i18n\.js"><\/script>/)
 })
 

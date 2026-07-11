@@ -3,502 +3,591 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DeepFlow — Research institucional de acciones de EE.UU. en minutos</title>
-  <meta name="description" content="DeepFlow es el motor de investigación de Denario: convierte un ticker en un paquete completo de research — datos verificados, modelo de valuación, memo de inversión y evidencia auditable — en menos de 10 minutos, por centavos de dólar." />
-  <meta property="og:title" content="DeepFlow — el motor de research de Denario" />
-  <meta property="og:description" content="De un ticker a un memo de inversión completo, auditable y con fuentes. En menos de 10 minutos." />
+  <title>DeepFlow | Research de acciones con evidencia auditable</title>
+  <meta
+    name="description"
+    content="Convertí un ticker en un memo de inversión con fuentes, valuación y trazabilidad. Conocé cómo DeepFlow organiza research de acciones de Estados Unidos."
+  />
+  <meta property="og:title" content="DeepFlow | Research con evidencia auditable" />
+  <meta
+    property="og:description"
+    content="Fuentes, valuación y trazabilidad en un paquete de research que podés revisar."
+  />
   <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#111412" />
+  <link rel="icon" href="assets/favicon.png" type="image/png" sizes="64x64" />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css" />
-  <script defer src="/_vercel/insights/script.js"></script>
+  <link
+    rel="preload"
+    href="assets/fonts/geist-latin-wght-normal.woff2"
+    as="font"
+    type="font/woff2"
+    crossorigin
+  />
+  <link rel="stylesheet" href="css/styles.css?v=20260711-hero-research-terminal-3" />
+  <script>
+    (function () {
+      var root = document.documentElement;
+      root.classList.add("js");
+      try {
+        var saved = localStorage.getItem("df-theme");
+        var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        root.dataset.theme = saved || (prefersDark ? "dark" : "light");
+      } catch (_error) {
+        root.dataset.theme = "light";
+      }
+    })();
+  </script>
+  <script>
+    if (!/^(localhost|127\.0\.0\.1)$/.test(window.location.hostname)) {
+      var insights = document.createElement("script");
+      insights.src = "/_vercel/insights/script.js";
+      insights.defer = true;
+      document.head.appendChild(insights);
+    }
+  </script>
 </head>
 <body>
-<script>if(localStorage.getItem('df-theme')!=='dark')document.body.classList.add('light');</script>
+  <a class="skip-link" href="#main-content" data-i18n="skipLink">Saltar al contenido</a>
 
-  <!-- ============ NAV ============ -->
-  <header class="nav" id="nav">
+  <header class="nav nav--landing" id="nav">
     <div class="nav__inner">
-      <a class="nav__brand" href="#top">
-        <span class="nav__dot" aria-hidden="true"></span>
+      <a class="nav__brand" href="#top" aria-label="DeepFlow, inicio">
         <span class="nav__logo">DeepFlow</span>
-        <span class="nav__sep" aria-hidden="true">·</span>
         <span class="nav__by">by Denario</span>
       </a>
-      <nav class="nav__links">
+
+      <button
+        class="nav-toggle"
+        id="nav-toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="primary-navigation"
+      >
+        <span class="sr-only" data-i18n="nav.menuOpen">Abrir menú</span>
+        <span class="nav-toggle__mark" aria-hidden="true"></span>
+      </button>
+
+      <nav class="nav__links" id="primary-navigation" aria-label="Navegación principal" data-i18n-attrs="aria-label:nav.aria">
         <a href="#producto" data-i18n="nav.product">Producto</a>
         <a href="#proceso" data-i18n="nav.process">Cómo funciona</a>
         <a href="#muestra" data-i18n="nav.sample">Muestra</a>
         <a href="#roadmap" data-i18n="nav.roadmap">Roadmap</a>
+        <a class="nav__mobile-contact" href="#contacto" data-i18n="nav.contact">Pedir muestra</a>
       </nav>
+
       <div class="nav__actions">
-        <a href="#contacto" class="btn btn--small btn--nav-cta" data-i18n="nav.contact">Hablemos →</a>
-        <div class="language-toggle" id="language-toggle" role="group" aria-label="Cambiar idioma" data-i18n-attrs="aria-label:language.toggleAria">
+        <div
+          class="language-toggle"
+          id="language-toggle"
+          role="group"
+          aria-label="Cambiar idioma"
+          data-i18n-attrs="aria-label:language.toggleAria"
+        >
           <button type="button" data-lang-option="es" aria-pressed="true">ES</button>
           <button type="button" data-lang-option="en" aria-pressed="false">EN</button>
         </div>
-        <a href="/app/?login=1" class="profile-button" aria-label="Ver perfil" title="Ver perfil" data-i18n-attrs="aria-label:nav.profileAria;title:nav.profileTitle">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="8" r="3.2"></circle>
-            <path d="M5.5 20a6.7 6.7 0 0 1 13 0"></path>
-          </svg>
-        </a>
-        <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema"></button>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Cambiar tema">
+          <span aria-hidden="true">Aa</span>
+        </button>
+        <a class="btn btn--small btn--nav-cta" href="#contacto" data-i18n="nav.contact">Pedir muestra</a>
       </div>
     </div>
   </header>
 
-  <main id="top">
-
-    <!-- ============ HERO ============ -->
-    <section class="hero">
-      <div class="hero__bg" aria-hidden="true">
-        <canvas id="hero-canvas" aria-hidden="true"></canvas>
-        <!-- anillos 3D de tickers en vivo (datos: Yahoo Finance, fallback estático) -->
-      </div>
+  <main class="site-main" id="main-content">
+    <section class="hero" id="top">
       <div class="hero__inner">
         <div class="hero__copy">
-          <p class="eyebrow" data-reveal data-i18n="hero.eyebrow">Motor de research · US listed equities</p>
-          <h1 class="hero__title">
-            <span class="line"><span data-i18n-html="hero.title.line1">Research de nivel</span></span>
-            <span class="line"><span data-i18n-html="hero.title.line2"><em>institucional</em>,</span></span>
-            <span class="line"><span data-i18n-html="hero.title.line3">en menos de</span></span>
-            <span class="line"><span data-i18n-html="hero.title.line4"><em>10 minutos</em></span></span>
+          <p class="eyebrow" data-i18n="hero.eyebrow">Research con evidencia</p>
+          <h1 class="hero__title" data-i18n-html="hero.title">
+            De un ticker a una <em>tesis defendible.</em>
           </h1>
-          <p class="hero__sub" data-reveal data-i18n="hero.sub">
-            DeepFlow convierte un ticker en un paquete completo de research:
-            datos verificados, modelo de valuación, memo de inversión y evidencia
-            auditable. Por centavos de dólar.
+          <p class="hero__sub" data-i18n="hero.sub">
+            DeepFlow reúne fuentes, valida datos y entrega un memo auditable. La decisión sigue siendo humana.
           </p>
-          <div class="hero__cta" data-reveal>
-            <a href="/app/" class="btn btn--primary" data-i18n="hero.cta.samples">Ver muestras</a>
-            <a href="/app/" class="btn btn--ghost" data-i18n="hero.cta.tracker">Research Tracker →</a>
-            <a href="#proceso" class="btn btn--ghost" data-i18n="hero.cta.process">Cómo funciona</a>
+          <div class="hero__actions">
+            <a class="btn btn--primary" href="#muestra" data-i18n="hero.ctaPrimary">Ver la muestra</a>
+            <a class="btn btn--secondary" href="#proceso" data-i18n="hero.ctaSecondary">Cómo funciona</a>
           </div>
         </div>
 
-        <!-- Live run console -->
-        <div class="console" data-reveal aria-label="Simulación de un run de DeepFlow" data-i18n-attrs="aria-label:hero.consoleAria">
-          <div class="console__bar">
-            <span class="console__dot"></span>
-            <span class="console__dot"></span>
-            <span class="console__dot"></span>
-            <span class="console__title">deepflow · run_2041 · NVDA</span>
-          </div>
-          <div class="console__body" id="console-body"></div>
-          <div class="console__status">
-            <span class="pulse"></span>
-            <span id="console-state" data-i18n="hero.consoleInitial">inicializando run…</span>
-          </div>
-        </div>
-      </div>
+        <figure class="hero__media hero-brief" data-reveal>
+          <div
+            class="hero-brief__stage"
+            data-hero-brief-stage
+            role="img"
+            aria-label="Estructura ilustrativa de una ficha de investigación DeepFlow"
+            data-i18n-attrs="aria-label:hero.briefAria"
+          >
+            <img
+              class="hero-brief__terminal-texture"
+              src="assets/images/hero-research-terminal.webp"
+              alt=""
+              aria-hidden="true"
+              decoding="async"
+              fetchpriority="high"
+            />
+            <article class="hero-brief__thesis hero-brief__thesis--back" aria-hidden="true">
+              <header>
+                <span data-i18n="hero.thesisBackLabel">MELI · tesis de muestra</span>
+                <span>01</span>
+              </header>
+              <strong data-i18n="hero.thesisBackTitle">MELI</strong>
+              <p class="hero-brief__ghost-copy" data-i18n="hero.thesisBackExcerpt">
+                Fragmento visual. No representa research publicado.
+              </p>
+              <span class="hero-brief__ghost-lines"></span>
+            </article>
+            <article class="hero-brief__thesis hero-brief__thesis--middle" aria-hidden="true">
+              <header>
+                <span data-i18n="hero.thesisMiddleLabel">MELI · notas de cobertura</span>
+                <span>02</span>
+              </header>
+              <strong data-i18n="hero.thesisMiddleTitle">MELI</strong>
+              <p class="hero-brief__ghost-copy" data-i18n="hero.thesisMiddleExcerpt">
+                Documento de trabajo para mostrar la estructura.
+              </p>
+              <span class="hero-brief__ghost-lines"></span>
+            </article>
+            <article class="hero-brief__sheet" aria-hidden="true">
+              <header class="hero-brief__header">
+                <span data-i18n="hero.briefEyebrow">DeepFlow / MELI</span>
+                <span class="hero-brief__status" data-i18n="hero.briefStatus">Muestra visual</span>
+              </header>
 
-      <div class="hero__stats" data-reveal>
-        <div class="stat">
-          <span class="stat__num" data-i18n-html="hero.stat.timeNum">&lt;<span data-count="10">10</span> min</span>
-          <span class="stat__label" data-i18n="hero.stat.timeLabel">por compañía analizada</span>
-        </div>
-        <div class="stat">
-          <span class="stat__num" data-i18n-html="hero.stat.costNum">centavos <span class="stat__unit">USD</span></span>
-          <span class="stat__label" data-i18n="hero.stat.costLabel">costo por run completo</span>
-        </div>
-        <div class="stat">
-          <span class="stat__num" data-i18n-html="hero.stat.sourcesNum"><span data-count="8">8</span>+ fuentes</span>
-          <span class="stat__label" data-i18n="hero.stat.sourcesLabel">de datos primarios, con timestamp</span>
-        </div>
-        <div class="stat">
-          <span class="stat__num" data-i18n-html="hero.stat.auditNum"><span data-count="100">100</span>%</span>
-          <span class="stat__label" data-i18n="hero.stat.auditLabel">trazable y auditable</span>
-        </div>
-      </div>
+              <div class="hero-brief__prompt">
+                <span data-i18n="hero.briefInputLabel">Ticker</span>
+                <strong data-i18n="hero.briefInput">MELI</strong>
+              </div>
 
-      <div class="hero__scrollhint" aria-hidden="true">
-        <span></span>
+              <div class="hero-brief__flow">
+                <div class="hero-brief__row">
+                  <span class="hero-brief__index">01</span>
+                  <div>
+                    <strong data-i18n="hero.briefSourcesLabel">Fuentes</strong>
+                    <p data-i18n="hero.briefSources">Filing · transcript · mercado · contexto</p>
+                  </div>
+                </div>
+                <div class="hero-brief__row">
+                  <span class="hero-brief__index">02</span>
+                  <div>
+                    <strong data-i18n="hero.briefChecksLabel">Controles</strong>
+                    <p data-i18n="hero.briefChecks">Origen · vigencia · consistencia</p>
+                  </div>
+                </div>
+                <div class="hero-brief__row">
+                  <span class="hero-brief__index">03</span>
+                  <div>
+                    <strong data-i18n="hero.briefOutputLabel">Salida</strong>
+                    <p data-i18n="hero.briefOutput">Resumen · modelo · evidencia</p>
+                  </div>
+                </div>
+              </div>
+
+              <aside class="hero-brief__note">
+                <span data-i18n="hero.briefNoteLabel">Nota de análisis</span>
+                <p data-i18n="hero.briefNote">Una tesis útil no oculta la duda. Muestra qué dato podría romperla.</p>
+              </aside>
+
+              <footer class="hero-brief__footer">
+                <span>DeepFlow / Research file</span>
+                <span data-i18n="hero.briefTrail">evidencia → revisión → decisión</span>
+              </footer>
+            </article>
+          </div>
+          <figcaption data-i18n="hero.mediaCaption">
+            Tres capas de una tesis de muestra. No es research publicado.
+          </figcaption>
+        </figure>
       </div>
     </section>
 
-    <!-- ============ MARQUEE ============ -->
-    <div class="marquee" aria-hidden="true">
-      <div class="marquee__track">
-        <span>SEC / EDGAR</span><i>·</i>
-        <span>FMP</span><i>·</i>
-        <span>Yahoo Finance</span><i>·</i>
-        <span>Finnhub</span><i>·</i>
-        <span>Earnings transcripts</span><i>·</i>
-        <span>News</span><i>·</i>
-        <span>Macro</span><i>·</i>
-        <span>Peer context</span><i>·</i>
-        <span>SEC / EDGAR</span><i>·</i>
-        <span>FMP</span><i>·</i>
-        <span>Yahoo Finance</span><i>·</i>
-        <span>Finnhub</span><i>·</i>
-        <span>Earnings transcripts</span><i>·</i>
-        <span>News</span><i>·</i>
-        <span>Macro</span><i>·</i>
-        <span>Peer context</span><i>·</i>
+    <div class="source-marquee" aria-label="Preguntas de revisión" data-i18n-attrs="aria-label:sources.aria">
+      <div class="source-marquee__track">
+        <div class="source-marquee__group">
+          <span data-i18n="sources.question1">¿Qué tiene que ser cierto?</span>
+          <span data-i18n="sources.question2">¿Qué evidencia falta?</span>
+          <span data-i18n="sources.question3">¿Qué podría romper la tesis?</span>
+          <span data-i18n="sources.question4">¿Qué supuesto mueve más el modelo?</span>
+        </div>
+        <div class="source-marquee__group" aria-hidden="true">
+          <span data-i18n="sources.question1">¿Qué tiene que ser cierto?</span>
+          <span data-i18n="sources.question2">¿Qué evidencia falta?</span>
+          <span data-i18n="sources.question3">¿Qué podría romper la tesis?</span>
+          <span data-i18n="sources.question4">¿Qué supuesto mueve más el modelo?</span>
+        </div>
       </div>
     </div>
 
-    <!-- ============ MANIFESTO / PRODUCTO ============ -->
-    <section class="manifesto" id="producto">
-      <div class="manifesto__bg" aria-hidden="true">
-        <div class="manifesto__glow"></div>
-        <canvas id="manifesto-canvas"></canvas>
+    <section class="proof section" id="producto">
+      <div class="section__inner">
+        <header class="section-heading" data-reveal>
+          <h2 data-i18n="product.title">Toda la investigación, en un paquete revisable.</h2>
+          <p data-i18n="product.sub">
+            El output conserva el dato, su origen, los supuestos y los límites que condicionan la tesis.
+          </p>
+        </header>
+
+        <div class="proof-grid">
+          <article class="proof-card proof-card--package" data-index="01" data-reveal>
+            <div class="proof-card__copy">
+              <span class="proof-card__label" data-i18n="product.packageLabel">Paquete de publicación</span>
+              <h3 data-i18n="product.packageTitle">Tres lecturas. Una misma evidencia.</h3>
+              <p data-i18n="product.packageBody">
+                Resumen para decidir qué revisar, memo para discutir y tesis completa para auditar.
+              </p>
+            </div>
+            <div class="document-strip" aria-label="Documentos de una publicación" data-i18n-attrs="aria-label:product.documentsAria">
+              <span data-i18n="product.document1">Resumen</span>
+              <span data-i18n="product.document2">Memo</span>
+              <span data-i18n="product.document3">Tesis completa</span>
+            </div>
+          </article>
+
+          <article class="proof-card proof-card--lineage" data-index="02" data-reveal>
+            <span class="proof-card__label" data-i18n="product.lineageLabel">Linaje de datos</span>
+            <h3 data-i18n="product.lineageTitle">Cada afirmación vuelve a su fuente.</h3>
+            <div class="lineage-list" aria-hidden="true">
+              <span data-i18n="product.lineage1">filing / dato / contexto</span>
+              <span data-i18n="product.lineage2">fuente / fecha / calidad</span>
+              <span data-i18n="product.lineage3">supuesto / impacto / límite</span>
+            </div>
+          </article>
+
+          <article class="proof-card proof-card--gates" data-index="03" data-reveal>
+            <span class="proof-card__label" data-i18n="product.gatesLabel">Control de publicación</span>
+            <h3 data-i18n="product.gatesTitle">Lo débil no se disfraza de certeza.</h3>
+            <p data-i18n="product.gatesBody">
+              Los controles separan paquetes completos, parciales y bloqueados antes de publicar.
+            </p>
+            <div class="gate-state" aria-hidden="true">
+              <span data-i18n="product.state1">Completo</span>
+              <span data-i18n="product.state2">Parcial</span>
+              <span data-i18n="product.state3">Bloqueado</span>
+            </div>
+          </article>
+
+          <article class="proof-card proof-card--human" data-index="04" data-reveal>
+            <span class="proof-card__label" data-i18n="product.humanLabel">Decisión separada</span>
+            <h3 data-i18n="product.humanTitle">DeepFlow organiza la evidencia. Vos decidís qué hacer con ella.</h3>
+            <p data-i18n="product.humanBody">
+              El sistema no ejecuta órdenes ni reemplaza una revisión profesional independiente.
+            </p>
+            <div
+              class="decision-boundary"
+              role="img"
+              aria-label="La evidencia pasa por revisión antes de una decisión humana"
+              data-i18n-attrs="aria-label:product.boundaryAria"
+            >
+              <span aria-hidden="true" data-i18n="product.boundary1">Evidencia</span>
+              <i aria-hidden="true"></i>
+              <span aria-hidden="true" data-i18n="product.boundary2">Revisión</span>
+              <i aria-hidden="true"></i>
+              <span class="decision-boundary__human" aria-hidden="true" data-i18n="product.boundary3">Decisión humana</span>
+            </div>
+          </article>
+        </div>
       </div>
+    </section>
+
+    <section class="manifesto section" id="soluciona">
       <div class="manifesto__inner">
-        <p class="eyebrow" data-reveal data-i18n="manifesto.eyebrow">Qué es DeepFlow</p>
-        <div class="manifesto__grid">
-          <h2 class="manifesto__text" data-lines data-i18n-html="manifesto.title">
-            DeepFlow <em>no</em> es un bot de trading. No promete alpha mágico.
-            Es una <em>línea de producción</em> de research: datos verificables,
-            modelo reproducible, memo legible y controles estrictos antes de publicar.
-            La decisión final siempre queda en <em>manos humanas</em>.
-          </h2>
-
-          <!-- pila de artifacts: la evidencia que deja cada run -->
-          <aside class="mstack" aria-label="Artifacts que produce cada run" data-i18n-attrs="aria-label:manifesto.stackAria">
-            <div class="mstack__card">
-              <span class="mstack__type mstack__type--pdf">PDF</span>
-              <div class="mstack__info">
-                <span class="mstack__name">final_memo.pdf</span>
-                <span class="mstack__meta" data-i18n="manifesto.stack.memo">memo de inversión completo</span>
-              </div>
-            </div>
-            <div class="mstack__card">
-              <span class="mstack__type mstack__type--xlsx">XLSX</span>
-              <div class="mstack__info">
-                <span class="mstack__name">valuation_model.xlsx</span>
-                <span class="mstack__meta" data-i18n="manifesto.stack.model">DCF · SOTP · price targets</span>
-              </div>
-            </div>
-            <div class="mstack__card">
-              <span class="mstack__type mstack__type--json">JSON</span>
-              <div class="mstack__info">
-                <span class="mstack__name">research_packet.json</span>
-                <span class="mstack__meta" data-i18n="manifesto.stack.packet">datos canónicos + lineage</span>
-              </div>
-            </div>
-            <div class="mstack__card">
-              <span class="mstack__type mstack__type--log">LOG</span>
-              <div class="mstack__info">
-                <span class="mstack__name">run_events.log</span>
-                <span class="mstack__meta" data-i18n="manifesto.stack.log">trazabilidad completa del run</span>
-              </div>
-            </div>
-            <p class="mstack__caption" data-reveal data-i18n="manifesto.stack.caption">← cada run deja evidencia auditable</p>
-          </aside>
-        </div>
-        <div class="manifesto__cols">
-          <div class="mcol" data-reveal>
-            <span class="mcol__num">01</span>
-            <h3 data-i18n="manifesto.col1.title">Evidencia, no opiniones</h3>
-            <p data-i18n="manifesto.col1.body">Cada cifra importante queda registrada con fuente, timestamp y linaje. Si un dato no se puede defender, no entra al memo.</p>
-          </div>
-          <div class="mcol" data-reveal>
-            <span class="mcol__num">02</span>
-            <h3 data-i18n="manifesto.col2.title">Reproducible de punta a punta</h3>
-            <p data-i18n="manifesto.col2.body">Cada análisis es un run con ID, eventos y artifacts. Podés volver atrás, revisar qué se usó y por qué se concluyó lo que se concluyó.</p>
-          </div>
-          <div class="mcol" data-reveal>
-            <span class="mcol__num">03</span>
-            <h3 data-i18n="manifesto.col3.title">El humano decide</h3>
-            <p data-i18n="manifesto.col3.body">DeepFlow produce una recomendación investigativa y una decisión de publicabilidad. La decisión de capital queda separada, siempre.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ CÓMO FUNCIONA (horizontal pinned scroll) ============ -->
-    <section class="process" id="proceso">
-      <div class="process__top">
-        <div>
-          <p class="eyebrow" data-i18n="process.eyebrow">Cómo funciona</p>
-          <h2 class="process__title" data-i18n="process.title">De un ticker a un memo defendible, en siete pasos.</h2>
-        </div>
-        <div class="process__counter" aria-hidden="true">
-          <span id="proc-current">01</span><span class="process__counter-sep">/</span><span>07</span>
-        </div>
-      </div>
-
-      <div class="process__track" id="process-track">
-        <article class="pstep">
-          <span class="pstep__num">01</span>
-          <div class="pstep__body">
-            <h3 data-i18n="process.step1.title">Entrada</h3>
-            <p data-i18n="process.step1.body">Le das un ticker o una pregunta. DeepFlow abre el análisis y empieza a trabajar.</p>
-          </div>
-          <code class="step__code" data-i18n="process.step1.code">un ticker → un run</code>
-        </article>
-        <article class="pstep">
-          <span class="pstep__num">02</span>
-          <div class="pstep__body">
-            <h3 data-i18n="process.step2.title">Ingesta de datos</h3>
-            <p data-i18n="process.step2.body">Reúne datos de mercado, filings, noticias y más, de fuentes confiables y con trazabilidad.</p>
-          </div>
-          <code class="step__code" data-i18n="process.step2.code">datos con fuente</code>
-        </article>
-        <article class="pstep">
-          <span class="pstep__num">03</span>
-          <div class="pstep__body">
-            <h3 data-i18n="process.step3.title">Normalización</h3>
-            <p data-i18n="process.step3.body">Ordena todo en un paquete único y consistente, listo para analizar.</p>
-          </div>
-          <code class="step__code" data-i18n="process.step3.code">research packet</code>
-        </article>
-        <article class="pstep">
-          <span class="pstep__num">04</span>
-          <div class="pstep__body">
-            <h3 data-i18n="process.step4.title">Gates de calidad</h3>
-            <p data-i18n="process.step4.body">Controles automáticos revisan los datos. Si algo no es confiable, el proceso se frena.</p>
-          </div>
-          <code class="step__code" data-i18n="process.step4.code">control de calidad</code>
-        </article>
-        <article class="pstep">
-          <span class="pstep__num">05</span>
-          <div class="pstep__body">
-            <h3 data-i18n="process.step5.title">Valuación</h3>
-            <p data-i18n="process.step5.body">Construye el modelo de valuación y estima los precios objetivo.</p>
-          </div>
-          <code class="step__code" data-i18n="process.step5.code">modelo + price targets</code>
-        </article>
-        <article class="pstep">
-          <span class="pstep__num">06</span>
-          <div class="pstep__body">
-            <h3 data-i18n="process.step6.title">Análisis</h3>
-            <p data-i18n="process.step6.body">Redacta el análisis con guardrails: la lógica decide, el modelo no improvisa.</p>
-          </div>
-          <code class="step__code" data-i18n="process.step6.code">análisis con control</code>
-        </article>
-        <article class="pstep">
-          <span class="pstep__num">07</span>
-          <div class="pstep__body">
-            <h3 data-i18n="process.step7.title">Memo</h3>
-            <p data-i18n="process.step7.body">Entrega un memo de inversión completo, con toda la evidencia detrás.</p>
-          </div>
-          <code class="step__code" data-i18n="process.step7.code">memo + evidencia</code>
-        </article>
-      </div>
-
-      <div class="process__bar" aria-hidden="true">
-        <div class="process__chartwrap">
-          <span class="process__chart-base"></span>
-          <span class="process__chart-fill"></span>
-          <span class="process__tip" id="proc-tip"></span>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ QUÉ SOLUCIONA ============ -->
-    <section class="solves" id="soluciona">
-      <canvas class="bg-canvas" id="solves-canvas" aria-hidden="true"></canvas>
-      <div class="solves__inner">
-        <p class="eyebrow" data-reveal data-i18n="solves.eyebrow">Para qué sirve</p>
-        <h2 class="h2" data-reveal data-i18n-html="solves.title">El research serio toma semanas.<br />DeepFlow lo vuelve una operación de minutos.</h2>
-
-        <div class="solves__grid">
-          <article class="card" data-reveal>
-            <div class="card__metric" data-i18n-html="solves.card1.metric"><span class="strike">semanas</span> → 10 min</div>
-            <h3 data-i18n="solves.card1.title">Reducción brutal de trabajo manual</h3>
-            <p data-i18n="solves.card1.body">Juntar filings, datos de mercado, transcripts y noticias a mano toma días. DeepFlow lo orquesta en un solo run reproducible.</p>
-          </article>
-          <article class="card" data-reveal>
-            <div class="card__metric" data-i18n="solves.card2.metric">fuente + timestamp</div>
-            <h3 data-i18n="solves.card2.title">Confianza verificable, no fe</h3>
-            <p data-i18n="solves.card2.body">Nada de "según mis cálculos". Cada número del memo tiene linaje: de dónde salió, cuándo, y qué calidad tiene la fuente.</p>
-          </article>
-          <article class="card" data-reveal>
-            <div class="card__metric" data-i18n="solves.card3.metric">gates estrictos</div>
-            <h3 data-i18n="solves.card3.title">Cero humo</h3>
-            <p data-i18n="solves.card3.body">Si la valuación o la calidad de datos es débil, el memo lo dice — en vez de forzar un precio objetivo. Lo no defendible se bloquea.</p>
-          </article>
-          <article class="card" data-reveal>
-            <div class="card__metric" data-i18n="solves.card4.metric">decisión separada</div>
-            <h3 data-i18n="solves.card4.title">El juicio sigue siendo tuyo</h3>
-            <p data-i18n="solves.card4.body">DeepFlow no reemplaza al analista: le da una línea de producción. La decisión de capital queda registrada como acto humano, aparte.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ MUESTRA ============ -->
-    <section class="sample" id="muestra">
-      <canvas class="bg-canvas" id="sample-canvas" aria-hidden="true"></canvas>
-      <div class="sample__inner">
-        <p class="eyebrow" data-reveal data-i18n="sample.eyebrow">La muestra</p>
-        <h2 class="h2" data-reveal data-i18n="sample.title">Así se ve un memo de DeepFlow.</h2>
-        <p class="sample__sub" data-reveal data-i18n="sample.sub">Cada run produce un memo de inversión completo, listo para un comité. Esta es su anatomía:</p>
-
-        <div class="sample__layout">
-          <div class="memo" data-reveal>
-            <div class="memo__page">
-              <div class="memo__header">
-                <span class="memo__brand" data-i18n="sample.memo.brand">DEEPFLOW · MEMO DE INVERSIÓN</span>
-                <span class="memo__date">run_2041 · 2026</span>
-              </div>
-              <h3 class="memo__title memo__title--clear">Mercado Libre <span>(MELI)</span></h3>
-              <div class="memo__classified" aria-hidden="true">
-                <div class="memo__tags">
-                  <span class="tag tag--green" data-i18n="sample.memo.tag.publishable">PUBLICABLE ✓</span>
-                  <span class="tag" data-i18n="sample.memo.tag.confidence">confianza: alta</span>
-                  <span class="tag" data-i18n="sample.memo.tag.sources">12 fuentes</span>
-                </div>
-                <div class="memo__lines">
-                  <div class="memo__line w90"></div>
-                  <div class="memo__line w75"></div>
-                  <div class="memo__line w85"></div>
-                  <div class="memo__line w60"></div>
-                </div>
-                <div class="memo__chart" aria-hidden="true">
-                  <svg viewBox="0 0 300 80" preserveAspectRatio="none">
-                    <polyline points="0,62 30,58 60,55 90,48 120,44 150,36 180,39 210,28 240,22 270,17 300,12" fill="none" stroke="currentColor" stroke-width="1.5"/>
-                  </svg>
-                </div>
-                <div class="memo__lines">
-                  <div class="memo__line w80"></div>
-                  <div class="memo__line w70"></div>
-                </div>
-              </div>
-              <div class="memo__blur">
-                <a href="/app/" data-i18n="sample.memo.link">Ver muestras →</a>
-              </div>
-            </div>
-          </div>
-
-          <ul class="sample__contents" data-reveal>
-            <li><span>01</span> <span data-i18n="sample.item1">Resumen ejecutivo</span></li>
-            <li><span>02</span> <span data-i18n="sample.item2">Tesis de inversión</span></li>
-            <li><span>03</span> <span data-i18n="sample.item3">Checklist antes de capital</span></li>
-            <li><span>04</span> <span data-i18n="sample.item4">Historia financiera</span></li>
-            <li><span>05</span> <span data-i18n="sample.item5">Valuación &amp; precio objetivo</span></li>
-            <li><span>06</span> <span data-i18n="sample.item6">Caso alcista / Caso bajista</span></li>
-            <li><span>07</span> <span data-i18n="sample.item7">Catalizadores &amp; riesgos</span></li>
-            <li><span>08</span> <span data-i18n="sample.item8">Contexto de noticias</span></li>
-            <li><span>09</span> <span data-i18n="sample.item9">Apéndice de fuentes</span></li>
-            <li><span>10</span> <span data-i18n="sample.item10">Supuestos del modelo</span></li>
-          </ul>
-        </div>
-
-        <div class="sample__cta" data-reveal>
-          <a href="/app/" class="btn btn--primary" data-i18n="sample.cta">Ver muestras</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ ROADMAP ============ -->
-    <section class="roadmap" id="roadmap">
-      <div class="roadmap__inner">
-        <div class="roadmap__header">
+        <h2
+          class="manifesto__statement"
+          data-scrub-text
+          data-scrub-accent="Ordena la evidencia"
+          data-i18n="manifesto.title"
+          data-i18n-attrs="data-scrub-accent:manifesto.accent"
+        >
+          DeepFlow no reemplaza el criterio. Ordena la evidencia para revisar supuestos, detectar límites y discutir una tesis antes de mover capital.
+        </h2>
+        <dl class="manifesto__principles" data-reveal>
           <div>
-            <p class="eyebrow" data-reveal data-i18n="roadmap.eyebrow">Roadmap</p>
-            <h2 class="h2" data-reveal data-i18n="roadmap.title">El mapa de construcción después de DeepFlow.</h2>
+            <dt data-i18n="manifesto.term1">Revisable</dt>
+            <dd data-i18n="manifesto.body1">Podés abrir el dato y seguir su origen.</dd>
           </div>
-          <p class="roadmap__sub" data-reveal data-i18n="roadmap.sub">
-            Denario avanza de research auditado hacia asignación, seguimiento y decisioning. La regla
-            central: los modelos juzgan y proponen; los sistemas deterministas calculan, validan,
-            dimensionan, bloquean y auditan.
+          <div>
+            <dt data-i18n="manifesto.term2">Reproducible</dt>
+            <dd data-i18n="manifesto.body2">El mismo paquete conserva reglas y supuestos.</dd>
+          </div>
+          <div>
+            <dt data-i18n="manifesto.term3">Discutible</dt>
+            <dd data-i18n="manifesto.body3">La tesis expone riesgos, límites y desacuerdos.</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="process section" id="proceso">
+      <div class="process__inner">
+        <div class="process__intro" data-process-pin>
+          <h2 data-i18n="process.title">Tres movimientos. Seis controles visibles.</h2>
+          <p data-i18n="process.sub">
+            Cada etapa deja dos marcas: qué entró y qué pasó la revisión.
+          </p>
+          <ol
+            class="process__checkpoints"
+            aria-label="Seis controles del proceso"
+            data-i18n-attrs="aria-label:process.checkpointsAria"
+          >
+            <li><span>01</span><span data-i18n="process.checkpoint1">Fuentes</span></li>
+            <li><span>02</span><span data-i18n="process.checkpoint2">Contexto</span></li>
+            <li><span>03</span><span data-i18n="process.checkpoint3">Origen</span></li>
+            <li><span>04</span><span data-i18n="process.checkpoint4">Consistencia</span></li>
+            <li><span>05</span><span data-i18n="process.checkpoint5">Memo</span></li>
+            <li><span>06</span><span data-i18n="process.checkpoint6">Revisión humana</span></li>
+          </ol>
+        </div>
+
+        <div class="process__steps">
+          <article class="process-step" data-process-step>
+            <div>
+              <h3 data-i18n="process.gatherTitle">Reúne</h3>
+              <p data-i18n="process.gatherBody">
+                Junta filings, datos de mercado, transcripciones, noticias y contexto comparable.
+              </p>
+              <span data-i18n="process.gatherMeta">entrada con origen identificado</span>
+              <ul class="process-step__checks">
+                <li data-i18n="process.gatherCheck1">Fuentes primarias</li>
+                <li data-i18n="process.gatherCheck2">Contexto</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="process-step" data-process-step>
+            <div>
+              <h3 data-i18n="process.verifyTitle">Verifica</h3>
+              <p data-i18n="process.verifyBody">
+                Normaliza el paquete, contrasta consistencia y bloquea conclusiones que no se sostienen.
+              </p>
+              <span data-i18n="process.verifyMeta">calidad antes de narrativa</span>
+              <ul class="process-step__checks">
+                <li data-i18n="process.verifyCheck1">Origen</li>
+                <li data-i18n="process.verifyCheck2">Consistencia</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="process-step" data-process-step>
+            <div>
+              <h3 data-i18n="process.deliverTitle">Entrega</h3>
+              <p data-i18n="process.deliverBody">
+                Publica una tesis, un modelo y un apéndice de fuentes listos para revisión humana.
+              </p>
+              <span data-i18n="process.deliverMeta">memo, modelo y evidencia</span>
+              <ul class="process-step__checks">
+                <li data-i18n="process.deliverCheck1">Memo</li>
+                <li data-i18n="process.deliverCheck2">Revisión humana</li>
+              </ul>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="sample section" id="muestra">
+      <div class="section__inner">
+        <header class="section-heading section-heading--sample" data-reveal>
+          <p class="eyebrow" data-i18n="sample.eyebrow">La muestra</p>
+          <h2 data-i18n="sample.title">Abrí el output, no una promesa.</h2>
+          <p data-i18n="sample.sub">
+            La muestra enseña qué entrega el sistema sin inventar rendimientos, precios ni testimonios.
+          </p>
+        </header>
+
+        <div class="evidence-carousel" data-evidence-carousel>
+          <aside class="publication-card" data-reveal aria-label="Anatomía del paquete de publicación" data-i18n-attrs="aria-label:sample.packageAria">
+            <div class="publication-card__top">
+              <span>DeepFlow</span>
+              <span data-i18n="sample.packageType">Paquete de research</span>
+            </div>
+            <div class="publication-card__identity">
+              <span data-i18n="sample.inputLabel">Ticker</span>
+              <strong data-i18n="sample.inputValue">MELI</strong>
+            </div>
+            <div class="publication-card__documents">
+              <span data-i18n="sample.document1">Resumen</span>
+              <span data-i18n="sample.document2">Memo</span>
+              <span data-i18n="sample.document3">Tesis completa</span>
+            </div>
+            <p data-i18n="sample.packageNote">Cada documento apunta al mismo paquete de evidencia.</p>
+          </aside>
+
+          <div class="evidence-carousel__content" data-reveal>
+            <div
+              class="evidence-carousel__tabs"
+              role="tablist"
+              aria-label="Capas del output"
+              data-i18n-attrs="aria-label:sample.tabsAria"
+            >
+              <button id="tab-summary" type="button" role="tab" aria-selected="true" aria-controls="panel-summary" data-carousel-tab="0" data-tab-index="01" data-i18n="sample.tab1">Resumen</button>
+              <button id="tab-model" type="button" role="tab" aria-selected="false" aria-controls="panel-model" data-carousel-tab="1" data-tab-index="02" data-i18n="sample.tab2">Modelo</button>
+              <button id="tab-evidence" type="button" role="tab" aria-selected="false" aria-controls="panel-evidence" data-carousel-tab="2" data-tab-index="03" data-i18n="sample.tab3">Evidencia</button>
+            </div>
+
+            <div class="evidence-carousel__panels">
+              <section class="evidence-panel is-active" id="panel-summary" role="tabpanel" aria-labelledby="tab-summary" data-carousel-panel="0">
+                <h3 data-i18n="sample.panel1Title">La tesis en lenguaje de comité.</h3>
+                <p data-i18n="sample.panel1Body">
+                  Resume la oportunidad, el caso contrario, los catalizadores y los riesgos que merecen revisión.
+                </p>
+                <dl class="evidence-panel__records">
+                  <div>
+                    <dt data-i18n="sample.summary.thesis">Tesis</dt>
+                    <dd data-i18n="sample.summary.thesisBody">Lo que tiene que ser cierto.</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="sample.summary.countercase">Contracaso</dt>
+                    <dd data-i18n="sample.summary.countercaseBody">La mejor explicación alternativa.</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="sample.summary.review">Próxima revisión</dt>
+                    <dd data-i18n="sample.summary.reviewBody">El dato que podría cambiar el caso.</dd>
+                  </div>
+                </dl>
+              </section>
+              <section class="evidence-panel" id="panel-model" role="tabpanel" aria-labelledby="tab-model" data-carousel-panel="1" hidden>
+                <h3 data-i18n="sample.panel2Title">Supuestos que se pueden cuestionar.</h3>
+                <p data-i18n="sample.panel2Body">
+                  La valuación separa entradas, escenarios y sensibilidad para evitar una cifra sin contexto.
+                </p>
+                <dl class="evidence-panel__records">
+                  <div>
+                    <dt data-i18n="sample.model.base">Caso base</dt>
+                    <dd data-i18n="sample.model.baseBody">Supuestos centrales y por qué importan.</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="sample.model.sensitivity">Sensibilidad</dt>
+                    <dd data-i18n="sample.model.sensitivityBody">Variables que más mueven el resultado.</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="sample.model.limit">Límite</dt>
+                    <dd data-i18n="sample.model.limitBody">Lo que el modelo todavía no captura.</dd>
+                  </div>
+                </dl>
+              </section>
+              <section class="evidence-panel" id="panel-evidence" role="tabpanel" aria-labelledby="tab-evidence" data-carousel-panel="2" hidden>
+                <h3 data-i18n="sample.panel3Title">Fuentes y límites en el mismo lugar.</h3>
+                <p data-i18n="sample.panel3Body">
+                  El apéndice conserva origen, fecha y calidad, además de los huecos que el análisis no pudo resolver.
+                </p>
+                <dl class="evidence-panel__records">
+                  <div>
+                    <dt data-i18n="sample.evidence.origin">Origen</dt>
+                    <dd data-i18n="sample.evidence.originBody">Dónde nació cada afirmación.</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="sample.evidence.freshness">Vigencia</dt>
+                    <dd data-i18n="sample.evidence.freshnessBody">Cuándo fue verificada.</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="sample.evidence.gap">Hueco</dt>
+                    <dd data-i18n="sample.evidence.gapBody">Qué todavía no sabemos.</dd>
+                  </div>
+                </dl>
+              </section>
+            </div>
+
+            <div class="evidence-carousel__nav">
+              <button type="button" data-carousel-prev data-i18n="sample.previous" aria-label="Anterior" data-i18n-attrs="aria-label:sample.previous">Anterior</button>
+              <button type="button" data-carousel-next data-i18n="sample.next" aria-label="Siguiente" data-i18n-attrs="aria-label:sample.next">Siguiente</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="roadmap section" id="roadmap">
+      <div class="section__inner">
+        <header class="section-heading" data-reveal>
+          <h2 data-i18n="roadmap.title">Lo próximo queda detrás de los mismos controles.</h2>
+          <p data-i18n="roadmap.sub">
+            El roadmap amplía el análisis sin convertir DeepFlow en un broker ni prometer ejecución automática.
+          </p>
+        </header>
+
+        <div class="roadmap-accordion" data-roadmap-accordion>
+          <article class="roadmap-panel is-active" data-roadmap-panel data-roadmap-image="portfolio">
+            <button type="button" class="roadmap-panel__button" aria-expanded="true" aria-controls="roadmap-body-1 roadmap-guard-1">
+              <span class="roadmap-panel__title" data-i18n="roadmap.item1Title">Portfolio por riesgo</span>
+              <span class="roadmap-panel__body" id="roadmap-body-1" data-i18n="roadmap.item1Body">Propuestas de pesos con horizonte, liquidez y restricciones visibles.</span>
+              <span class="roadmap-panel__guard" id="roadmap-guard-1" data-i18n="roadmap.item1Guard">Sin órdenes de trading</span>
+            </button>
+          </article>
+          <article class="roadmap-panel" data-roadmap-panel data-roadmap-image="tracking">
+            <button type="button" class="roadmap-panel__button" aria-expanded="false" aria-controls="roadmap-body-2 roadmap-guard-2">
+              <span class="roadmap-panel__title" data-i18n="roadmap.item2Title">Seguimiento de tesis</span>
+              <span class="roadmap-panel__body" id="roadmap-body-2" data-i18n="roadmap.item2Body">Seguimiento de tesis, precios, drift y señales para volver a investigar.</span>
+              <span class="roadmap-panel__guard" id="roadmap-guard-2" data-i18n="roadmap.item2Guard">Research fresco primero</span>
+            </button>
+          </article>
+          <article class="roadmap-panel" data-roadmap-panel data-roadmap-image="macro">
+            <button type="button" class="roadmap-panel__button" aria-expanded="false" aria-controls="roadmap-body-3 roadmap-guard-3">
+              <span class="roadmap-panel__title" data-i18n="roadmap.item3Title">Comité IA</span>
+              <span class="roadmap-panel__body" id="roadmap-body-3" data-i18n="roadmap.item3Body">Debate multiagente, disenso registrado y una revisión común antes de decidir.</span>
+              <span class="roadmap-panel__guard" id="roadmap-guard-3" data-i18n="roadmap.item3Guard">La decisión sigue separada</span>
+            </button>
+          </article>
+          <article class="roadmap-panel" data-roadmap-panel data-roadmap-image="execution">
+            <button type="button" class="roadmap-panel__button" aria-expanded="false" aria-controls="roadmap-body-4 roadmap-guard-4">
+              <span class="roadmap-panel__title" data-i18n="roadmap.item4Title">Ejecución con controles</span>
+              <span class="roadmap-panel__body" id="roadmap-body-4" data-i18n="roadmap.item4Body">Una frontera futura que exige evidencia histórica, controles y aprobación explícita.</span>
+              <span class="roadmap-panel__guard" id="roadmap-guard-4" data-i18n="roadmap.item4Guard">Bloqueado por defecto</span>
+            </button>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact section" id="contacto">
+      <div class="contact__inner">
+        <div class="contact__copy" data-reveal>
+          <h2 data-i18n="contact.title">Elegí un ticker. Te mostramos el proceso.</h2>
+          <p data-i18n="contact.sub">
+            Pedí una muestra o proponé una empresa. La respuesta será research, no asesoramiento personalizado.
+          </p>
+          <p class="contact__note" data-i18n="contact.note">
+            DeepFlow no ejecuta operaciones ni reemplaza una revisión profesional independiente.
           </p>
         </div>
 
-        <div class="roadmap__grid" data-reveal>
-          <article class="roadmap__tile roadmap__tile--guarded">
-            <span class="roadmap__kicker" data-i18n="roadmap.tile1.kicker">01 / diseñado</span>
-            <h3 data-i18n="roadmap.tile1.title">Portfolio por perfil de riesgo</h3>
-            <p data-i18n="roadmap.tile1.body">Cuestionario de horizonte, drawdown, liquidez y restricciones; propuesta de pesos, nunca orden de trading.</p>
-          </article>
-          <article class="roadmap__tile">
-            <span class="roadmap__kicker" data-i18n="roadmap.tile2.kicker">02 / medición</span>
-            <h3 data-i18n="roadmap.tile2.title">Tracking y watchlist</h3>
-            <p data-i18n="roadmap.tile2.body">Ledger de calls, precios, drift, drawdown, tesis intacta/debilitada y cola de reruns con matemática determinista.</p>
-          </article>
-          <article class="roadmap__tile">
-            <span class="roadmap__kicker" data-i18n="roadmap.tile3.kicker">03 / contexto</span>
-            <h3 data-i18n="roadmap.tile3.title">Macro + committee</h3>
-            <p data-i18n="roadmap.tile3.body">Macro Inquiry aporta contexto; un comité multi-agente debate, registra disenso y propone decisiones sin ejecutar.</p>
-          </article>
-          <article class="roadmap__tile roadmap__tile--locked">
-            <span class="roadmap__kicker" data-i18n="roadmap.tile4.kicker">04 / futuro bloqueado</span>
-            <h3 data-i18n="roadmap.tile4.title">Shadow, opciones y execution gateway</h3>
-            <p data-i18n="roadmap.tile4.body">Paper/shadow, opciones y broker viven detrás de risk gates, evidencia histórica y aprobación humana explícita.</p>
-          </article>
-        </div>
-
-        <div class="roadmap__rule" data-reveal>
-          <span data-i18n="roadmap.rule1">No broker activo</span>
-          <span data-i18n="roadmap.rule2">No órdenes live</span>
-          <span data-i18n="roadmap.rule3">No portfolio sin research fresco</span>
-          <span data-i18n="roadmap.rule4">Execution fail-closed</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ CONTACTO ============ -->
-    <section class="contact" id="contacto">
-      <canvas class="bg-canvas" id="contact-canvas" aria-hidden="true"></canvas>
-      <div class="contact__inner">
-        <div class="contact__copy">
-          <p class="eyebrow" data-reveal data-i18n="contact.eyebrow">Contacto</p>
-          <h2 class="contact__title" data-lines data-i18n-html="contact.title">¿Querés ver qué dice DeepFlow sobre <em>tu</em> próxima inversión?</h2>
-          <p class="contact__sub" data-reveal data-i18n="contact.sub">Escribime y te mando una muestra real, o corremos un run sobre el ticker que vos elijas.</p>
-          <div class="contact__channels" data-reveal>
-            <a href="mailto:francobales3@gmail.com?subject=Quiero%20ver%20una%20muestra%20de%20DeepFlow" class="channel" data-i18n-attrs="href:contact.emailHref">
-              <span class="channel__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="5" width="18" height="14" rx="2.5"/>
-                  <path d="M3.5 7.5 12 13l8.5-5.5"/>
-                </svg>
-              </span>
-              <span class="channel__label">Email</span>
-              <span class="channel__arrow" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18 18 6M9 6h9v9"/></svg>
-              </span>
-            </a>
-            <a href="https://wa.me/5491128818819?text=Hola%20Franco%2C%20quiero%20ver%20una%20muestra%20de%20DeepFlow." class="channel" target="_blank" rel="noopener" data-i18n-attrs="href:contact.whatsappHref">
-              <span class="channel__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.885-9.885 9.885m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-              </span>
-              <span class="channel__label">WhatsApp</span>
-              <span class="channel__arrow" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18 18 6M9 6h9v9"/></svg>
-              </span>
-            </a>
-          </div>
-        </div>
-
-        <form class="form" id="contact-form" data-reveal>
-          <label class="form__field">
+        <form class="contact-form" id="contact-form" data-reveal novalidate>
+          <label>
             <span data-i18n="contact.name">Nombre</span>
-            <input type="text" name="name" placeholder="Tu nombre" required data-i18n-attrs="placeholder:contact.namePlaceholder" />
+            <input type="text" name="name" autocomplete="name" required placeholder="Tu nombre" data-i18n-attrs="placeholder:contact.namePlaceholder" />
           </label>
-          <label class="form__field">
+          <label>
             <span data-i18n="contact.email">Email</span>
-            <input type="email" name="email" placeholder="tu@email.com" required data-i18n-attrs="placeholder:contact.emailPlaceholder" />
+            <input type="email" name="email" autocomplete="email" required placeholder="tu@email.com" data-i18n-attrs="placeholder:contact.emailPlaceholder" />
           </label>
-          <label class="form__field">
-            <span data-i18n="contact.message">Mensaje</span>
-            <textarea name="message" rows="4" placeholder="Quiero ver una muestra de DeepFlow sobre…" required data-i18n-attrs="placeholder:contact.messagePlaceholder"></textarea>
+          <label>
+            <span data-i18n="contact.message">Ticker o pregunta</span>
+            <textarea name="message" rows="4" required placeholder="Quiero revisar una muestra sobre..." data-i18n-attrs="placeholder:contact.messagePlaceholder"></textarea>
           </label>
-          <button type="submit" class="btn btn--primary btn--full" data-i18n="contact.submit">Enviar mensaje</button>
-          <p class="form__hint" data-i18n="contact.hint">Se abre tu cliente de correo con el mensaje listo para enviar.</p>
+          <button class="btn btn--primary btn--full" type="submit" data-i18n="contact.submit">Pedir muestra</button>
+          <p class="contact-form__hint" data-i18n-html="contact.hint">
+            Se abrirá tu correo. Al enviar aceptás la <a href="legal.html#privacidad">política de privacidad</a>.
+          </p>
+          <p class="contact-form__status" id="contact-status" role="status" aria-live="polite"></p>
         </form>
       </div>
     </section>
-
   </main>
 
   <footer class="footer">
     <div class="footer__inner">
-      <span class="footer__brand">DeepFlow <em>by Denario</em></span>
+      <a class="footer__brand" href="#top">DeepFlow <em>by Denario</em></a>
       <span class="footer__note" data-i18n="footer.note">Research auditable. Decisión humana.</span>
-      <span class="footer__legal" data-i18n-html="footer.legal">© 2026 Denario. DeepFlow no es asesoramiento financiero ni un bot de trading. · <a href="legal.html" style="color:inherit;opacity:0.6;text-decoration:underline;text-underline-offset:3px;">Términos, privacidad y legales</a></span>
+      <span class="footer__legal" data-i18n-html="footer.legal">
+        © 2026 Denario. No es asesoramiento financiero. <a href="legal.html">Términos, privacidad y legales</a>
+      </span>
     </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
-  <script src="js/landing-i18n.js"></script>
-  <script src="js/main.js"></script>
+  <script src="js/landing-i18n.js?v=20260711-roadmap-committee-ai"></script>
+  <script src="js/main.js?v=20260711-roadmap-cards"></script>
 </body>
 </html>
