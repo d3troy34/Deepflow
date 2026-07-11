@@ -11,12 +11,7 @@
       rel="stylesheet"
     />
   </head>
-  <body>
-    <script>
-      try {
-        if (localStorage.getItem('df-theme') === 'light') document.body.classList.add('light')
-      } catch (e) {}
-    </script>
+  <body class="light">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

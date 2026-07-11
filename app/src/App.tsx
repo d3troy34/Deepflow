@@ -165,6 +165,7 @@ const APP_TEXT = {
     'auth.publicBody': 'El acceso con cuenta esta temporalmente deshabilitado. Estamos preparando el nuevo flujo antes de abrir el tracker.',
     'auth.button': 'Ver proximamente',
     'auth.backHome': 'Volver al inicio',
+    'auth.viewPublic': 'Ver research publico',
     'app.runsError': 'No se pudo cargar /api/runs:',
     'app.backendHint': 'Esta corriendo el backend en :8000?',
     'app.loadingRuns': 'Cargando runs...',
@@ -280,6 +281,7 @@ const APP_TEXT = {
     'auth.publicBody': 'Account access is temporarily disabled. We are preparing the new flow before opening the tracker.',
     'auth.button': 'View coming soon',
     'auth.backHome': 'Back home',
+    'auth.viewPublic': 'View public research',
     'app.runsError': 'Could not load /api/runs:',
     'app.backendHint': 'Is the backend running on :8000?',
     'app.loadingRuns': 'Loading runs...',
@@ -457,22 +459,6 @@ const SearchIcon = ({ className = '' }: IconProps) => (
     <path d="m21 21-4.3-4.3" />
   </svg>
 )
-const ThemeIcon = ({ light }: { light: boolean }) =>
-  light ? (
-    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path d="M13.5 8.7A6 6 0 0 1 7.3 2.5a6 6 0 1 0 6.2 6.2z" fill="currentColor" />
-    </svg>
-  ) : (
-    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <circle cx="8" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.4" />
-      <path
-        d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.1 3.1l1.06 1.06M11.84 11.84l1.06 1.06M3.1 12.9l1.06-1.06M11.84 4.16l1.06-1.06"
-        stroke="currentColor"
-        strokeWidth="1.3"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
 const UserIcon = () => (
   <svg width="15" height="15" {...svgBase} aria-hidden="true">
     <circle cx="12" cy="8" r="3.2" />
@@ -707,15 +693,11 @@ interface AccountNavState {
 }
 
 function NavBar({
-  light,
-  toggleTheme,
   auth,
   account,
   onProfileSave,
   onSignOut,
 }: {
-  light: boolean
-  toggleTheme: () => void
   auth?: AuthNavState
   account?: AccountNavState
   onProfileSave?: (input: AccountProfileUpdate) => void
@@ -907,14 +889,6 @@ function NavBar({
               </div>
             )}
           </div>
-          <button
-            type="button"
-            className="theme-toggle"
-            onClick={toggleTheme}
-            aria-label={light ? t('nav.themeDark') : t('nav.themeLight')}
-          >
-            <ThemeIcon light={light} />
-          </button>
         </div>
       </div>
     </header>
@@ -1444,8 +1418,6 @@ function PublicEvidenceView({
   error,
   q,
   setQ,
-  light,
-  toggleTheme,
   auth,
   account,
   onProfileSave,
@@ -1461,8 +1433,6 @@ function PublicEvidenceView({
   error: string | null
   q: string
   setQ: (value: string) => void
-  light: boolean
-  toggleTheme: () => void
   auth: AuthNavState
   account: AccountNavState
   onProfileSave: (input: AccountProfileUpdate) => void
@@ -1494,8 +1464,6 @@ function PublicEvidenceView({
   return (
     <div className="min-h-screen">
       <NavBar
-        light={light}
-        toggleTheme={toggleTheme}
         auth={auth}
         account={account}
         onProfileSave={onProfileSave}
@@ -1541,8 +1509,6 @@ function PublicEvidenceView({
 }
 
 function AuthGate({
-  light,
-  toggleTheme,
   auth,
   authError,
   eyebrow,
@@ -1551,8 +1517,6 @@ function AuthGate({
   buttonLabel,
   loginHref = LOGIN_UNAVAILABLE_HREF,
 }: {
-  light: boolean
-  toggleTheme: () => void
   auth: AuthNavState
   authError: string | null
   eyebrow?: string
@@ -1568,25 +1532,30 @@ function AuthGate({
   const displayButtonLabel = buttonLabel ?? t('auth.button')
   return (
     <div className="min-h-screen">
-      <NavBar light={light} toggleTheme={toggleTheme} auth={auth} />
+      <NavBar auth={auth} />
       <main className="mx-auto max-w-container px-6">
-        <section className="pt-24 max-w-[560px]">
-          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-green">
-            {displayEyebrow}
-          </span>
-          <h1 className="font-display text-[44px] leading-tight text-bone mt-4">
-            {displayTitle}
-          </h1>
-          <p className="text-[14px] text-bone-dim leading-relaxed mt-4">
-            {displayBody}
-          </p>
-          <a
-            href={loginHref}
-            className="mt-7 rounded-md border border-line-strong px-4 py-2 font-mono text-[11px] uppercase tracking-wide text-bone hover:border-green disabled:cursor-wait disabled:text-muted"
-          >
-            {displayButtonLabel}
-          </a>
-          {authError && <p className="text-red text-[13px] mt-5">Auth error: {authError}</p>}
+        <section className="flex min-h-[70vh] items-center justify-center py-16">
+          <div className="w-full max-w-[520px] rounded-xl border border-line bg-ink-2 px-8 py-12 text-center sm:px-12">
+            <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-green">
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--green)' }} aria-hidden="true" />
+              {displayEyebrow}
+            </span>
+            <h1 className="mt-5 font-display text-[clamp(30px,6vw,44px)] leading-[1.08] text-bone">
+              {displayTitle}
+            </h1>
+            <p className="mx-auto mt-4 max-w-[42ch] text-[14.5px] leading-relaxed text-bone-dim">
+              {displayBody}
+            </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <a href={loginHref} className="btn btn--small btn--nav-cta">
+                {displayButtonLabel}
+              </a>
+              <a href="/" className="btn btn--small">
+                {t('auth.backHome')}
+              </a>
+            </div>
+            {authError && <p className="mt-6 text-[13px] text-red">Auth error: {authError}</p>}
+          </div>
         </section>
       </main>
       <Footer />
@@ -1595,35 +1564,40 @@ function AuthGate({
 }
 
 function LoginComingSoonPage({
-  light,
-  toggleTheme,
   auth,
 }: {
-  light: boolean
-  toggleTheme: () => void
   auth: AuthNavState
 }) {
   const { t } = useI18n()
   return (
     <div className="min-h-screen">
-      <NavBar light={light} toggleTheme={toggleTheme} auth={auth} />
+      <NavBar auth={auth} />
       <main className="mx-auto max-w-container px-6">
-        <section className="pt-24 max-w-[560px]">
-          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-green">
-            {t('profile.title')}
-          </span>
-          <h1 className="font-display text-[44px] leading-tight text-bone mt-4">
-            {t('profile.comingSoon')}
-          </h1>
-          <p className="text-[14px] text-bone-dim leading-relaxed mt-4">
-            {t('auth.body')}
-          </p>
-          <a
-            href="/"
-            className="mt-7 inline-block rounded-md border border-line-strong px-4 py-2 font-mono text-[11px] uppercase tracking-wide text-bone hover:border-green"
-          >
-            {t('auth.backHome')}
-          </a>
+        <section className="flex min-h-[70vh] items-center justify-center py-16">
+          <div className="w-full max-w-[520px] rounded-xl border border-line bg-ink-2 px-8 py-12 text-center sm:px-12">
+            <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-green">
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--green)' }} aria-hidden="true" />
+              {t('auth.eyebrow')}
+            </span>
+            <h1 className="mt-5 font-display text-[clamp(30px,6vw,44px)] leading-[1.08] text-bone">
+              {t('auth.title')}
+            </h1>
+            <p className="mx-auto mt-4 max-w-[42ch] text-[14.5px] leading-relaxed text-bone-dim">
+              {t('auth.body')}
+            </p>
+            <span className="mt-6 inline-flex items-center gap-2 rounded-pill border border-line-strong px-3 py-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-muted">
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--amber)' }} aria-hidden="true" />
+              {t('profile.comingSoon')}
+            </span>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <a href="/" className="btn btn--small">
+                {t('auth.backHome')}
+              </a>
+              <a href={import.meta.env.BASE_URL} className="btn btn--small btn--nav-cta">
+                {t('auth.viewPublic')}
+              </a>
+            </div>
+          </div>
         </section>
       </main>
       <Footer />
@@ -1652,7 +1626,6 @@ export default function App() {
   const [livePrices, setLivePrices] = useState<Record<string, number | null>>({})
   const [error, setError] = useState<string | null>(null)
   const [q, setQ] = useState('')
-  const [light, setLight] = useState(document.body.classList.contains('light'))
   const [pins, setPins] = useState<Pin[]>(() => getPins())
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [authSession, setAuthSession] = useState<AuthSession | null>(null)
@@ -1898,28 +1871,13 @@ export default function App() {
       })
   }
 
-  const toggleTheme = () => {
-    const next = !light
-    document.body.classList.toggle('light', next)
-    localStorage.setItem('df-theme', next ? 'light' : 'dark')
-    setLight(next)
-  }
-
   if (loginUnavailablePage) {
-    return withI18n(
-      <LoginComingSoonPage
-        light={light}
-        toggleTheme={toggleTheme}
-        auth={auth}
-      />,
-    )
+    return withI18n(<LoginComingSoonPage auth={auth} />)
   }
 
   if (publicMode && requiresAuth && (authLoading || !authSession)) {
     return withI18n(
       <AuthGate
-        light={light}
-        toggleTheme={toggleTheme}
         auth={auth}
         authError={authError}
         eyebrow={t('auth.publicEyebrow')}
@@ -1938,8 +1896,6 @@ export default function App() {
         error={publicationError}
         q={q}
         setQ={setQ}
-        light={light}
-        toggleTheme={toggleTheme}
         auth={auth}
         account={account}
         onProfileSave={handleProfileSave}
@@ -1954,21 +1910,12 @@ export default function App() {
   }
 
   if (requiresAuth && (authLoading || !authSession)) {
-    return withI18n(
-      <AuthGate
-        light={light}
-        toggleTheme={toggleTheme}
-        auth={auth}
-        authError={authError}
-      />,
-    )
+    return withI18n(<AuthGate auth={auth} authError={authError} />)
   }
 
   return withI18n(
     <div className="min-h-screen">
       <NavBar
-        light={light}
-        toggleTheme={toggleTheme}
         auth={auth}
         account={account}
         onProfileSave={handleProfileSave}
@@ -1981,7 +1928,9 @@ export default function App() {
 
         {authError && <p className="text-red text-[13px] mt-6">Auth error: {authError}</p>}
         {error && (
-          <p className="text-red text-[13px] mt-6">`n            {t('app.runsError')} {error}. {t('app.backendHint')}`n          </p>
+          <p className="text-red text-[13px] mt-6">
+            {t('app.runsError')} {error}. {t('app.backendHint')}
+          </p>
         )}
         {!runs && !error && <p className="text-muted text-[13px] mt-6">{t('app.loadingRuns')}</p>}
         {runs && filtered.length === 0 && !error && (

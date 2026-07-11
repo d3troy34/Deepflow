@@ -375,7 +375,6 @@
     setText(".footer__note", nav.footerNote);
     setText(".footer__legal", nav.footerLegal);
     setAttrs(".profile-button", { "aria-label": nav.profile, title: nav.profile });
-    setAttrs("#theme-toggle", { "aria-label": nav.theme });
     setAttrs("#language-toggle", { "aria-label": nav.language || "Change language" });
 
     document.querySelectorAll("[data-lang-option]").forEach((button) => {

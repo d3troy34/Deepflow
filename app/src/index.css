@@ -25,10 +25,10 @@
   --ink-3: #ddd9d2;
   --bone: #111217;
   --bone-dim: #3d3e44;
-  --muted: #6b6c72;
-  --green: #1a9e6a;
-  --green-dim: rgba(26, 158, 106, 0.12);
-  --amber: #c57a10;
+  --muted: #5a5b61;
+  --green: #0d6b45;
+  --green-dim: rgba(13, 107, 69, 0.12);
+  --amber: #8a5000;
   --term-amber: #c96800;
   --red: #b03020;
   --line: rgba(17, 18, 23, 0.1);
@@ -199,8 +199,7 @@
     flex-shrink: 0;
   }
 
-  .profile-button,
-  .theme-toggle {
+  .profile-button {
     width: 34px;
     height: 34px;
     border-radius: 50%;
@@ -222,8 +221,7 @@
   }
 
   .profile-button[aria-expanded='true'],
-  .profile-button:hover,
-  .theme-toggle:hover {
+  .profile-button:hover {
     color: var(--bone);
     border-color: var(--bone);
   }
@@ -438,13 +436,13 @@
   }
 
   .light .btn--nav-cta {
-    border-color: rgba(26, 158, 106, 0.38);
-    background: rgba(26, 158, 106, 0.06);
+    border-color: rgba(13, 107, 69, 0.38);
+    background: rgba(13, 107, 69, 0.06);
   }
 
   .light .btn--nav-cta:hover {
-    border-color: rgba(26, 158, 106, 0.6);
-    background: rgba(26, 158, 106, 0.12);
+    border-color: rgba(13, 107, 69, 0.6);
+    background: rgba(13, 107, 69, 0.12);
   }
 
   @media (max-width: 980px) {
@@ -483,8 +481,7 @@
       font-size: 12.5px;
     }
 
-    .profile-button,
-    .theme-toggle {
+    .profile-button {
       width: 30px;
       height: 30px;
     }
